@@ -2,9 +2,11 @@
 
 S3method(print,safebiome_audit)
 export("%>%")
+export(check_balance)
 export(check_biome)
 export(check_continuous_design)
 export(check_design)
+export(check_model_matrix)
 export(is_biome_audit)
 importClassesFrom(SummarizedExperiment,SummarizedExperiment)
 importFrom(magrittr,"%>%")

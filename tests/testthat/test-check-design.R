@@ -191,3 +191,86 @@ test_that("check_design validates required inputs", {
     "Missing values found"
   )
 })
+
+test_that("check_design rejects outcomes with fewer than two levels", {
+  metadata <- data.frame(
+    outcome = rep("Control", 4),
+    center = c("A", "B", "A", "B")
+  )
+
+  expect_error(
+    check_design(metadata, outcome = "outcome", batch = "center"),
+    "at least two levels"
+  )
+})
+
+test_that("design helper edge cases return stable values", {
+  expect_equal(safebiome:::split_design_rows(safebiome:::empty_design_result(), "batch"), list())
+
+  expect_error(safebiome:::compute_cramers_v(1), "contingency table")
+  expect_true(is.na(safebiome:::compute_cramers_v(matrix(1, nrow = 1))))
+  expect_true(is.na(
+    safebiome:::compute_standardized_mean_difference(
+      values = c(1, 2, 3),
+      groups = c("A", "A", "A")
+    )
+  ))
+  expect_equal(
+    safebiome:::compute_standardized_mean_difference(
+      values = c(1, 1, 2, 2),
+      groups = c("A", "A", "B", "B")
+    ),
+    Inf
+  )
+  expect_true(is.na(safebiome:::pooled_standard_deviation(1, 2)))
+  expect_false(safebiome:::detect_complete_separation(matrix(1, nrow = 1)))
+})
+
+test_that("design risk helpers cover unknown, high and medium branches", {
+  expect_equal(
+    safebiome:::assess_categorical_design_risk(
+      p_value = NA_real_,
+      cramers_v = 0.1,
+      empty_cells = 0,
+      min_cell_count = 10,
+      complete_separation = FALSE
+    ),
+    "unknown"
+  )
+  expect_equal(
+    safebiome:::assess_categorical_design_risk(
+      p_value = 0.5,
+      cramers_v = 0.8,
+      empty_cells = 0,
+      min_cell_count = 10,
+      complete_separation = FALSE
+    ),
+    "high"
+  )
+  expect_equal(
+    safebiome:::assess_continuous_design_risk(
+      p_value = 0.5,
+      standardized_difference = 0.6,
+      imbalance_ratio = 1
+    ),
+    "medium"
+  )
+  expect_equal(
+    safebiome:::assess_continuous_design_risk(
+      p_value = NA_real_,
+      standardized_difference = 0.1,
+      imbalance_ratio = 1
+    ),
+    "unknown"
+  )
+})
+
+test_that("design warnings include outcome imbalance", {
+  result <- data.frame(
+    variable = "age",
+    risk = "low",
+    imbalance_ratio = 0.1
+  )
+
+  expect_true(any(grepl("imbalanced", safebiome:::design_warnings(result))))
+})
