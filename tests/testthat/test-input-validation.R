@@ -9,7 +9,8 @@ test_that("validate_biome_input returns a structured input summary", {
       outcome = "outcome",
       batch = "batch",
       covariates = "age",
-      subject = "subject"
+      subject = "subject",
+      time = "timepoint"
     )
 
   expect_s3_class(result$metadata, "data.frame")
@@ -18,9 +19,11 @@ test_that("validate_biome_input returns a structured input summary", {
   expect_equal(result$assay$n_features, 50)
   expect_equal(result$assay$n_samples, 40)
   expect_equal(result$variables$outcome, "outcome")
+  expect_equal(result$variables$time, "timepoint")
   expect_equal(result$summary$assay$n_samples, 40)
   expect_equal(result$summary$batch_levels$batch, c("A", "B"))
   expect_equal(result$summary$n_subjects, 20)
+  expect_equal(result$summary$n_timepoints, 2)
 })
 
 test_that("validate_biome_input rejects invalid objects", {
@@ -110,4 +113,34 @@ test_that("check_character_or_null validates optional character vectors", {
     safebiome:::check_character_or_null(1, "batch"),
     "character vector"
   )
+})
+
+test_that("check_string_or_null validates optional scalar strings", {
+  expect_true(safebiome:::check_string_or_null(NULL, "subject"))
+  expect_null(safebiome:::check_string_or_null("patient_id", "subject"))
+
+  expect_error(
+    safebiome:::check_string_or_null(c("patient_id", "visit_id"), "subject"),
+    "single non-missing string"
+  )
+})
+
+test_that("lightweight public API validators reject malformed arguments", {
+  expect_true(safebiome:::check_non_empty_character(c("aitchison", "bray"), "distances"))
+  expect_error(
+    safebiome:::check_non_empty_character(character(), "distances"),
+    "non-empty character vector"
+  )
+  expect_error(
+    safebiome:::check_non_empty_character(c("aitchison", NA_character_), "distances"),
+    "non-empty character vector"
+  )
+
+  expect_true(safebiome:::check_positive_integer(999, "n_perm"))
+  expect_error(safebiome:::check_positive_integer(0, "n_perm"), "positive integer")
+  expect_error(safebiome:::check_positive_integer(99.5, "n_perm"), "positive integer")
+
+  expect_true(safebiome:::check_flag(TRUE, "verbose"))
+  expect_error(safebiome:::check_flag(NA, "verbose"), "logical value")
+  expect_error(safebiome:::check_flag(c(TRUE, FALSE), "verbose"), "logical value")
 })

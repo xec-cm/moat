@@ -15,6 +15,7 @@
 #'   `colData(se)`.
 #' @param subject Optional single string naming the subject identifier variable
 #'   in `colData(se)`.
+#' @param time Optional single string naming the time variable in `colData(se)`.
 #' @param assay A single string naming the assay to audit. Defaults to
 #'   `"counts"`.
 #'
@@ -28,6 +29,7 @@ validate_biome_input <- function(
   batch = NULL,
   covariates = NULL,
   subject = NULL,
+  time = NULL,
   assay = "counts"
 ) {
 
@@ -36,7 +38,8 @@ validate_biome_input <- function(
   check_string(assay, "assay")
   check_character_or_null(batch, "batch")
   check_character_or_null(covariates, "covariates")
-  check_character_or_null(subject, "subject")
+  check_string_or_null(subject, "subject")
+  check_string_or_null(time, "time")
 
   available_assays <- SummarizedExperiment::assayNames(se)
   if (!assay %in% available_assays) {
@@ -51,7 +54,7 @@ validate_biome_input <- function(
   }
 
   metadata <- as.data.frame(SummarizedExperiment::colData(se))
-  required_variables <- unique(c(outcome, batch, covariates, subject))
+  required_variables <- unique(c(outcome, batch, covariates, subject, time))
   missing_variables <- setdiff(required_variables, names(metadata))
   if (length(missing_variables) > 0) {
     cli::cli_abort(
@@ -92,7 +95,8 @@ validate_biome_input <- function(
     outcome = outcome,
     batch = batch,
     covariates = covariates,
-    subject = subject
+    subject = subject,
+    time = time
   )
 
   list(
@@ -140,6 +144,55 @@ check_character_or_null <- function(x, name) {
 }
 
 #' @keywords internal
+check_string_or_null <- function(x, name) {
+  if (is.null(x)) { return(invisible(TRUE)) }
+  check_string(x, name)
+}
+
+#' @keywords internal
+check_non_empty_character <- function(x, name) {
+  if (!is.character(x) || length(x) == 0 || anyNA(x) || any(x == "")) {
+    cli::cli_abort(
+      "{.arg {name}} must be a non-empty character vector without missing or empty values.",
+      class = "safebiome_error_invalid_argument"
+    )
+  }
+
+  invisible(TRUE)
+}
+
+#' @keywords internal
+check_positive_integer <- function(x, name) {
+  if (
+    !is.numeric(x) ||
+      length(x) != 1 ||
+      is.na(x) ||
+      !is.finite(x) ||
+      x <= 0 ||
+      x %% 1 != 0
+  ) {
+    cli::cli_abort(
+      "{.arg {name}} must be a single positive integer.",
+      class = "safebiome_error_invalid_argument"
+    )
+  }
+
+  invisible(TRUE)
+}
+
+#' @keywords internal
+check_flag <- function(x, name) {
+  if (!is.logical(x) || length(x) != 1 || is.na(x)) {
+    cli::cli_abort(
+      "{.arg {name}} must be a single non-missing logical value.",
+      class = "safebiome_error_invalid_argument"
+    )
+  }
+
+  invisible(TRUE)
+}
+
+#' @keywords internal
 format_missing_summary <- function(x) {
   paste0("{.var ", x$variable, "} (", x$n_missing, " missing)", collapse = ", ")
 }
@@ -174,7 +227,8 @@ summarize_biome_input <- function(metadata, assay, variables) {
     outcome_levels = as.character(unique(metadata[[variables$outcome]])),
     batch_levels = summarize_biome_variable_levels(metadata, variables$batch),
     covariate_classes = summarize_biome_variable_classes(metadata, variables$covariates),
-    n_subjects = summarize_biome_subjects(metadata, variables$subject)
+    n_subjects = summarize_biome_subjects(metadata, variables$subject),
+    n_timepoints = summarize_biome_timepoints(metadata, variables$time)
   )
 }
 
@@ -200,4 +254,10 @@ summarize_biome_variable_classes <- function(metadata, variables) {
 summarize_biome_subjects <- function(metadata, subject) {
   if (is.null(subject)) { return(NA_integer_) }
   length(unique(metadata[[subject]]))
+}
+
+#' @keywords internal
+summarize_biome_timepoints <- function(metadata, time) {
+  if (is.null(time)) { return(NA_integer_) }
+  length(unique(metadata[[time]]))
 }
