@@ -87,16 +87,19 @@ validate_biome_input <- function(
   }
 
   assay_matrix <- SummarizedExperiment::assay(se, assay)
+  assay_summary <- summarize_assay(assay_matrix, assay)
+  variables <- list(
+    outcome = outcome,
+    batch = batch,
+    covariates = covariates,
+    subject = subject
+  )
 
   list(
     metadata = metadata,
-    assay = summarize_assay(assay_matrix, assay),
-    variables = list(
-      outcome = outcome,
-      batch = batch,
-      covariates = covariates,
-      subject = subject
-    )
+    assay = assay_summary,
+    variables = variables,
+    summary = summarize_biome_input(metadata, assay_summary, variables)
   )
 }
 
@@ -158,4 +161,43 @@ summarize_assay <- function(x, assay) {
     sample_names = colnames(x),
     storage_mode = storage.mode(x)
   )
+}
+
+#' @keywords internal
+summarize_biome_input <- function(metadata, assay, variables) {
+  list(
+    assay = assay,
+    variables = variables,
+    n_samples = nrow(metadata),
+    n_metadata_variables = ncol(metadata),
+    metadata_variables = names(metadata),
+    outcome_levels = as.character(unique(metadata[[variables$outcome]])),
+    batch_levels = summarize_biome_variable_levels(metadata, variables$batch),
+    covariate_classes = summarize_biome_variable_classes(metadata, variables$covariates),
+    n_subjects = summarize_biome_subjects(metadata, variables$subject)
+  )
+}
+
+#' @keywords internal
+summarize_biome_variable_levels <- function(metadata, variables) {
+  if (is.null(variables)) { return(list()) }
+  stats::setNames(
+    lapply(variables, function(variable) as.character(unique(metadata[[variable]]))),
+    variables
+  )
+}
+
+#' @keywords internal
+summarize_biome_variable_classes <- function(metadata, variables) {
+  if (is.null(variables)) { return(list()) }
+  stats::setNames(
+    lapply(variables, function(variable) class(metadata[[variable]])),
+    variables
+  )
+}
+
+#' @keywords internal
+summarize_biome_subjects <- function(metadata, subject) {
+  if (is.null(subject)) { return(NA_integer_) }
+  length(unique(metadata[[subject]]))
 }
