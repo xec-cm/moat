@@ -1,3 +1,64 @@
+#' Check batch correction feasibility
+#'
+#' `check_correction()` combines batch-by-outcome balance and model matrix
+#' identifiability diagnostics to determine whether batch adjustment is
+#' statistically feasible.
+#'
+#' @inheritParams check_model_matrix
+#'
+#' @return A list with correction feasibility diagnostics, including balance
+#'   diagnostics, model matrix diagnostics, a positivity score, a feasibility
+#'   category, and recommendation text.
+#' @export
+#'
+#' @examples
+#' metadata <- data.frame(
+#'   condition = rep(c("control", "case"), each = 6),
+#'   center = rep(c("A", "B"), times = 6),
+#'   age = seq(30, 41)
+#' )
+#'
+#' check_correction(metadata, outcome = "condition", batch = "center", covariates = "age")
+check_correction <- function(
+  metadata,
+  outcome,
+  batch = NULL,
+  covariates = NULL
+) {
+  check_character_or_null(batch, "batch")
+  check_character_or_null(covariates, "covariates")
+  check_correction_common_inputs(metadata, outcome, batch = batch, covariates = covariates)
+
+  if (is.null(batch)) {
+    return(skipped_correction_result())
+  }
+
+  balance <- check_balance(metadata, outcome = outcome, batch = batch)
+  model_matrix <- check_model_matrix(
+    metadata,
+    outcome = outcome,
+    batch = batch,
+    covariates = covariates
+  )
+  positivity_score <- min(balance$positivity_score)
+  feasibility <- assess_correction_feasibility(balance, model_matrix)
+  recommendations <- correction_recommendations(
+    feasibility = feasibility,
+    balance = balance,
+    model_matrix = model_matrix
+  )
+
+  list(
+    status = "evaluated",
+    module = "correction",
+    feasibility = feasibility,
+    positivity_score = positivity_score,
+    balance = balance,
+    model_matrix = model_matrix,
+    recommendations = recommendations
+  )
+}
+
 #' Check batch-by-outcome balance
 #'
 #' `check_balance()` audits whether each batch level contains enough outcome
@@ -252,4 +313,76 @@ assess_model_matrix_risk <- function(rank_deficient, condition_number) {
   }
 
   "low"
+}
+
+#' @keywords internal
+skipped_correction_result <- function() {
+  list(
+    status = "skipped",
+    module = "correction",
+    feasibility = "not_applicable",
+    positivity_score = NA_real_,
+    balance = data.frame(),
+    model_matrix = data.frame(),
+    recommendations = "No batch variable provided; batch correction feasibility was not evaluated."
+  )
+}
+
+#' @keywords internal
+assess_correction_feasibility <- function(balance, model_matrix) {
+  if (
+    any(balance$risk == "critical") ||
+      any(model_matrix$risk == "non_identifiable")
+  ) {
+    return("non_identifiable")
+  }
+
+  if (
+    any(balance$risk == "high") ||
+      any(model_matrix$risk == "high")
+  ) {
+    return("unsafe")
+  }
+
+  if (
+    any(balance$risk == "medium") ||
+      any(model_matrix$risk == "caution")
+  ) {
+    return("caution")
+  }
+
+  "safe"
+}
+
+#' @keywords internal
+correction_recommendations <- function(feasibility, balance, model_matrix) {
+  switch(
+    feasibility,
+    "non_identifiable" = correction_non_identifiable_recommendations(balance, model_matrix),
+    "unsafe" = "Avoid naive batch correction; inspect positivity and collinearity before adjustment.",
+    "caution" = "Batch adjustment may be possible, but report balance diagnostics and run sensitivity analyses.",
+    "safe" = "Batch adjustment appears statistically identifiable based on metadata diagnostics.",
+    "Correction feasibility could not be determined."
+  )
+}
+
+#' @keywords internal
+correction_non_identifiable_recommendations <- function(balance, model_matrix) {
+  reasons <- character()
+  if (any(balance$risk == "critical")) {
+    critical_batch <- balance$batch[balance$risk == "critical"]
+    reasons <- c(
+      reasons,
+      paste("Outcome is completely separated within batch variable(s):", paste(critical_batch, collapse = ", "))
+    )
+  }
+  if (any(model_matrix$risk == "non_identifiable")) {
+    aliased <- unlist(model_matrix$aliased_columns, use.names = FALSE)
+    if (length(aliased) > 0) {
+      reasons <- c(reasons, paste("Model matrix has aliased column(s):", paste(aliased, collapse = ", ")))
+    } else {
+      reasons <- c(reasons, "Model matrix is rank deficient.")
+    }
+  }
+  c(reasons, "Do not rely on batch correction as the primary analysis for this design.")
 }

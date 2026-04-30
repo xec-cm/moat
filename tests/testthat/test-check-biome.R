@@ -1,7 +1,7 @@
 test_that("check_biome returns a pending audit with full public API parameters", {
   se <- readRDS(test_path("fixtures/repeated_biome.rds"))
-  SummarizedExperiment::colData(se)$batch <- rep(c("A", "B"), times = 20)
-  SummarizedExperiment::colData(se)$age <- rep(30, times = 40)
+  SummarizedExperiment::colData(se)$batch <- rep(c("A", "B"), each = 20)
+  SummarizedExperiment::colData(se)$age <- seq_len(40)
 
   audit <- check_biome(
     se,
@@ -39,8 +39,11 @@ test_that("check_biome returns a pending audit with full public API parameters",
   expect_equal(audit$design$variable, c("batch", "age"))
   expect_equal(audit$design$role, c("batch", "covariate"))
   expect_equal(audit$design$variable_type, c("categorical", "continuous"))
+  expect_equal(audit$correction$status, "evaluated")
+  expect_equal(audit$correction$module, "correction")
+  expect_equal(audit$correction$feasibility, "safe")
 
-  modules <- c("batch", "correction", "leakage")
+  modules <- c("batch", "leakage")
   expect_equal(
     unname(vapply(audit[modules], `[[`, character(1), "status")),
     rep("pending", length(modules))
@@ -61,6 +64,8 @@ test_that("check_biome handles missing optional arguments gracefully", {
   expect_equal(audit$params$distances, c("aitchison", "bray"))
   expect_equal(audit$params$n_perm, 999)
   expect_true(audit$params$verbose)
+  expect_equal(audit$correction$status, "skipped")
+  expect_equal(audit$correction$feasibility, "not_applicable")
 })
 
 test_that("check_biome validates issue 6 public API arguments", {
