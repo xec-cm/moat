@@ -5,4 +5,10 @@
 #'
 #' @importClassesFrom SummarizedExperiment SummarizedExperiment
 #' @keywords internal
+#' @examples
+#' # Load the toy dataset included in the package
+#' data("toy_biome", package = "safebiome")
+#' 
+#' # Check its structure
+#' class(toy_biome)
 "_PACKAGE"

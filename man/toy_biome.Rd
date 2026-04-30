@@ -29,4 +29,16 @@ This dataset contains artificial read counts for 50 taxa across 40 samples,
 along with sample metadata including an outcome and a batch variable. It
 has been generated to exhibit a strong batch effect on the first half of the taxa.
 }
+\examples{
+data("toy_biome")
+
+# Inspect the object dimensions
+dim(toy_biome)
+
+# Check sample metadata
+head(SummarizedExperiment::colData(toy_biome))
+
+# View assay counts for the first 5 taxa and 5 samples
+SummarizedExperiment::assay(toy_biome)[1:5, 1:5]
+}
 \keyword{datasets}

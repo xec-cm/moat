@@ -17,4 +17,15 @@
 #'   }
 #' }
 #' @source Simulated data. See `data-raw/simulate_toy_data.R` for the generation script.
+#' @examples
+#' data("toy_biome")
+#' 
+#' # Inspect the object dimensions
+#' dim(toy_biome)
+#' 
+#' # Check sample metadata
+#' head(SummarizedExperiment::colData(toy_biome))
+#' 
+#' # View assay counts for the first 5 taxa and 5 samples
+#' SummarizedExperiment::assay(toy_biome)[1:5, 1:5]
 "toy_biome"
