@@ -17,6 +17,7 @@
 #'   }
 #' }
 #' @source Simulated data. See `data-raw/simulate_toy_data.R` for the generation script.
+#' @usage data(toy_biome)
 #' @examples
 #' data("toy_biome")
 #' 

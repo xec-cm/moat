@@ -21,7 +21,7 @@ A \code{SummarizedExperiment} object with 50 features (taxa) and 40 samples.
 Simulated data. See \code{data-raw/simulate_toy_data.R} for the generation script.
 }
 \usage{
-toy_biome
+data(toy_biome)
 }
 \description{
 A small, simulated \code{SummarizedExperiment} object for examples and testing.
