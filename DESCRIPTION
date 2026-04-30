@@ -19,7 +19,8 @@ Imports:
     cli,
     magrittr,
     methods,
-    SummarizedExperiment
+    SummarizedExperiment,
+    vegan
 Suggests:
     BiocStyle,
     knitr,
