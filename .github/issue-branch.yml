@@ -1,0 +1,9 @@
+defaultBranch: "devel"
+branchName: short
+openDraftPR: true
+autoLinkIssue: true
+copyIssueDescriptionToPR: true
+copyIssueLabelsToPR: true
+conventionalPrTitles: true
+conventionalStyle: semver
+silent: false

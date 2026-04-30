@@ -1,0 +1,32 @@
+---
+output: github_document
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# safebiome
+
+`safebiome` is an R package for auditing microbiome study designs before
+downstream statistical analysis.
+
+The package is under active development. The first development milestone is to
+provide a small, installable package skeleton with tests and continuous
+integration.
+
+## Installation
+
+```{r, eval = FALSE}
+# install.packages("pak")
+pak::pak("xec-cm/safebiome")
+```
+
+## Development
+
+```{r, eval = FALSE}
+devtools::check()
+```

@@ -1,2 +1,6 @@
 ^safebiome\.Rproj$
 ^\.Rproj\.user$
+^\.github$
+^README\.Rmd$
+^LICENSE\.md$
+^issues_template\.md$
