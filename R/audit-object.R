@@ -60,7 +60,8 @@ validate_biome_audit <- function(x) {
     )
   }
 
-  required_names <- c("input", "design", "batch", "correction", "leakage", "recommendations", "risk", "params")
+  required_names <- 
+    c("input", "design", "batch", "correction", "leakage", "recommendations", "risk", "params")
   unexpected_names <- setdiff(names(x), required_names)
   missing_names <- setdiff(required_names, names(x))
   if (length(missing_names) > 0) {
@@ -161,6 +162,7 @@ biome_audit <- function(
     risk = risk,
     params = params
   )
+
   validate_biome_audit(res)
 }
 
@@ -174,9 +176,7 @@ biome_audit <- function(
 #' # This is an internal object structure, but can be tested:
 #' audit <- safebiome:::biome_audit(risk = "low")
 #' is_biome_audit(audit)
-is_biome_audit <- function(x) {
-  inherits(x, "safebiome_audit")
-}
+is_biome_audit <- function(x) { inherits(x, "safebiome_audit") }
 
 #' Print a safebiome_audit object
 #'
@@ -210,9 +210,7 @@ print.safebiome_audit <- function(x, ...) {
   
   if (length(x$recommendations) > 0) {
     cli::cli_h2("Recommendations:")
-    for (rec in format_biome_recommendations(x$recommendations)) {
-      cli::cli_li(rec)
-    }
+    for (rec in format_biome_recommendations(x$recommendations)) { cli::cli_li(rec) }
   } else {
     cli::cli_alert_success("No critical recommendations.")
   }
@@ -221,17 +219,12 @@ print.safebiome_audit <- function(x, ...) {
 }
 
 #' @keywords internal
-biome_audit_schema_version <- function() {
-  "0.1.0"
-}
+biome_audit_schema_version <- function() { "0.1.0" }
 
 #' @keywords internal
 normalize_biome_audit_params <- function(params) {
   if (!is.list(params)) {
-    cli::cli_abort(
-      "{.arg params} must be a list.",
-      class = "safebiome_error_invalid_argument"
-    )
+    cli::cli_abort("{.arg params} must be a list.", class = "safebiome_error_invalid_argument")
   }
 
   if (!"schema_version" %in% names(params)) {
@@ -243,22 +236,13 @@ normalize_biome_audit_params <- function(params) {
 
 #' @keywords internal
 format_biome_recommendations <- function(x) {
-  if (is.character(x)) {
-    return(x)
-  }
-
+  if (is.character(x)) { return(x) }
   vapply(x, as.character, character(1))
 }
 
 #' @keywords internal
 biome_audit_module_status <- function(x) {
-  if (length(x) == 0) {
-    return("Pending/Skipped")
-  }
-
-  if (identical(x$status, "pending")) {
-    return("Pending")
-  }
-
+  if (length(x) == 0) { return("Pending/Skipped") }
+  if (identical(x$status, "pending")) { return("Pending") }
   "Evaluated"
 }

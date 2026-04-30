@@ -180,10 +180,7 @@ summarize_biome_input <- function(metadata, assay, variables) {
 
 #' @keywords internal
 summarize_biome_variable_levels <- function(metadata, variables) {
-  if (is.null(variables)) {
-    return(list())
-  }
-
+  if (is.null(variables)) { return(list()) }
   stats::setNames(
     lapply(variables, function(variable) as.character(unique(metadata[[variable]]))),
     variables
@@ -192,10 +189,7 @@ summarize_biome_variable_levels <- function(metadata, variables) {
 
 #' @keywords internal
 summarize_biome_variable_classes <- function(metadata, variables) {
-  if (is.null(variables)) {
-    return(list())
-  }
-
+  if (is.null(variables)) { return(list()) }
   stats::setNames(
     lapply(variables, function(variable) class(metadata[[variable]])),
     variables
@@ -204,9 +198,6 @@ summarize_biome_variable_classes <- function(metadata, variables) {
 
 #' @keywords internal
 summarize_biome_subjects <- function(metadata, subject) {
-  if (is.null(subject)) {
-    return(NA_integer_)
-  }
-
+  if (is.null(subject)) { return(NA_integer_) }
   length(unique(metadata[[subject]]))
 }
