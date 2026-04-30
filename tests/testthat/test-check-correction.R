@@ -130,6 +130,85 @@ test_that("check_model_matrix detects perfect aliasing", {
   expect_equal(result$risk, "non_identifiable")
 })
 
+test_that("check_correction returns non-identifiable for perfect confounding", {
+  metadata <- data.frame(
+    outcome = rep(c("Control", "Disease"), each = 10),
+    center = rep(c("A", "B"), each = 10)
+  )
+
+  result <- check_correction(metadata, outcome = "outcome", batch = "center")
+
+  expect_equal(result$status, "evaluated")
+  expect_equal(result$module, "correction")
+  expect_equal(result$feasibility, "non_identifiable")
+  expect_equal(result$positivity_score, 0.5)
+  expect_s3_class(result$balance, "data.frame")
+  expect_s3_class(result$model_matrix, "data.frame")
+  expect_true(any(grepl("completely separated", result$recommendations)))
+  expect_true(any(grepl("Do not rely", result$recommendations)))
+})
+
+test_that("check_correction returns unsafe for partial positivity failures", {
+  metadata <- data.frame(
+    outcome = c(rep("Control", 8), rep("Disease", 8), "Control", "Disease"),
+    center = c(rep("A", 8), rep("B", 8), "C", "C")
+  )
+
+  result <- check_correction(metadata, outcome = "outcome", batch = "center")
+
+  expect_equal(result$feasibility, "unsafe")
+  expect_equal(result$balance$risk, "high")
+  expect_equal(result$model_matrix$risk, "low")
+  expect_match(result$recommendations, "Avoid naive batch correction")
+})
+
+test_that("check_correction returns caution for sparse but identifiable balance", {
+  metadata <- data.frame(
+    outcome = rep(c("Control", "Disease"), each = 4),
+    center = rep(c("A", "B"), times = 4)
+  )
+
+  result <- check_correction(metadata, outcome = "outcome", batch = "center")
+
+  expect_equal(result$feasibility, "caution")
+  expect_equal(result$balance$risk, "medium")
+  expect_equal(result$model_matrix$risk, "low")
+  expect_match(result$recommendations, "may be possible")
+})
+
+test_that("check_correction returns safe for balanced identifiable metadata", {
+  metadata <- data.frame(
+    outcome = rep(c("Control", "Disease"), each = 10),
+    center = rep(c("A", "B"), times = 10),
+    age = seq_len(20)
+  )
+
+  result <- check_correction(
+    metadata,
+    outcome = "outcome",
+    batch = "center",
+    covariates = "age"
+  )
+
+  expect_equal(result$feasibility, "safe")
+  expect_equal(result$positivity_score, 1)
+  expect_match(result$recommendations, "appears statistically identifiable")
+})
+
+test_that("check_correction skips when no batch is provided", {
+  metadata <- data.frame(
+    outcome = rep(c("Control", "Disease"), each = 4),
+    age = seq_len(8)
+  )
+
+  result <- check_correction(metadata, outcome = "outcome", covariates = "age")
+
+  expect_equal(result$status, "skipped")
+  expect_equal(result$feasibility, "not_applicable")
+  expect_true(is.na(result$positivity_score))
+  expect_match(result$recommendations, "No batch variable provided")
+})
+
 test_that("check_model_matrix flags high numeric collinearity", {
   metadata <- data.frame(
     outcome = rep(c("Control", "Disease"), times = 10),
@@ -184,4 +263,12 @@ test_that("correction risk helpers cover medium, caution, and non-finite branche
     "caution"
   )
   expect_equal(safebiome:::model_matrix_condition_number(matrix(0, nrow = 2, ncol = 2)), Inf)
+  expect_equal(
+    safebiome:::correction_recommendations(
+      feasibility = "mystery",
+      balance = data.frame(),
+      model_matrix = data.frame()
+    ),
+    "Correction feasibility could not be determined."
+  )
 })

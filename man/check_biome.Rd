@@ -57,8 +57,8 @@ A \code{safebiome_audit} object.
 \description{
 \code{check_biome()} is the main entry point for \code{safebiome}. It validates a
 \code{SummarizedExperiment}-like object, records the audit parameters, and returns
-a stable \code{safebiome_audit} object. Design diagnostics are evaluated from
-metadata; batch, correction, and leakage diagnostics are represented as
+a stable \code{safebiome_audit} object. Design and correction diagnostics are
+evaluated from metadata; batch and leakage diagnostics are represented as
 pending placeholders until their modules are implemented.
 }
 \examples{
