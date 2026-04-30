@@ -1,14 +1,3 @@
----
-output: github_document
----
-
-```{r setup, include = FALSE}
-knitr::opts_chunk$set(
-    collapse = TRUE,
-    comment = "#>"
-)
-```
-
 # safebiome
 
 `safebiome` audits microbiome studies for design confounding, batch effects,
@@ -41,7 +30,8 @@ reviewed and reported.
 
 ## Installation
 
-```{r install, eval = FALSE}
+
+``` r
 # install.packages("pak")
 pak::pak("xec-cm/safebiome")
 ```
@@ -50,7 +40,8 @@ pak::pak("xec-cm/safebiome")
 
 The planned high-level API is:
 
-```{r example-api, eval = FALSE}
+
+``` r
 library(safebiome)
 
 audit <- check_biome(
@@ -72,7 +63,8 @@ report(audit)
 `check_biome()` will return a `safebiome_audit` object containing module-level
 results and an overall interpretation:
 
-```{r expected-output, eval = FALSE}
+
+``` r
 audit$input
 audit$design
 audit$correction
@@ -118,7 +110,8 @@ shape of the package and may change as the core implementation lands.
 
 ## Development
 
-```{r development, eval = FALSE}
+
+``` r
 devtools::check()
 BiocCheck::BiocCheck()
 ```
