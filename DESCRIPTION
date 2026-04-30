@@ -1,18 +1,26 @@
 Package: safebiome
 Title: Audit Microbiome Study Designs Before Downstream Analysis
-Version: 0.0.0.9000
+Version: 0.99.0
 Authors@R: 
     person("Francesc", "Català-Moll", , "fcatala@irsicaixa.es", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-2354-8648"))
-Author: Francesc Catala-Moll [aut, cre]
-Maintainer: Francesc Catala-Moll <fcatala@irsicaixa.es>
 Description: Audits microbiome studies for design confounding, batch
     effects, correction feasibility, and validation leakage before downstream
     statistical analysis.
 License: MIT + file LICENSE
+URL: https://github.com/xec-cm/safebiome
+BugReports: https://github.com/xec-cm/safebiome/issues
+biocViews: Software, Microbiome, Metagenomics, Sequencing, ExperimentalDesign,
+    QualityControl, StatisticalMethod
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
+Imports:
+    SummarizedExperiment
 Suggests:
+    BiocStyle,
+    knitr,
+    rmarkdown,
     testthat (>= 3.0.0)
+VignetteBuilder: knitr
 Config/testthat/edition: 3

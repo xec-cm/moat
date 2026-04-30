@@ -1,0 +1,59 @@
+---
+title: "safebiome"
+author:
+  - name: Francesc Catala-Moll
+    affiliation: IrsiCaixa AIDS Research Institute
+package: safebiome
+output:
+  BiocStyle::html_document:
+    toc: true
+vignette: >
+  %\VignetteIndexEntry{safebiome}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+# Overview
+
+`safebiome` is an R package for auditing microbiome study designs before
+downstream statistical analysis.
+
+The package is in early development. Its planned scope includes checks for
+design confounding, batch effects, correction feasibility, and validation
+leakage.
+
+# Installation check
+
+```{r load-package}
+library(safebiome)
+```
+
+# Planned workflow
+
+The intended user workflow is:
+
+```{r planned-workflow, eval=FALSE}
+audit <- check_biome(
+    x,
+    outcome = "condition",
+    batch = c("center", "sequencing_run"),
+    covariates = c("age", "sex", "antibiotic_use"),
+    subject = "patient_id"
+)
+
+summary(audit)
+plan_analysis(audit)
+```
+
+These user-facing functions will be implemented in upcoming development
+milestones.
+
+# Session information
+
+```{r session-info}
+sessionInfo()
+```
