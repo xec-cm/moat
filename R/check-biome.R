@@ -16,8 +16,17 @@
 #'   `colData(x)`.
 #' @param subject Optional single string naming the subject identifier variable
 #'   in `colData(x)`.
+#' @param time Optional single string naming the time variable in `colData(x)`.
 #' @param assay A single string naming the assay to audit. Defaults to
 #'   `"counts"`.
+#' @param transform A single string naming the microbiome transformation to
+#'   record for downstream audit modules. Defaults to `"clr"`.
+#' @param distances A character vector naming microbiome distances to record for
+#'   downstream audit modules. Defaults to `c("aitchison", "bray")`.
+#' @param n_perm A single positive integer with the planned number of
+#'   permutations for downstream audit modules. Defaults to `999`.
+#' @param verbose A single logical value indicating whether future audit modules
+#'   should report progress. Defaults to `TRUE`.
 #'
 #' @return A `safebiome_audit` object.
 #' @export
@@ -38,14 +47,25 @@ check_biome <- function(
   batch = NULL,
   covariates = NULL,
   subject = NULL,
-  assay = "counts"
+  time = NULL,
+  assay = "counts",
+  transform = "clr",
+  distances = c("aitchison", "bray"),
+  n_perm = 999,
+  verbose = TRUE
 ) {
+  check_string(transform, "transform")
+  check_non_empty_character(distances, "distances")
+  check_positive_integer(n_perm, "n_perm")
+  check_flag(verbose, "verbose")
+
   input <- validate_biome_input(
     se = x,
     outcome = outcome,
     batch = batch,
     covariates = covariates,
     subject = subject,
+    time = time,
     assay = assay
   )
 
@@ -62,7 +82,12 @@ check_biome <- function(
       batch = batch,
       covariates = covariates,
       subject = subject,
-      assay = assay
+      time = time,
+      assay = assay,
+      transform = transform,
+      distances = distances,
+      n_perm = n_perm,
+      verbose = verbose
     )
   )
 }

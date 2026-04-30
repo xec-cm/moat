@@ -194,11 +194,11 @@ print.safebiome_audit <- function(x, ...) {
     "high" = cli::col_red,
     "medium" = cli::col_yellow,
     "low" = cli::col_green,
-    cli::col_grey
+    cli::col_blue
   )
   
   cli::cli_alert_info("Overall Risk: {risk_color(x$risk)}")
-  cli::cli_alert_info("Schema version: {x$params$schema_version}")
+  cli::cli_alert_info("Schema version: {cli::col_blue(x$params$schema_version)}")
   
   cli::cli_h2("Modules Evaluated:")
   

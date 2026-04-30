@@ -10,6 +10,7 @@ validate_biome_input(
   batch = NULL,
   covariates = NULL,
   subject = NULL,
+  time = NULL,
   assay = "counts"
 )
 }
@@ -28,6 +29,8 @@ accepted.}
 
 \item{subject}{Optional single string naming the subject identifier variable
 in \code{colData(se)}.}
+
+\item{time}{Optional single string naming the time variable in \code{colData(se)}.}
 
 \item{assay}{A single string naming the assay to audit. Defaults to
 \code{"counts"}.}

@@ -10,7 +10,12 @@ check_biome(
   batch = NULL,
   covariates = NULL,
   subject = NULL,
-  assay = "counts"
+  time = NULL,
+  assay = "counts",
+  transform = "clr",
+  distances = c("aitchison", "bray"),
+  n_perm = 999,
+  verbose = TRUE
 )
 }
 \arguments{
@@ -29,8 +34,22 @@ accepted.}
 \item{subject}{Optional single string naming the subject identifier variable
 in \code{colData(x)}.}
 
+\item{time}{Optional single string naming the time variable in \code{colData(x)}.}
+
 \item{assay}{A single string naming the assay to audit. Defaults to
 \code{"counts"}.}
+
+\item{transform}{A single string naming the microbiome transformation to
+record for downstream audit modules. Defaults to \code{"clr"}.}
+
+\item{distances}{A character vector naming microbiome distances to record for
+downstream audit modules. Defaults to \code{c("aitchison", "bray")}.}
+
+\item{n_perm}{A single positive integer with the planned number of
+permutations for downstream audit modules. Defaults to \code{999}.}
+
+\item{verbose}{A single logical value indicating whether future audit modules
+should report progress. Defaults to \code{TRUE}.}
 }
 \value{
 A \code{safebiome_audit} object.
