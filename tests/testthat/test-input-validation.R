@@ -18,6 +18,9 @@ test_that("validate_biome_input returns a structured input summary", {
   expect_equal(result$assay$n_features, 50)
   expect_equal(result$assay$n_samples, 40)
   expect_equal(result$variables$outcome, "outcome")
+  expect_equal(result$summary$assay$n_samples, 40)
+  expect_equal(result$summary$batch_levels$batch, c("A", "B"))
+  expect_equal(result$summary$n_subjects, 20)
 })
 
 test_that("validate_biome_input rejects invalid objects", {
