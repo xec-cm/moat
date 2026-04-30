@@ -3,6 +3,7 @@
 S3method(print,safebiome_audit)
 export("%>%")
 export(check_biome)
+export(check_design)
 export(is_biome_audit)
 importClassesFrom(SummarizedExperiment,SummarizedExperiment)
 importFrom(magrittr,"%>%")
