@@ -2,9 +2,9 @@
 #'
 #' `check_biome()` is the main entry point for `safebiome`. It validates a
 #' `SummarizedExperiment`-like object, records the audit parameters, and returns
-#' a stable `safebiome_audit` object. Module-level diagnostics are represented
-#' as pending placeholders until the design, batch, correction, and leakage
-#' checks are implemented.
+#' a stable `safebiome_audit` object. Design diagnostics are evaluated from
+#' metadata; batch, correction, and leakage diagnostics are represented as
+#' pending placeholders until their modules are implemented.
 #'
 #' @param x A [SummarizedExperiment::SummarizedExperiment()] object. Objects
 #'   extending `SummarizedExperiment`, such as `TreeSummarizedExperiment`, are
@@ -71,7 +71,12 @@ check_biome <- function(
 
   biome_audit(
     input = input$summary,
-    design = pending_biome_module("design"),
+    design = check_design(
+      metadata = input$metadata,
+      outcome = outcome,
+      batch = batch,
+      covariates = covariates
+    ),
     batch = pending_biome_module("batch"),
     correction = pending_biome_module("correction"),
     leakage = pending_biome_module("leakage"),

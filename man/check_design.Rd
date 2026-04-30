@@ -2,33 +2,42 @@
 % Please edit documentation in R/check-design.R
 \name{check_design}
 \alias{check_design}
-\title{Check categorical metadata associations with the outcome}
+\title{Check experimental design metadata associations with the outcome}
 \usage{
-check_design(metadata, outcome, variables)
+check_design(metadata, outcome, batch = NULL, covariates = NULL)
 }
 \arguments{
 \item{metadata}{A data frame with sample metadata.}
 
 \item{outcome}{A single string naming the outcome variable in \code{metadata}.}
 
-\item{variables}{A character vector naming categorical metadata variables to
-test against \code{outcome}.}
+\item{batch}{Optional character vector naming categorical batch variables.}
+
+\item{covariates}{Optional character vector naming covariates. Numeric and
+integer covariates are audited as continuous; other covariates are audited
+as categorical.}
 }
 \value{
-A data frame with one row per audited variable.
+A data frame with one row per audited variable. The result also
+stores the global design risk in \code{attr(result, "risk")} and warnings in
+\code{attr(result, "warnings")}.
 }
 \description{
-\code{check_design()} audits categorical metadata variables for association with
-the study outcome. This first design module focuses on categorical variables;
-continuous metadata checks and the full design audit are implemented
-separately.
+\code{check_design()} combines categorical and continuous metadata audits into one
+design-level result. Batch variables are treated as categorical; covariates
+are routed by type.
 }
 \examples{
 metadata <- data.frame(
   condition = rep(c("control", "case"), each = 6),
-  center = rep(c("A", "B"), times = 6), 
-  gender = sort(rep(c("F", "M", "U"), times = 4))
+  center = rep(c("A", "B"), times = 6),
+  age = c(32, 35, 37, 34, 36, 38, 52, 55, 57, 54, 56, 58)
 )
 
-check_design(metadata, outcome = "condition", variables = c("center", "gender"))
+check_design(
+  metadata,
+  outcome = "condition",
+  batch = "center",
+  covariates = "age"
+)
 }

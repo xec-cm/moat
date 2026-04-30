@@ -6,49 +6,63 @@ test_that("compute_cramers_v returns zero for independence and one for perfect a
   expect_equal(safebiome:::compute_cramers_v(perfect), 1)
 })
 
-test_that("check_design flags perfectly confounded categorical variables", {
+test_that("categorical design audit flags perfectly confounded variables", {
   metadata <- data.frame(
     outcome = rep(c("Control", "Disease"), each = 10),
     center = rep(c("Center_A", "Center_B"), each = 10)
   )
 
-  result <- check_design(metadata, outcome = "outcome", variables = "center")
+  result <- safebiome:::check_categorical_design(
+    metadata,
+    outcome = "outcome",
+    variables = "center"
+  )
 
   expect_s3_class(result, "data.frame")
   expect_equal(nrow(result), 1)
   expect_equal(result$variable, "center")
+  expect_equal(result$variable_type, "categorical")
   expect_equal(result$empty_cells, 2)
   expect_equal(result$min_cell_count, 0)
   expect_true(result$complete_separation)
-  expect_equal(result$cramers_v, 1)
+  expect_equal(result$effect_size_name, "cramers_v")
+  expect_equal(result$effect_size, 1)
   expect_equal(result$risk, "critical")
   expect_s3_class(result$contingency_table[[1]], "table")
 })
 
-test_that("check_design assigns low risk to balanced categorical variables", {
+test_that("categorical design audit assigns low risk to balanced variables", {
   metadata <- data.frame(
     outcome = rep(c("Control", "Disease"), each = 10),
     center = rep(c("Center_A", "Center_B"), times = 10)
   )
 
-  result <- check_design(metadata, outcome = "outcome", variables = "center")
+  result <- safebiome:::check_categorical_design(
+    metadata,
+    outcome = "outcome",
+    variables = "center"
+  )
 
   expect_equal(result$test, "chi-square")
   expect_equal(result$p_value, 1)
-  expect_equal(result$cramers_v, 0)
+  expect_equal(result$effect_size, 0)
   expect_equal(result$empty_cells, 0)
   expect_equal(result$min_cell_count, 5)
   expect_false(result$complete_separation)
   expect_equal(result$risk, "low")
 })
 
-test_that("check_design uses Fisher test for sparse categorical tables", {
+test_that("categorical design audit uses Fisher test for sparse tables", {
   metadata <- data.frame(
     outcome = c("Control", "Control", "Disease", "Disease"),
     center = c("Center_A", "Center_B", "Center_A", "Center_B")
   )
 
-  result <- check_design(metadata, outcome = "outcome", variables = "center")
+  result <- safebiome:::check_categorical_design(
+    metadata,
+    outcome = "outcome",
+    variables = "center"
+  )
 
   expect_equal(result$test, "fisher")
   expect_equal(result$empty_cells, 0)
@@ -56,24 +70,109 @@ test_that("check_design uses Fisher test for sparse categorical tables", {
   expect_equal(result$risk, "medium")
 })
 
-test_that("check_design returns one tidy row per audited variable", {
+test_that("continuous design audit flags strong binary group differences", {
+  metadata <- data.frame(
+    outcome = rep(c("Control", "Disease"), each = 10),
+    age = c(29:38, 59:68)
+  )
+
+  result <- check_continuous_design(metadata, outcome = "outcome", variables = "age")
+
+  expect_s3_class(result, "data.frame")
+  expect_equal(result$variable, "age")
+  expect_equal(result$variable_type, "continuous")
+  expect_equal(result$test, "kruskal-wallis")
+  expect_equal(result$effect_size_name, "standardized_mean_difference")
+  expect_gt(result$effect_size, 1.5)
+  expect_equal(result$risk, "high")
+  expect_named(result$group_means[[1]], c("Control", "Disease"))
+  expect_named(result$group_medians[[1]], c("Control", "Disease"))
+})
+
+test_that("continuous design audit assigns low risk to balanced variables", {
+  metadata <- data.frame(
+    outcome = rep(c("Control", "Disease"), each = 10),
+    age = rep(30:39, times = 2)
+  )
+
+  result <- check_continuous_design(metadata, outcome = "outcome", variables = "age")
+
+  expect_equal(result$effect_size, 0)
+  expect_gt(result$p_value, 0.05)
+  expect_equal(result$risk, "low")
+})
+
+test_that("continuous design audit supports multi-group outcomes", {
+  metadata <- data.frame(
+    outcome = rep(c("A", "B", "C"), each = 6),
+    depth = c(10:15, 20:25, 40:45)
+  )
+
+  result <- check_continuous_design(metadata, outcome = "outcome", variables = "depth")
+
+  expect_equal(result$n_outcome_levels, 3)
+  expect_equal(result$test, "kruskal-wallis")
+  expect_gt(result$effect_size, 1)
+  expect_true(result$risk %in% c("medium", "high"))
+})
+
+test_that("continuous design audit rejects non-numeric variables and missing values", {
+  metadata <- data.frame(
+    outcome = c("Control", "Disease", "Control", "Disease"),
+    age = c(30, 40, 35, 45),
+    sex = c("F", "M", "F", "M")
+  )
+
+  expect_error(
+    check_continuous_design(metadata, outcome = "outcome", variables = "sex"),
+    "Non-numeric"
+  )
+
+  metadata$age[1] <- NA_real_
+  expect_error(
+    check_continuous_design(metadata, outcome = "outcome", variables = "age"),
+    "Missing values found"
+  )
+})
+
+test_that("check_design combines batch and covariate audits", {
   metadata <- data.frame(
     outcome = rep(c("Control", "Disease"), each = 10),
     center = rep(c("Center_A", "Center_B"), each = 10),
-    sex = rep(c("Female", "Male"), times = 10)
+    sex = rep(c("Female", "Male"), times = 10),
+    age = c(29:38, 59:68)
   )
 
   result <- check_design(
     metadata,
     outcome = "outcome",
-    variables = c("center", "sex")
+    batch = "center",
+    covariates = c("sex", "age")
   )
 
   expect_s3_class(result, "data.frame")
-  expect_equal(result$variable, c("center", "sex"))
-  expect_equal(result$variable_type, rep("categorical", 2))
-  expect_equal(length(result$contingency_table), 2)
-  expect_equal(result$risk, c("critical", "low"))
+  expect_equal(result$variable, c("center", "sex", "age"))
+  expect_equal(result$role, c("batch", "covariate", "covariate"))
+  expect_equal(result$variable_type, c("categorical", "categorical", "continuous"))
+  expect_equal(attr(result, "risk"), "critical")
+  expect_true(any(grepl("center", attr(result, "warnings"))))
+})
+
+test_that("check_design handles partial or absent design variables", {
+  metadata <- data.frame(
+    outcome = rep(c("Control", "Disease"), each = 10),
+    center = rep(c("Center_A", "Center_B"), times = 10),
+    age = rep(30:39, times = 2)
+  )
+
+  batch_only <- check_design(metadata, outcome = "outcome", batch = "center")
+  covariate_only <- check_design(metadata, outcome = "outcome", covariates = "age")
+  none <- check_design(metadata, outcome = "outcome")
+
+  expect_equal(batch_only$role, "batch")
+  expect_equal(covariate_only$role, "covariate")
+  expect_equal(nrow(none), 0)
+  expect_equal(attr(none, "risk"), "unknown")
 })
 
 test_that("check_design validates required inputs", {
@@ -82,13 +181,13 @@ test_that("check_design validates required inputs", {
     center = c("A", "B")
   )
 
-  expect_error(check_design(list(), outcome = "outcome", variables = "center"), "data frame")
-  expect_error(check_design(metadata, outcome = "missing", variables = "center"), "Missing variable")
-  expect_error(check_design(metadata, outcome = "outcome", variables = character()), "non-empty")
+  expect_error(check_design(list(), outcome = "outcome", batch = "center"), "data frame")
+  expect_error(check_design(metadata, outcome = "missing", batch = "center"), "Missing variable")
+  expect_error(check_design(metadata, outcome = "outcome", batch = "missing"), "Missing variable")
 
   metadata$center[1] <- NA_character_
   expect_error(
-    check_design(metadata, outcome = "outcome", variables = "center"),
+    check_design(metadata, outcome = "outcome", batch = "center"),
     "Missing values found"
   )
 })

@@ -35,8 +35,12 @@ test_that("check_biome returns a pending audit with full public API parameters",
 
   expect_equal(audit$input$variables$time, "timepoint")
   expect_equal(audit$input$n_timepoints, 2)
+  expect_s3_class(audit$design, "data.frame")
+  expect_equal(audit$design$variable, c("batch", "age"))
+  expect_equal(audit$design$role, c("batch", "covariate"))
+  expect_equal(audit$design$variable_type, c("categorical", "continuous"))
 
-  modules <- c("design", "batch", "correction", "leakage")
+  modules <- c("batch", "correction", "leakage")
   expect_equal(
     unname(vapply(audit[modules], `[[`, character(1), "status")),
     rep("pending", length(modules))
