@@ -4,3 +4,4 @@
 ^README\.Rmd$
 ^LICENSE\.md$
 ^issues_template\.md$
+^data-raw$

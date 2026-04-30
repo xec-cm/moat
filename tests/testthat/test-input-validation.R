@@ -1,75 +1,49 @@
-make_test_biome <- function(metadata = NULL, assays = NULL) {
-  if (is.null(metadata)) {
-    metadata <- data.frame(
-      condition = c("case", "case", "control", "control"),
-      batch = c("a", "b", "a", "b"),
-      age = c(34, 41, 39, 52),
-      patient_id = paste0("p", 1:4),
-      row.names = paste0("sample", 1:4)
-    )
-  }
-
-  if (is.null(assays)) {
-    assays <- list(
-      counts = matrix(
-        c(
-          10, 2, 0, 1,
-          4, 8, 1, 0,
-          0, 3, 9, 2
-        ),
-        nrow = 3,
-        dimnames = list(
-          paste0("taxon", 1:3),
-          paste0("sample", 1:4)
-        )
-      )
-    )
-  }
-
-  SummarizedExperiment::SummarizedExperiment(assays = assays, colData = metadata)
-}
-
 test_that("validate_biome_input returns a structured input summary", {
-  result <- 
-    make_test_biome() %>% 
+  se <- readRDS(test_path("fixtures/repeated_biome.rds"))
+  # repeated_biome has outcome, subject, timepoint. Add batch and covariate for a full test.
+  SummarizedExperiment::colData(se)$batch <- rep(c("A", "B"), times = 20)
+  SummarizedExperiment::colData(se)$age <- rep(30, times = 40)
+  
+  result <- se %>% 
     safebiome:::validate_biome_input(
-      outcome = "condition",
+      outcome = "outcome",
       batch = "batch",
       covariates = "age",
-      subject = "patient_id"
+      subject = "subject"
     )
 
   expect_s3_class(result$metadata, "data.frame")
-  expect_equal(nrow(result$metadata), 4)
+  expect_equal(nrow(result$metadata), 40)
   expect_equal(result$assay$name, "counts")
-  expect_equal(result$assay$n_features, 3)
-  expect_equal(result$assay$n_samples, 4)
-  expect_equal(result$variables$outcome, "condition")
+  expect_equal(result$assay$n_features, 50)
+  expect_equal(result$assay$n_samples, 40)
+  expect_equal(result$variables$outcome, "outcome")
 })
 
 test_that("validate_biome_input rejects invalid objects", {
   expect_error(
     safebiome:::validate_biome_input(
-      data.frame(condition = c("case", "control")),
-      outcome = "condition"
+      data.frame(outcome = c("Control", "Disease")),
+      outcome = "outcome"
     ),
     "SummarizedExperiment"
   )
 })
 
 test_that("validate_biome_input requires the selected assay", {
-  se <- make_test_biome()
+  se <- readRDS(test_path("fixtures/clean_biome.rds"))
   expect_error(
-    safebiome:::validate_biome_input(se, outcome = "condition", assay = "clr"),
+    safebiome:::validate_biome_input(se, outcome = "outcome", assay = "clr"),
     "assay.*must select an assay"
   )
 })
 
 test_that("validate_biome_input requires metadata variables", {
+  se <- readRDS(test_path("fixtures/clean_biome.rds"))
   expect_error(
     safebiome:::validate_biome_input(
-      make_test_biome(),
-      outcome = "missing_condition",
+      se,
+      outcome = "missing_outcome",
       batch = "missing_batch"
     ),
     "Missing variable"
@@ -77,32 +51,24 @@ test_that("validate_biome_input requires metadata variables", {
 })
 
 test_that("validate_biome_input requires at least two outcome levels", {
-  se <- data.frame(
-    condition = rep("case", 4),
-    batch = c("a", "b", "a", "b"),
-    row.names = paste0("sample", 1:4)
-  ) %>% make_test_biome()
-
+  se <- readRDS(test_path("fixtures/clean_biome.rds"))
+  SummarizedExperiment::colData(se)$outcome <- "Control" # Force only 1 level
+  
   expect_error(
-    safebiome:::validate_biome_input(se, outcome = "condition", batch = "batch"),
+    safebiome:::validate_biome_input(se, outcome = "outcome"),
     "at least two"
   )
 })
 
 test_that("validate_biome_input reports missing metadata values", {
-  se <- data.frame(
-    condition = c("case", "case", "control", "control"),
-    batch = c("a", NA, "a", "b"),
-    age = c(34, 41, NA, 52),
-    row.names = paste0("sample", 1:4)
-  ) %>% make_test_biome()
-
+  se <- readRDS(test_path("fixtures/batch_effect_biome.rds"))
+  SummarizedExperiment::colData(se)$batch[1] <- NA # Introduce NA
+  
   expect_error(
     safebiome:::validate_biome_input(
       se,
-      outcome = "condition",
-      batch = "batch",
-      covariates = "age"
+      outcome = "outcome",
+      batch = "batch"
     ),
     "Missing values found"
   )
