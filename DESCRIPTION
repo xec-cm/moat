@@ -8,7 +8,7 @@ Description: Audits microbiome studies for design confounding, batch
     effects, correction feasibility, and validation leakage before downstream
     statistical analysis.
 License: MIT + file LICENSE
-URL: https://github.com/xec-cm/safebiome
+URL: https://github.com/xec-cm/safebiome, https://xec-cm.github.io/safebiome/
 BugReports: https://github.com/xec-cm/safebiome/issues
 biocViews: Software, Microbiome, Metagenomics, Sequencing, ExperimentalDesign,
     QualityControl, StatisticalMethod

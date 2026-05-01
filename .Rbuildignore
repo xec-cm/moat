@@ -5,3 +5,6 @@
 ^LICENSE\.md$
 ^issues_template\.md$
 ^data-raw$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$

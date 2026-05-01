@@ -2,3 +2,4 @@
 *.Rcheck/
 *.BiocCheck/
 *.tar.gz
+docs
