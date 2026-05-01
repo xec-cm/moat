@@ -59,8 +59,8 @@ A \code{safebiome_audit} object.
 \code{SummarizedExperiment}-like object, records the audit parameters, and returns
 a stable \code{safebiome_audit} object. Design and correction diagnostics are
 evaluated from metadata; batch diagnostics combine distance-based PERMANOVA,
-PERMDISP, and PCoA audits. Leakage diagnostics are represented as pending
-placeholders until their module is implemented.
+PERMDISP, and PCoA audits. Leakage diagnostics evaluate repeated measures,
+batch-driven validation leakage, and optional temporal leakage.
 }
 \examples{
 data("toy_biome")

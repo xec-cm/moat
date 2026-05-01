@@ -19,7 +19,7 @@ test_that("check_biome returns an evaluated audit with full public API parameter
 
   expect_s3_class(audit, "safebiome_audit")
   expect_true(is_biome_audit(audit))
-  expect_equal(audit$risk, audit$batch$risk)
+  expect_equal(audit$risk, "high")
   expect_true(length(audit$recommendations) > 0)
 
   expect_equal(audit$params$outcome, "outcome")
@@ -46,7 +46,10 @@ test_that("check_biome returns an evaluated audit with full public API parameter
   expect_equal(audit$batch$status, "evaluated")
   expect_equal(audit$batch$module, "batch")
   expect_equal(audit$batch$summary$distance, c("aitchison", "bray"))
-  expect_equal(audit$leakage$status, "pending")
+  expect_equal(audit$leakage$status, "evaluated")
+  expect_equal(audit$leakage$module, "leakage")
+  expect_equal(audit$leakage$repeated_measures$risk, "high")
+  expect_equal(audit$leakage$recommended_cv, "grouped_time_aware_cv_by_subject")
 })
 
 test_that("check_biome handles missing optional arguments gracefully", {
@@ -65,6 +68,8 @@ test_that("check_biome handles missing optional arguments gracefully", {
   expect_true(audit$params$verbose)
   expect_equal(audit$batch$status, "skipped")
   expect_equal(audit$batch$module, "batch")
+  expect_equal(audit$leakage$status, "skipped")
+  expect_equal(audit$leakage$module, "leakage")
   expect_equal(audit$correction$status, "skipped")
   expect_equal(audit$correction$feasibility, "not_applicable")
 })

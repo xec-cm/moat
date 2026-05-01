@@ -4,8 +4,8 @@
 #' `SummarizedExperiment`-like object, records the audit parameters, and returns
 #' a stable `safebiome_audit` object. Design and correction diagnostics are
 #' evaluated from metadata; batch diagnostics combine distance-based PERMANOVA,
-#' PERMDISP, and PCoA audits. Leakage diagnostics are represented as pending
-#' placeholders until their module is implemented.
+#' PERMDISP, and PCoA audits. Leakage diagnostics evaluate repeated measures,
+#' batch-driven validation leakage, and optional temporal leakage.
 #'
 #' @param x A [SummarizedExperiment::SummarizedExperiment()] object. Objects
 #'   extending `SummarizedExperiment`, such as `TreeSummarizedExperiment`, are
@@ -79,6 +79,13 @@ check_biome <- function(
     distances = distances,
     n_perm = n_perm
   )
+  leakage_audit <- check_leakage(
+    metadata = input$metadata,
+    outcome = outcome,
+    subject = subject,
+    batch = batch,
+    time = time
+  )
 
   biome_audit(
     input = input$summary,
@@ -95,9 +102,9 @@ check_biome <- function(
       batch = batch,
       covariates = covariates
     ),
-    leakage = pending_biome_module("leakage"),
-    recommendations = batch_audit$recommendations,
-    risk = check_biome_risk(batch_audit),
+    leakage = leakage_audit,
+    recommendations = c(batch_audit$recommendations, leakage_audit$recommendations),
+    risk = check_biome_risk(batch_audit, leakage_audit),
     params = list(
       outcome = outcome,
       batch = batch,
@@ -114,11 +121,16 @@ check_biome <- function(
 }
 
 #' @keywords internal
-check_biome_risk <- function(batch) {
-  if (identical(batch$status, "evaluated")) {
-    return(batch$risk)
-  }
-  "unknown"
+check_biome_risk <- function(...) {
+  modules <- list(...)
+  risks <- vapply(modules, function(module) {
+    if (is.list(module) && !is.null(module$risk)) {
+      return(module$risk)
+    }
+    "unknown"
+  }, character(1))
+
+  highest_leakage_risk(risks)
 }
 
 #' @keywords internal
