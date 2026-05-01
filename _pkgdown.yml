@@ -1,4 +1,100 @@
 url: https://xec-cm.github.io/safebiome/
+
 template:
   bootstrap: 5
+  bootswatch: minty
 
+development:
+  mode: auto
+
+home:
+  title: "safebiome: microbiome study-design audits"
+  description: >
+    Audit microbiome studies for design confounding, batch effects,
+    correction feasibility, and validation leakage before downstream analysis.
+
+navbar:
+  structure:
+    left: [intro, reference, articles, news]
+    right: [search, github]
+  components:
+    intro:
+      text: "Get started"
+      href: articles/safebiome.html
+    reference:
+      text: "Reference"
+      href: reference/index.html
+    articles:
+      text: "Articles"
+      menu:
+      - text: "Full audit workflow"
+        href: articles/safebiome.html
+    news:
+      text: "News"
+      href: news/index.html
+    github:
+      icon: fab fa-github
+      href: https://github.com/xec-cm/safebiome/
+      aria-label: "GitHub repository"
+
+authors:
+  Francesc Català-Moll:
+    href: https://orcid.org/0000-0002-2354-8648
+
+articles:
+- title: "Workflows"
+  navbar: "Workflows"
+  contents:
+  - safebiome
+
+search:
+  exclude:
+  - reference/biome_audit.html
+  - reference/new_biome_audit.html
+  - reference/print.safebiome_audit.html
+  - reference/safebiome-package.html
+  - reference/validate_biome_audit.html
+  - reference/validate_biome_input.html
+
+reference:
+- title: "Start Here"
+  desc: "Run a complete audit, summarize risk, plan downstream analysis, and visualize key diagnostics."
+- contents:
+  - check_biome
+  - summary.safebiome_audit
+  - plan_analysis
+  - plot_design
+  - plot_variance
+
+- title: "Design And Correction Audits"
+  desc: "Audit metadata confounding and evaluate whether batch adjustment is identifiable."
+- contents:
+  - check_design
+  - check_continuous_design
+  - check_balance
+  - check_model_matrix
+  - check_correction
+
+- title: "Microbiome Distances And Batch Effects"
+  desc: "Transform microbiome data, compute distances, and audit distance-based batch effects."
+- contents:
+  - transform_biome
+  - compute_biome_distance
+  - check_permanova
+  - check_batch
+
+- title: "Leakage Audits"
+  desc: "Detect repeated-measure and metadata-driven validation leakage risks."
+- contents:
+  - check_repeated_measures
+  - check_leakage
+
+- title: "Data And Audit Objects"
+  desc: "Example data and lightweight audit object helpers."
+- contents:
+  - toy_biome
+  - is_biome_audit
+
+- title: "Package Helpers"
+- contents:
+  - "%>%"
