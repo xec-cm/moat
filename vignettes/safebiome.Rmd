@@ -1,5 +1,5 @@
 ---
-title: "safebiome"
+title: "Auditing microbiome study designs with safebiome"
 author:
   - name: Francesc Catala-Moll
     affiliation: IrsiCaixa AIDS Research Institute
@@ -7,52 +7,163 @@ package: safebiome
 output:
   BiocStyle::html_document:
     toc: true
+    toc_depth: 2
 vignette: >
-  %\VignetteIndexEntry{safebiome}
+  %\VignetteIndexEntry{Auditing microbiome study designs with safebiome}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.align = "center",
+  fig.width = 7,
+  fig.height = 4.5
+)
 ```
 
-# Overview
+# Why Audit Microbiome Studies?
 
-`safebiome` is an R package for auditing microbiome study designs before
-downstream statistical analysis.
+Microbiome analyses are sensitive to study design. Outcome groups can be
+confounded with center, sequencing run, extraction kit, visit, or subject
+identity. When this happens, downstream analyses can report biological
+differences that are partly or entirely driven by technical or design
+structure.
 
-The package is in early development. Its planned scope includes checks for
-design confounding, batch effects, correction feasibility, and validation
-leakage.
+`safebiome` audits those risks before analysis. It does not automatically
+correct counts or decide the final model. Instead, it returns diagnostics,
+warnings, plots, and analysis-plan recommendations that help make the study
+design explicit.
 
-# Installation check
+# Load the Toy Dataset
 
 ```{r load-package}
 library(safebiome)
+data("toy_biome")
+
+toy_biome
 ```
 
-# Planned workflow
+The example dataset is a small simulated `SummarizedExperiment` with count data
+and sample metadata.
 
-The intended user workflow is:
+```{r inspect-metadata}
+head(SummarizedExperiment::colData(toy_biome))
+```
 
-```{r planned-workflow, eval=FALSE}
+# Run the Audit
+
+For examples and vignettes we use a small number of permutations. Real analyses
+should generally use a larger value, such as the default `999`.
+
+```{r run-audit}
 audit <- check_biome(
-    x,
-    outcome = "condition",
-    batch = c("center", "sequencing_run"),
-    covariates = c("age", "sex", "antibiotic_use"),
-    subject = "patient_id"
+  toy_biome,
+  outcome = "outcome",
+  batch = "batch",
+  distances = "bray",
+  n_perm = 99,
+  verbose = FALSE
 )
 
 summary(audit)
+```
+
+# Interpret Design Risk
+
+The design module checks whether metadata variables are associated with the
+outcome. For categorical variables it stores a contingency table, Cramer's V,
+empty-cell counts, and a conservative risk label.
+
+```{r design-table}
+audit$design[, c(
+  "variable",
+  "role",
+  "variable_type",
+  "effect_size_name",
+  "effect_size",
+  "empty_cells",
+  "risk"
+)]
+```
+
+`plot_design()` shows the outcome distribution across an audited categorical
+variable. Empty cells are outlined because they can indicate confounding or
+complete separation.
+
+```{r plot-design}
+plot_design(audit, variable = "batch")
+```
+
+# Interpret Correction Feasibility
+
+Batch adjustment is only meaningful when outcome and batch are not perfectly
+aliased. The correction module summarizes whether ordinary adjustment appears
+identifiable from the metadata.
+
+```{r correction-feasibility}
+audit$correction$feasibility
+audit$correction$recommendations
+```
+
+This diagnostic is not a command to correct the data. It is a warning about
+what kinds of downstream adjustment are statistically defensible.
+
+# Interpret Batch Risk
+
+The batch module combines distance-based PERMANOVA, dispersion diagnostics, and
+ordination-axis association checks. The summary table reports how much
+microbiome variation is attributed to the outcome and to batch.
+
+```{r batch-summary}
+audit$batch$summary[, c(
+  "distance",
+  "outcome_r2",
+  "batch_r2",
+  "batch_dominance_score",
+  "permanova_risk",
+  "permdisp_risk",
+  "pcoa_risk",
+  "risk"
+)]
+```
+
+`plot_variance()` visualizes the PERMANOVA R2 terms. A batch term that exceeds
+the outcome term is a strong signal that the downstream analysis needs explicit
+batch sensitivity checks.
+
+```{r plot-variance}
+plot_variance(audit, distance = "bray")
+```
+
+# Interpret Leakage Risk
+
+Validation leakage can occur when samples from the same subject, batch, or time
+structure are split across train and test folds in a way that makes prediction
+look better than it is. `safebiome` reports the recommended cross-validation
+scheme based on the metadata supplied to `check_biome()`.
+
+```{r leakage-summary}
+audit$leakage$recommended_cv
+audit$leakage$recommendations
+```
+
+# Generate an Analysis Plan
+
+`plan_analysis()` translates the audit into recommended formulas, validation
+schemes, batch strategy, and sensitivity analyses.
+
+```{r analysis-plan}
 plan_analysis(audit)
 ```
 
-These user-facing functions will be implemented in upcoming development
-milestones.
+The plan should be read as a structured starting point. Analysts still need to
+choose methods appropriate for their scientific question, data distribution,
+and experimental design.
 
-# Session information
+# Session Information
 
 ```{r session-info}
 sessionInfo()
