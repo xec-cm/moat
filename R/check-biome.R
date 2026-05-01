@@ -3,8 +3,9 @@
 #' `check_biome()` is the main entry point for `safebiome`. It validates a
 #' `SummarizedExperiment`-like object, records the audit parameters, and returns
 #' a stable `safebiome_audit` object. Design and correction diagnostics are
-#' evaluated from metadata; batch and leakage diagnostics are represented as
-#' pending placeholders until their modules are implemented.
+#' evaluated from metadata; batch diagnostics combine distance-based PERMANOVA,
+#' PERMDISP, and PCoA audits. Leakage diagnostics are represented as pending
+#' placeholders until their module is implemented.
 #'
 #' @param x A [SummarizedExperiment::SummarizedExperiment()] object. Objects
 #'   extending `SummarizedExperiment`, such as `TreeSummarizedExperiment`, are
@@ -68,6 +69,16 @@ check_biome <- function(
     time = time,
     assay = assay
   )
+  batch_audit <- check_batch(
+    x = x,
+    metadata = input$metadata,
+    outcome = outcome,
+    batch = batch,
+    covariates = covariates,
+    assay = assay,
+    distances = distances,
+    n_perm = n_perm
+  )
 
   biome_audit(
     input = input$summary,
@@ -77,7 +88,7 @@ check_biome <- function(
       batch = batch,
       covariates = covariates
     ),
-    batch = pending_biome_module("batch"),
+    batch = batch_audit,
     correction = check_correction(
       metadata = input$metadata,
       outcome = outcome,
@@ -85,8 +96,8 @@ check_biome <- function(
       covariates = covariates
     ),
     leakage = pending_biome_module("leakage"),
-    recommendations = character(),
-    risk = "unknown",
+    recommendations = batch_audit$recommendations,
+    risk = check_biome_risk(batch_audit),
     params = list(
       outcome = outcome,
       batch = batch,
@@ -100,6 +111,14 @@ check_biome <- function(
       verbose = verbose
     )
   )
+}
+
+#' @keywords internal
+check_biome_risk <- function(batch) {
+  if (identical(batch$status, "evaluated")) {
+    return(batch$risk)
+  }
+  "unknown"
 }
 
 #' @keywords internal

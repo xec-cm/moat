@@ -1,4 +1,4 @@
-test_that("check_biome returns a pending audit with full public API parameters", {
+test_that("check_biome returns an evaluated audit with full public API parameters", {
   se <- readRDS(test_path("fixtures/repeated_biome.rds"))
   SummarizedExperiment::colData(se)$batch <- rep(c("A", "B"), each = 20)
   SummarizedExperiment::colData(se)$age <- seq_len(40)
@@ -19,8 +19,8 @@ test_that("check_biome returns a pending audit with full public API parameters",
 
   expect_s3_class(audit, "safebiome_audit")
   expect_true(is_biome_audit(audit))
-  expect_equal(audit$risk, "unknown")
-  expect_equal(audit$recommendations, character())
+  expect_equal(audit$risk, audit$batch$risk)
+  expect_true(length(audit$recommendations) > 0)
 
   expect_equal(audit$params$outcome, "outcome")
   expect_equal(audit$params$batch, "batch")
@@ -43,11 +43,10 @@ test_that("check_biome returns a pending audit with full public API parameters",
   expect_equal(audit$correction$module, "correction")
   expect_equal(audit$correction$feasibility, "safe")
 
-  modules <- c("batch", "leakage")
-  expect_equal(
-    unname(vapply(audit[modules], `[[`, character(1), "status")),
-    rep("pending", length(modules))
-  )
+  expect_equal(audit$batch$status, "evaluated")
+  expect_equal(audit$batch$module, "batch")
+  expect_equal(audit$batch$summary$distance, c("aitchison", "bray"))
+  expect_equal(audit$leakage$status, "pending")
 })
 
 test_that("check_biome handles missing optional arguments gracefully", {
@@ -64,6 +63,8 @@ test_that("check_biome handles missing optional arguments gracefully", {
   expect_equal(audit$params$distances, c("aitchison", "bray"))
   expect_equal(audit$params$n_perm, 999)
   expect_true(audit$params$verbose)
+  expect_equal(audit$batch$status, "skipped")
+  expect_equal(audit$batch$module, "batch")
   expect_equal(audit$correction$status, "skipped")
   expect_equal(audit$correction$feasibility, "not_applicable")
 })

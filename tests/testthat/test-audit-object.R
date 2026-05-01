@@ -149,7 +149,7 @@ test_that("check_biome returns a validated audit with stored parameters", {
 
   expect_s3_class(audit, "safebiome_audit")
   expect_true(is_biome_audit(audit))
-  expect_equal(audit$risk, "unknown")
+  expect_equal(audit$risk, audit$batch$risk)
   expect_equal(audit$params$outcome, "outcome")
   expect_equal(audit$params$batch, "batch")
   expect_equal(audit$params$assay, "counts")
@@ -157,6 +157,7 @@ test_that("check_biome returns a validated audit with stored parameters", {
   expect_equal(audit$input$assay$n_features, 50)
   expect_equal(audit$input$batch_levels$batch, c("Batch_1", "Batch_2"))
   expect_s3_class(audit$design, "data.frame")
+  expect_equal(audit$batch$status, "evaluated")
   expect_equal(audit$design$variable, "batch")
   expect_equal(audit$design$role, "batch")
 })
