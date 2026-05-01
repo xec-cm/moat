@@ -60,6 +60,71 @@ test_that("plot_design can plot proportions within variable levels", {
   )
 })
 
+test_that("plot_design handles complex multi-variable categorical designs", {
+  metadata <- data.frame(
+    outcome = c(
+      rep("Control", 5),
+      rep("Disease", 4),
+      rep("Responder", 3)
+    ),
+    center = c(
+      rep("Center A", 3),
+      rep("Center B", 3),
+      rep("Center C", 3),
+      rep("Center D", 3)
+    ),
+    run = c(
+      "Run 1", "Run 1", "Run 2", "Run 2", "Run 3", "Run 3",
+      "Run 4", "Run 4", "Run 5", "Run 5", "Run 6", "Run 6"
+    ),
+    extraction = c(
+      "Kit A", "Kit B", "Kit A", "Kit C", "Kit B", "Kit B",
+      "Kit C", "Kit C", "Kit A", "Kit A", "Kit D", "Kit D"
+    ),
+    age = c(42, 45, 47, 50, 51, 53, 60, 61, 63, 64, 70, 72),
+    check.names = FALSE
+  )
+  audit <- safebiome:::biome_audit(
+    design = check_design(
+      metadata,
+      outcome = "outcome",
+      batch = c("center", "run"),
+      covariates = c("extraction", "age")
+    ),
+    params = list(
+      outcome = "outcome",
+      batch = c("center", "run"),
+      covariates = c("extraction", "age")
+    )
+  )
+
+  default_plot <- plot_design(audit)
+  extraction_plot <- plot_design(audit, variable = "extraction", type = "proportion")
+  extraction_row <- audit$design[audit$design$variable == "extraction", , drop = FALSE]
+  extraction_data <- safebiome:::design_contingency_plot_data(
+    extraction_row$contingency_table[[1]],
+    type = "proportion"
+  )
+
+  expect_s3_class(default_plot, "ggplot")
+  expect_s3_class(extraction_plot, "ggplot")
+  expect_equal(default_plot$labels$x, "center")
+  expect_equal(extraction_plot$labels$x, "extraction")
+  expect_equal(nrow(audit$design), 4)
+  expect_equal(
+    audit$design$role[match(c("center", "run", "extraction", "age"), audit$design$variable)],
+    c("batch", "batch", "covariate", "covariate")
+  )
+  expect_equal(nlevels(extraction_data$variable_level), 4)
+  expect_equal(nlevels(extraction_data$outcome_level), 3)
+  expect_gt(sum(extraction_data$empty), 0)
+  expect_equal(
+    as.numeric(tapply(extraction_data$value, extraction_data$variable_level, sum)),
+    rep(1, 4),
+    tolerance = 1e-8
+  )
+})
+
 test_that("plot_design validates unavailable design variables", {
   metadata <- data.frame(
     outcome = rep(c("Control", "Disease"), each = 4),
