@@ -171,7 +171,7 @@ test_that("check_correction returns caution for sparse but identifiable balance"
   result <- check_correction(metadata, outcome = "outcome", batch = "center")
 
   expect_equal(result$feasibility, "caution")
-  expect_equal(result$balance$risk, "medium")
+  expect_equal(result$balance$risk, "moderate")
   expect_equal(result$model_matrix$risk, "low")
   expect_match(result$recommendations, "may be possible")
 })
@@ -244,7 +244,7 @@ test_that("check_model_matrix validates inputs", {
   )
 })
 
-test_that("correction risk helpers cover medium, caution, and non-finite branches", {
+test_that("correction risk helpers cover moderate, caution, and non-finite branches", {
   expect_equal(
     safebiome:::assess_balance_risk(
       empty_cells = 0,
@@ -253,7 +253,7 @@ test_that("correction risk helpers cover medium, caution, and non-finite branche
       n_batch_levels = 2,
       positivity_score = 1
     ),
-    "medium"
+    "moderate"
   )
   expect_equal(
     safebiome:::assess_model_matrix_risk(

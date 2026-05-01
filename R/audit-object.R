@@ -5,6 +5,7 @@
 #' @param batch A list with batch audit results.
 #' @param correction A list with correction audit results.
 #' @param leakage A list with leakage audit results.
+#' @param risk_summary A list with global and module-specific risk scoring.
 #' @param recommendations A character vector or list of recommendations.
 #' @param risk A single string indicating the overall risk.
 #' @param params A list of parameters used for the audit.
@@ -17,10 +18,16 @@ new_biome_audit <- function(
   batch = list(),
   correction = list(),
   leakage = list(),
+  risk_summary = list(),
   recommendations = character(),
   risk = "unknown",
   params = list()
 ) {
+  risk <- normalize_audit_risk(risk)
+  if (length(risk_summary) == 0) {
+    risk_summary <- minimal_risk_summary(risk = risk, recommendations = recommendations)
+  }
+
   structure(
     list(
       input = input,
@@ -28,6 +35,7 @@ new_biome_audit <- function(
       batch = batch,
       correction = correction,
       leakage = leakage,
+      risk_summary = risk_summary,
       recommendations = recommendations,
       risk = risk,
       params = normalize_biome_audit_params(params)
@@ -61,7 +69,7 @@ validate_biome_audit <- function(x) {
   }
 
   required_names <- 
-    c("input", "design", "batch", "correction", "leakage", "recommendations", "risk", "params")
+    c("input", "design", "batch", "correction", "leakage", "risk_summary", "recommendations", "risk", "params")
   unexpected_names <- setdiff(names(x), required_names)
   missing_names <- setdiff(required_names, names(x))
   if (length(missing_names) > 0) {
@@ -84,7 +92,7 @@ validate_biome_audit <- function(x) {
     )
   }
 
-  module_names <- c("input", "design", "batch", "correction", "leakage", "params")
+  module_names <- c("input", "design", "batch", "correction", "leakage", "risk_summary", "params")
   invalid_modules <- module_names[!vapply(x[module_names], is.list, logical(1))]
   if (length(invalid_modules) > 0) {
     cli::cli_abort(
@@ -113,7 +121,7 @@ validate_biome_audit <- function(x) {
     )
   }
 
-  allowed_risk <- c("low", "medium", "high", "unknown")
+  allowed_risk <- c(audit_risk_levels(), "medium")
   if (is.na(x$risk) || !x$risk %in% allowed_risk) {
     cli::cli_abort(
       c(
@@ -130,6 +138,8 @@ validate_biome_audit <- function(x) {
       class = "safebiome_error_missing_schema_version"
     )
   }
+
+  validate_risk_summary(x$risk_summary)
 
   x
 }
@@ -148,6 +158,7 @@ biome_audit <- function(
   batch = list(),
   correction = list(),
   leakage = list(),
+  risk_summary = list(),
   recommendations = character(),
   risk = "unknown",
   params = list()
@@ -158,6 +169,7 @@ biome_audit <- function(
     batch = batch,
     correction = correction,
     leakage = leakage,
+    risk_summary = risk_summary,
     recommendations = recommendations,
     risk = risk,
     params = params
@@ -191,7 +203,9 @@ print.safebiome_audit <- function(x, ...) {
   
   risk_color <- switch(
     as.character(x$risk),
+    "critical" = cli::col_red,
     "high" = cli::col_red,
+    "moderate" = cli::col_yellow,
     "medium" = cli::col_yellow,
     "low" = cli::col_green,
     cli::col_blue
@@ -216,6 +230,44 @@ print.safebiome_audit <- function(x, ...) {
   }
   
   invisible(x)
+}
+
+#' @keywords internal
+validate_risk_summary <- function(x) {
+  if (!is.list(x)) {
+    cli::cli_abort(
+      "{.field risk_summary} must be a list.",
+      class = "safebiome_error_invalid_risk_summary"
+    )
+  }
+
+  required_names <- c("overall", "modules", "recommendations")
+  missing_names <- setdiff(required_names, names(x))
+  if (length(missing_names) > 0) {
+    cli::cli_abort(
+      c(
+        "{.field risk_summary} is missing required components.",
+        "x" = "Missing: {.val {missing_names}}."
+      ),
+      class = "safebiome_error_invalid_risk_summary"
+    )
+  }
+
+  if (!is.list(x$overall) || !"risk" %in% names(x$overall) || !"reasons" %in% names(x$overall)) {
+    cli::cli_abort(
+      "{.field risk_summary$overall} must include {.field risk} and {.field reasons}.",
+      class = "safebiome_error_invalid_risk_summary"
+    )
+  }
+
+  if (!is.data.frame(x$modules)) {
+    cli::cli_abort(
+      "{.field risk_summary$modules} must be a data frame.",
+      class = "safebiome_error_invalid_risk_summary"
+    )
+  }
+
+  invisible(TRUE)
 }
 
 #' @keywords internal

@@ -401,7 +401,7 @@ assess_permanova_risk <- function(
       (!is.na(batch_dominance_score) && batch_dominance_score >= 1 && batch_r2 >= 0.02) ||
       (!is.na(batch_p_value) && batch_p_value <= 0.10)
   ) {
-    return("medium")
+    return("moderate")
   }
   "low"
 }
@@ -457,7 +457,7 @@ assess_permdisp_risk <- function(p_value) {
     return("high")
   }
   if (p_value <= 0.10) {
-    return("medium")
+    return("moderate")
   }
   "low"
 }
@@ -572,7 +572,7 @@ assess_pcoa_risk <- function(max_axis_r2, min_p_value) {
     (!is.na(max_axis_r2) && max_axis_r2 >= 0.10) ||
       (!is.na(min_p_value) && min_p_value <= 0.10)
   ) {
-    return("medium")
+    return("moderate")
   }
   "low"
 }
@@ -609,12 +609,13 @@ highest_batch_risk <- function(risk) {
   if (length(risk) == 0) {
     return("unknown")
   }
-  risk_order <- c("unknown" = 0, "low" = 1, "medium" = 2, "high" = 3)
+  risk <- normalize_audit_risk_vector(risk)
+  risk_order <- c("unknown" = 0, "low" = 1, "moderate" = 2, "high" = 3)
   risk <- risk[risk %in% names(risk_order)]
   if (length(risk) == 0) {
     return("unknown")
   }
-  names(which.max(risk_order[risk]))
+  unname(names(which.max(risk_order[risk])))
 }
 
 #' @keywords internal
@@ -625,7 +626,7 @@ batch_recommendations <- function(risk) {
       "Batch signal is strong relative to outcome or ordination structure; report batch diagnostics before downstream analysis.",
       "Avoid interpreting outcome effects without sensitivity analyses that account for batch."
     ),
-    "medium" = "Batch signal is detectable; inspect distance-specific diagnostics and report sensitivity analyses.",
+    "moderate" = "Batch signal is detectable; inspect distance-specific diagnostics and report sensitivity analyses.",
     "low" = "No strong batch signal was detected by the selected distance diagnostics.",
     "Batch risk could not be determined from the selected diagnostics."
   )

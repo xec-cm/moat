@@ -67,7 +67,7 @@ test_that("categorical design audit uses Fisher test for sparse tables", {
   expect_equal(result$test, "fisher")
   expect_equal(result$empty_cells, 0)
   expect_equal(result$min_cell_count, 1)
-  expect_equal(result$risk, "medium")
+  expect_equal(result$risk, "moderate")
 })
 
 test_that("continuous design audit flags strong binary group differences", {
@@ -113,7 +113,7 @@ test_that("continuous design audit supports multi-group outcomes", {
   expect_equal(result$n_outcome_levels, 3)
   expect_equal(result$test, "kruskal-wallis")
   expect_gt(result$effect_size, 1)
-  expect_true(result$risk %in% c("medium", "high"))
+  expect_true(result$risk %in% c("moderate", "high"))
 })
 
 test_that("continuous design audit rejects non-numeric variables and missing values", {
@@ -226,7 +226,7 @@ test_that("design helper edge cases return stable values", {
   expect_false(safebiome:::detect_complete_separation(matrix(1, nrow = 1)))
 })
 
-test_that("design risk helpers cover unknown, high and medium branches", {
+test_that("design risk helpers cover unknown, high and moderate branches", {
   expect_equal(
     safebiome:::assess_categorical_design_risk(
       p_value = NA_real_,
@@ -253,7 +253,7 @@ test_that("design risk helpers cover unknown, high and medium branches", {
       standardized_difference = 0.6,
       imbalance_ratio = 1
     ),
-    "medium"
+    "moderate"
   )
   expect_equal(
     safebiome:::assess_continuous_design_risk(

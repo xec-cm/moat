@@ -234,7 +234,7 @@ test_that("batch risk helpers cover edge thresholds", {
       batch_dominance_score = 1.2,
       batch_p_value = 0.2
     ),
-    "medium"
+    "moderate"
   )
   expect_equal(
     safebiome:::assess_permanova_risk(
@@ -247,18 +247,18 @@ test_that("batch risk helpers cover edge thresholds", {
 
   expect_equal(safebiome:::assess_permdisp_risk(NA_real_), "unknown")
   expect_equal(safebiome:::assess_permdisp_risk(0.04), "high")
-  expect_equal(safebiome:::assess_permdisp_risk(0.08), "medium")
+  expect_equal(safebiome:::assess_permdisp_risk(0.08), "moderate")
   expect_equal(safebiome:::assess_permdisp_risk(0.2), "low")
 
   expect_equal(safebiome:::assess_pcoa_risk(NA_real_, NA_real_), "unknown")
   expect_equal(safebiome:::assess_pcoa_risk(0.25, 0.2), "high")
-  expect_equal(safebiome:::assess_pcoa_risk(0.12, 0.2), "medium")
+  expect_equal(safebiome:::assess_pcoa_risk(0.12, 0.2), "moderate")
   expect_equal(safebiome:::assess_pcoa_risk(0.02, 0.2), "low")
 
   expect_equal(safebiome:::highest_batch_risk(character()), "unknown")
   expect_equal(safebiome:::highest_batch_risk(c("mystery", NA_character_)), "unknown")
   expect_equal(safebiome:::highest_batch_risk(c("low", "high", "medium")), "high")
-  expect_match(safebiome:::batch_recommendations("medium"), "detectable")
+  expect_match(safebiome:::batch_recommendations("moderate"), "detectable")
   expect_match(safebiome:::batch_recommendations("unknown"), "could not be determined")
 })
 

@@ -440,7 +440,7 @@ assess_categorical_design_risk <- function(
   }
 
   if (cramers_v >= 0.3 || p_value < 0.05 || empty_cells > 0 || min_cell_count < 5) {
-    return("medium")
+    return("moderate")
   }
 
   "low"
@@ -461,7 +461,7 @@ assess_continuous_design_risk <- function(
   }
 
   if (standardized_difference >= 0.5 || p_value < 0.05 || imbalance_ratio < 0.2) {
-    return("medium")
+    return("moderate")
   }
 
   "low"
@@ -469,14 +469,15 @@ assess_continuous_design_risk <- function(
 
 #' @keywords internal
 highest_design_risk <- function(risk) {
-  risk_order <- c("unknown" = 0, "low" = 1, "medium" = 2, "high" = 3, "critical" = 4)
-  names(which.max(risk_order[risk]))
+  risk <- normalize_audit_risk_vector(risk)
+  risk_order <- c("unknown" = 0, "low" = 1, "moderate" = 2, "high" = 3, "critical" = 4)
+  unname(names(which.max(risk_order[risk])))
 }
 
 #' @keywords internal
 design_warnings <- function(x) {
   warnings <- character()
-  flagged <- x$variable[x$risk %in% c("medium", "high", "critical")]
+  flagged <- x$variable[normalize_audit_risk_vector(x$risk) %in% c("moderate", "high", "critical")]
   if (length(flagged) > 0) {
     warnings <- c(warnings, paste("Potential design association detected:", paste(flagged, collapse = ", ")))
   }

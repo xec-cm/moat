@@ -99,8 +99,8 @@ test_that("check_leakage handles time without subject", {
   result <- check_leakage(metadata, outcome = "outcome", time = "visit")
 
   expect_equal(result$status, "evaluated")
-  expect_equal(result$risk, "medium")
-  expect_equal(result$temporal_leakage$risk, "medium")
+  expect_equal(result$risk, "moderate")
+  expect_equal(result$temporal_leakage$risk, "moderate")
   expect_equal(result$recommended_cv, "time_aware_cv")
 })
 
@@ -134,8 +134,8 @@ test_that("check_leakage validates inputs", {
   )
 })
 
-test_that("leakage helpers cover medium and skipped recommendation branches", {
-  summary <- data.frame(batch = "center", risk = "medium")
+test_that("leakage helpers cover moderate and skipped recommendation branches", {
+  summary <- data.frame(batch = "center", risk = "moderate")
 
   expect_equal(
     safebiome:::assess_batch_leakage_risk(
@@ -144,9 +144,9 @@ test_that("leakage helpers cover medium and skipped recommendation branches", {
       positivity_score = 0.8,
       cramers_v = 0.2
     ),
-    "medium"
+    "moderate"
   )
-  expect_equal(safebiome:::assess_temporal_leakage_risk(0), "medium")
+  expect_equal(safebiome:::assess_temporal_leakage_risk(0), "moderate")
   expect_equal(safebiome:::highest_leakage_risk(character()), "unknown")
   expect_equal(safebiome:::highest_leakage_risk(c("low", "high")), "high")
   expect_equal(

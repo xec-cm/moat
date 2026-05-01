@@ -86,25 +86,34 @@ check_biome <- function(
     batch = batch,
     time = time
   )
+  design_audit <- check_design(
+    metadata = input$metadata,
+    outcome = outcome,
+    batch = batch,
+    covariates = covariates
+  )
+  correction_audit <- check_correction(
+    metadata = input$metadata,
+    outcome = outcome,
+    batch = batch,
+    covariates = covariates
+  )
+  risk_summary <- score_audit_risk(
+    design = design_audit,
+    batch = batch_audit,
+    correction = correction_audit,
+    leakage = leakage_audit
+  )
 
   biome_audit(
     input = input$summary,
-    design = check_design(
-      metadata = input$metadata,
-      outcome = outcome,
-      batch = batch,
-      covariates = covariates
-    ),
+    design = design_audit,
     batch = batch_audit,
-    correction = check_correction(
-      metadata = input$metadata,
-      outcome = outcome,
-      batch = batch,
-      covariates = covariates
-    ),
+    correction = correction_audit,
     leakage = leakage_audit,
-    recommendations = c(batch_audit$recommendations, leakage_audit$recommendations),
-    risk = check_biome_risk(batch_audit, leakage_audit),
+    risk_summary = risk_summary,
+    recommendations = risk_summary$recommendations,
+    risk = risk_summary$overall$risk,
     params = list(
       outcome = outcome,
       batch = batch,
@@ -118,19 +127,6 @@ check_biome <- function(
       verbose = verbose
     )
   )
-}
-
-#' @keywords internal
-check_biome_risk <- function(...) {
-  modules <- list(...)
-  risks <- vapply(modules, function(module) {
-    if (is.list(module) && !is.null(module$risk)) {
-      return(module$risk)
-    }
-    "unknown"
-  }, character(1))
-
-  highest_leakage_risk(risks)
 }
 
 #' @keywords internal
