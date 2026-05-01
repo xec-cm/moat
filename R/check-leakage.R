@@ -190,7 +190,7 @@ check_batch_leakage <- function(metadata, outcome, batch = NULL) {
   summary <- do.call(rbind, rows)
   row.names(summary) <- NULL
   risk <- highest_leakage_risk(summary$risk)
-  recommended_cv <- if (risk %in% c("high", "medium")) {
+  recommended_cv <- if (normalize_audit_risk(risk) %in% c("high", "moderate")) {
     paste0("leave_one_", summary$batch[which.max(leakage_risk_rank(summary$risk))], "_out_cv")
   } else {
     "standard_cv"
@@ -257,7 +257,7 @@ check_temporal_leakage <- function(
       subject = subject,
       n_timepoints = length(unique(metadata[[time]])),
       subjects_with_multiple_timepoints = NA_integer_,
-      risk = "medium",
+      risk = "moderate",
       recommended_cv = "time_aware_cv",
       recommendations = paste(
         "Time variable is available; use time-aware resampling and avoid training on future samples."
@@ -330,7 +330,7 @@ assess_batch_leakage_risk <- function(
   }
 
   if (positivity_score < 1 || cramers_v >= 0.3) {
-    return("medium")
+    return("moderate")
   }
 
   "low"
@@ -341,24 +341,26 @@ assess_temporal_leakage_risk <- function(subjects_with_multiple_timepoints) {
   if (subjects_with_multiple_timepoints > 0) {
     return("high")
   }
-  "medium"
+  "moderate"
 }
 
 #' @keywords internal
 leakage_risk_rank <- function(risk) {
-  risk_order <- c("unknown" = 0, "low" = 1, "medium" = 2, "high" = 3)
+  risk <- normalize_audit_risk_vector(risk)
+  risk_order <- c("unknown" = 0, "low" = 1, "moderate" = 2, "high" = 3)
   unname(risk_order[risk])
 }
 
 #' @keywords internal
 highest_leakage_risk <- function(risk) {
   risk <- risk[!is.na(risk)]
-  risk <- risk[risk %in% c("unknown", "low", "medium", "high")]
+  risk <- normalize_audit_risk_vector(risk)
+  risk <- risk[risk %in% c("unknown", "low", "moderate", "high")]
   if (length(risk) == 0) {
     return("unknown")
   }
 
-  names(which.max(c("unknown" = 0, "low" = 1, "medium" = 2, "high" = 3)[risk]))
+  unname(names(which.max(c("unknown" = 0, "low" = 1, "moderate" = 2, "high" = 3)[risk])))
 }
 
 #' @keywords internal
@@ -369,7 +371,7 @@ select_leakage_cv <- function(repeated_measures, batch_leakage, temporal_leakage
   if (identical(repeated_measures$status, "evaluated") && repeated_measures$risk == "high") {
     return(repeated_measures$recommended_cv)
   }
-  if (identical(batch_leakage$status, "evaluated") && batch_leakage$risk %in% c("high", "medium")) {
+  if (identical(batch_leakage$status, "evaluated") && normalize_audit_risk(batch_leakage$risk) %in% c("high", "moderate")) {
     return(batch_leakage$recommended_cv)
   }
   if (identical(temporal_leakage$status, "evaluated")) {
@@ -393,7 +395,7 @@ repeated_measures_recommendations <- function(risk, subject) {
 
 #' @keywords internal
 batch_leakage_recommendations <- function(summary, recommended_cv) {
-  flagged <- summary$batch[summary$risk %in% c("medium", "high")]
+  flagged <- summary$batch[normalize_audit_risk_vector(summary$risk) %in% c("moderate", "high")]
   if (length(flagged) == 0) {
     return("Batch variables appear balanced enough for standard validation.")
   }

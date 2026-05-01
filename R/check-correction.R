@@ -259,7 +259,7 @@ assess_balance_risk <- function(
   }
 
   if (empty_cells > 0 || min_cell_count < 5) {
-    return("medium")
+    return("moderate")
   }
 
   "low"
@@ -345,7 +345,7 @@ assess_correction_feasibility <- function(balance, model_matrix) {
   }
 
   if (
-    any(balance$risk == "medium") ||
+    any(normalize_audit_risk_vector(balance$risk) == "moderate") ||
       any(model_matrix$risk == "caution")
   ) {
     return("caution")
