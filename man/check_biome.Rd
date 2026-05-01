@@ -58,8 +58,9 @@ A \code{safebiome_audit} object.
 \code{check_biome()} is the main entry point for \code{safebiome}. It validates a
 \code{SummarizedExperiment}-like object, records the audit parameters, and returns
 a stable \code{safebiome_audit} object. Design and correction diagnostics are
-evaluated from metadata; batch and leakage diagnostics are represented as
-pending placeholders until their modules are implemented.
+evaluated from metadata; batch diagnostics combine distance-based PERMANOVA,
+PERMDISP, and PCoA audits. Leakage diagnostics are represented as pending
+placeholders until their module is implemented.
 }
 \examples{
 data("toy_biome")
