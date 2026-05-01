@@ -200,17 +200,8 @@ is_biome_audit <- function(x) { inherits(x, "safebiome_audit") }
 #' @keywords internal
 print.safebiome_audit <- function(x, ...) {
   cli::cli_h1("safebiome Audit Report")
-  
-  risk_color <- switch(
-    as.character(x$risk),
-    "critical" = cli::col_red,
-    "high" = cli::col_red,
-    "moderate" = cli::col_yellow,
-    "medium" = cli::col_yellow,
-    "low" = cli::col_green,
-    cli::col_blue
-  )
-  
+
+  risk_color <- biome_risk_color(x$risk)
   cli::cli_alert_info("Overall Risk: {risk_color(x$risk)}")
   cli::cli_alert_info("Schema version: {cli::col_blue(x$params$schema_version)}")
   
@@ -230,6 +221,19 @@ print.safebiome_audit <- function(x, ...) {
   }
   
   invisible(x)
+}
+
+#' @keywords internal
+biome_risk_color <- function(risk) {
+  switch(
+    as.character(risk),
+    "critical" = cli::col_red,
+    "high" = cli::col_red,
+    "moderate" = cli::col_yellow,
+    "medium" = cli::col_yellow,
+    "low" = cli::col_green,
+    cli::col_blue
+  )
 }
 
 #' @keywords internal
