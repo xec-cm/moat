@@ -20,6 +20,7 @@ class(toy_biome)
 Useful links:
 \itemize{
   \item \url{https://github.com/xec-cm/safebiome}
+  \item \url{https://xec-cm.github.io/safebiome/}
   \item Report bugs at \url{https://github.com/xec-cm/safebiome/issues}
 }
 

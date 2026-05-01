@@ -1,34 +1,19 @@
 
 # safebiome
 
-`safebiome` audits microbiome studies for design confounding, batch
-effects, correction feasibility, and validation leakage before
-downstream statistical analysis.
+[![Lifecycle:
+experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 
-The package is designed as a study-audit layer, not as an automatic
-batch correction tool. Its goal is to make design risks visible before
-users commit to differential abundance, PERMANOVA, ordination, or
-machine-learning workflows.
+`safebiome` audits microbiome study designs before downstream
+statistical analysis. It checks whether outcome, batch, covariates,
+repeated measures, and microbiome distance structure create risks that
+should be reported before differential abundance, PERMANOVA, ordination,
+or machine-learning analyses.
 
-## Scope
-
-`safebiome` helps answer questions such as:
-
-- Is the biological outcome confounded with center, sequencing run, or
-  another batch variable?
-- Is batch adjustment statistically identifiable, or are outcome and
-  batch too entangled?
-- Does batch explain more microbiome variation than the biological
-  question of interest?
-- Are repeated measures, centers, or preprocessing choices likely to
-  leak information into model validation?
-- What downstream analysis plan is defensible given the observed design
-  risks?
-
-The package will not silently correct counts, remove samples, or choose
-a final statistical model on behalf of the analyst. Instead, it returns
-structured diagnostics, risk levels, warnings, and analysis
-recommendations that can be reviewed and reported.
+The package is a study-audit layer. It does not silently correct counts,
+remove samples, or choose the final model. Instead, it returns
+structured diagnostics, risk levels, warnings, plots, and analysis-plan
+suggestions that analysts can review and report.
 
 ## Installation
 
@@ -37,80 +22,136 @@ recommendations that can be reviewed and reported.
 pak::pak("xec-cm/safebiome")
 ```
 
-## Example workflow
-
-The planned high-level API is:
+## Quick Start
 
 ``` r
 library(safebiome)
 
+data("toy_biome")
+
 audit <- check_biome(
-    x,
-    outcome = "condition",
-    batch = c("center", "sequencing_run"),
-    covariates = c("age", "sex", "antibiotic_use"),
-    subject = "patient_id"
+    toy_biome,
+    outcome = "outcome",
+    batch = "batch",
+    distances = "bray",
+    n_perm = 99,
+    verbose = FALSE
 )
 
 summary(audit)
-autoplot(audit)
+#> 
+#> ── safebiome audit ─────────────────────────────────────────────────────────────
+#> ℹ Overall risk: HIGH
+#> 
+#> ── Main warnings ──
+#> 
+#> • Batch audit for bray distance has high risk (batch R2 = 0.948).
+#> 
+#> ── Recommended next steps ──
+#> 
+#> • Batch signal is strong relative to outcome or ordination structure; report
+#> batch diagnostics before downstream analysis.
+#> • Avoid interpreting outcome effects without sensitivity analyses that account
+#> for batch.
+#> • Batch adjustment appears statistically identifiable based on metadata
+#> diagnostics.
+#> • Overall leakage risk is low.
+#> • No subject variable provided; repeated-measure leakage was not evaluated.
+#> • Batch variables appear balanced enough for standard validation.
+#> • No time variable provided; temporal leakage was not evaluated.
+```
+
+The audit object keeps module-level diagnostics:
+
+``` r
+audit$design[, c("variable", "role", "effect_size_name", "effect_size", "risk")]
+#>   variable  role effect_size_name effect_size risk
+#> 1    batch batch        cramers_v  0.05057217  low
+audit$batch$summary[, c("distance", "outcome_r2", "batch_r2", "risk")]
+#>   distance  outcome_r2  batch_r2 risk
+#> 1     bray 0.003494571 0.9477919 high
+audit$correction$feasibility
+#> [1] "safe"
+audit$leakage$recommended_cv
+#> [1] "standard_cv"
+```
+
+`plan_analysis()` translates the audit into downstream analysis
+guidance:
+
+``` r
 plan_analysis(audit)
-report(audit)
+#> 
+#> ── safebiome analysis plan ─────────────────────────────────────────────────────
+#> ℹ Overall risk: HIGH
+#> 
+#> ── Recommended formulas ──
+#> 
+#> • Differential abundance: `~ outcome + batch`
+#> • PERMANOVA: `distance ~ outcome + batch`
+#> 
+#> ── Validation ──
+#> 
+#> • standard_cv: Standard cross-validation is acceptable for the supplied leakage
+#> variables.
+#> 
+#> ── Batch strategy ──
+#> 
+#> • sensitivity_required: Batch explains substantial microbiome variation; report
+#> analyses with explicit batch sensitivity checks.
+#> 
+#> ── Sensitivity analyses ──
+#> 
+#> • Repeat microbiome association analyses with and without batch terms where
+#> identifiable.
+#> • Report distance-specific PERMANOVA results and batch R2 alongside outcome R2.
+#> 
+#> ── Warnings ──
+#> 
+#> ! Batch audit for bray distance has high risk (batch R2 = 0.948).
+#> ! Batch-dominated microbiome signal requires explicit sensitivity analysis.
 ```
 
-## Expected output
+## Plotting
 
-`check_biome()` will return a `safebiome_audit` object containing
-module-level results and an overall interpretation:
+`plot_design()` visualizes the outcome distribution across an audited
+categorical variable. Empty cells are highlighted because they often
+signal confounding or complete separation.
+
+`plot_variance()` visualizes PERMANOVA R2 by term, making batch
+dominance easy to spot.
 
 ``` r
-audit$input
-audit$design
-audit$correction
-audit$batch
-audit$leakage
-audit$recommendations
-audit$risk
+plot_design(audit, variable = "batch")
+plot_variance(audit, distance = "bray")
 ```
 
-Summaries are intended to read like an audit report:
+## What safebiome Checks
 
-``` text
-safebiome audit
+- **Design confounding:** whether outcome is associated with batch or
+  covariates in metadata.
+- **Correction feasibility:** whether batch adjustment is statistically
+  identifiable from the observed design.
+- **Microbiome batch effects:** whether batch explains microbiome
+  variation using PERMANOVA, dispersion, and ordination diagnostics.
+- **Validation leakage:** whether repeated measures, batch-outcome
+  association, or time structure require grouped or time-aware
+  validation.
+- **Analysis planning:** recommended formulas, permutation restrictions,
+  validation schemes, batch strategy, and sensitivity analyses.
 
-Overall risk: HIGH
+## Scientific Position
 
-Main warnings:
-- condition is associated with center
-- batch explains more microbiome variation than condition
-- repeated measures detected
+`safebiome` is intentionally conservative. A high-risk audit does not
+prove that an analysis is invalid, and a low-risk audit does not prove
+that all downstream models are safe. The package is designed to make
+design limitations explicit so that conclusions are interpreted with the
+right sensitivity analyses and reporting context.
 
-Recommended next steps:
-- include center as a design variable where identifiable
-- use grouped cross-validation by patient_id
-- avoid global batch correction as the primary analysis
-```
-
-## Development roadmap
-
-The first development milestones are:
-
-1.  Package skeleton, README, tests, and Bioconductor-oriented checks.
-2.  Toy microbiome datasets for examples and regression tests.
-3.  Input validation for `SummarizedExperiment`-like objects.
-4.  Core `safebiome_audit` object and `check_biome()` wrapper.
-5.  Design confounding and correction-feasibility diagnostics.
-6.  Microbiome transformations, distances, and batch-effect audits.
-7.  Leakage checks for repeated measures and batch-driven validation.
-8.  Risk scoring, recommendations, plots, and vignettes.
-
-The package is in early development. Interfaces shown here are the
-intended shape of the package and may change as the core implementation
-lands.
-
-## Development
+## Development Checks
 
 ``` r
+testthat::test_local()
 devtools::check()
 BiocCheck::BiocCheck()
 ```
