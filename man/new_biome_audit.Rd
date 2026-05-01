@@ -10,6 +10,7 @@ new_biome_audit(
   batch = list(),
   correction = list(),
   leakage = list(),
+  risk_summary = list(),
   recommendations = character(),
   risk = "unknown",
   params = list()
@@ -25,6 +26,8 @@ new_biome_audit(
 \item{correction}{A list with correction audit results.}
 
 \item{leakage}{A list with leakage audit results.}
+
+\item{risk_summary}{A list with global and module-specific risk scoring.}
 
 \item{recommendations}{A character vector or list of recommendations.}
 

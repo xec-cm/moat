@@ -9,7 +9,7 @@ test_that("biome_audit creates the expected S3 object structure", {
   expect_s3_class(audit, "safebiome_audit")
   expect_named(
     audit,
-    c("input", "design", "batch", "correction", "leakage", "recommendations", "risk", "params")
+    c("input", "design", "batch", "correction", "leakage", "risk_summary", "recommendations", "risk", "params")
   )
   expect_equal(audit$risk, "low")
   expect_equal(audit$params$outcome, "condition")
@@ -35,6 +35,7 @@ test_that("validate_biome_audit rejects malformed objects", {
       batch = list(),
       correction = list(),
       leakage = list(),
+      risk_summary = list(),
       recommendations = character(),
       risk = "unknown"
     ),
@@ -99,7 +100,7 @@ test_that("print.safebiome_audit returns the object invisibly", {
   audit <- safebiome:::biome_audit(
     design = safebiome:::pending_biome_module("design"),
     recommendations = "Use grouped validation.",
-    risk = "medium"
+    risk = "moderate"
   )
 
   printed <- capture.output(returned <- print(audit), type = "message")
@@ -135,6 +136,10 @@ test_that("audit object helpers cover list recommendations and pending states", 
     safebiome:::normalize_biome_audit_params("not a list"),
     "params"
   )
+  expect_error(
+    safebiome:::validate_risk_summary(list()),
+    "risk_summary"
+  )
 })
 
 test_that("check_biome returns a validated audit with stored parameters", {
@@ -149,7 +154,8 @@ test_that("check_biome returns a validated audit with stored parameters", {
 
   expect_s3_class(audit, "safebiome_audit")
   expect_true(is_biome_audit(audit))
-  expect_equal(audit$risk, audit$batch$risk)
+  expect_equal(audit$risk, audit$risk_summary$overall$risk)
+  expect_s3_class(audit$risk_summary$modules, "data.frame")
   expect_equal(audit$params$outcome, "outcome")
   expect_equal(audit$params$batch, "batch")
   expect_equal(audit$params$assay, "counts")
