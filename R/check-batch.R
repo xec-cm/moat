@@ -102,10 +102,78 @@ check_permanova <- function(
   )
 }
 
+#' Check multivariate dispersion differences across metadata variables
+#'
+#' `check_dispersion()` runs [vegan::betadisper()] and permutation tests on a
+#' precomputed sample distance matrix. Strong dispersion differences indicate
+#' that PERMANOVA effects may partly reflect spread differences rather than
+#' centroid shifts.
+#'
+#' @inheritParams check_permanova
+#' @param variables A character vector naming metadata variables to test.
+#'
+#' @return A data frame with one row per variable.
+#' @export
+#'
+#' @examples
+#' data("toy_biome")
+#' metadata <- as.data.frame(SummarizedExperiment::colData(toy_biome))
+#' distance <- compute_biome_distance(toy_biome, distance = "bray")
+#' check_dispersion(distance, metadata, variables = c("outcome", "batch"), n_perm = 99)
+check_dispersion <- function(
+  distance,
+  metadata,
+  variables,
+  n_perm = 999
+) {
+  check_dist_object(distance, "distance")
+  check_metadata_frame(metadata)
+  check_non_empty_character(variables, "variables")
+  check_positive_integer(n_perm, "n_perm")
+
+  variables <- unique(variables)
+  missing_variables <- setdiff(variables, names(metadata))
+  if (length(missing_variables) > 0) {
+    cli::cli_abort(
+      c(
+        "{cli::qty(length(missing_variables))}Required metadata variable{?s} {?is/are} missing.",
+        "x" = "{cli::qty(length(missing_variables))}Missing variable{?s}: {.val {missing_variables}}."
+      ),
+      class = "safebiome_error_missing_metadata_variable"
+    )
+  }
+
+  metadata <- align_metadata_to_distance(metadata, distance)
+  missing_summary <- summarize_missing_values(metadata, variables)
+  if (nrow(missing_summary) > 0) {
+    cli::cli_abort(
+      c(
+        "{cli::qty(nrow(missing_summary))}Missing values found in required metadata variable{?s}.",
+        "x" = "{format_missing_summary(missing_summary)}."
+      ),
+      class = "safebiome_error_missing_metadata_values"
+    )
+  }
+
+  rows <- lapply(
+    variables,
+    check_dispersion_variable,
+    distance = distance,
+    metadata = metadata,
+    n_perm = n_perm
+  )
+  result <- do.call(rbind, rows)
+  row.names(result) <- NULL
+  result
+}
+
 #' Check microbiome batch effects across distances
 #'
-#' `check_batch()` combines distance calculation, PERMANOVA, PERMDISP, and PCoA
-#' diagnostics into a batch-risk summary.
+#' `check_batch()` combines distance calculation, PERMANOVA, dispersion, and
+#' PCoA diagnostics into a batch-risk summary. Full dispersion diagnostics are
+#' stored in `dispersion`; `permdisp` remains as a batch-only compatibility
+#' table. PCoA diagnostics include coordinates, variance explained, and
+#' axis-by-metadata association tests.
 #'
 #' @param x A numeric matrix-like object or a
 #'   [SummarizedExperiment::SummarizedExperiment()] object.
@@ -160,6 +228,7 @@ check_batch <- function(
 
   summary <- make_batch_summary(diagnostics)
   risk <- highest_batch_risk(summary$risk)
+  warnings <- batch_warnings(diagnostics)
 
   list(
     status = "evaluated",
@@ -167,8 +236,10 @@ check_batch <- function(
     risk = risk,
     summary = summary,
     permanova = stats::setNames(lapply(diagnostics, `[[`, "permanova"), distances),
+    dispersion = stats::setNames(lapply(diagnostics, `[[`, "dispersion"), distances),
     permdisp = stats::setNames(lapply(diagnostics, `[[`, "permdisp"), distances),
     pcoa = stats::setNames(lapply(diagnostics, `[[`, "pcoa"), distances),
+    warnings = warnings,
     recommendations = batch_recommendations(risk)
   )
 }
@@ -194,17 +265,34 @@ evaluate_batch_distance <- function(
     covariates = covariates,
     n_perm = n_perm
   )
-  permdisp <- check_permdisp(distance, metadata = metadata, batch = batch)
-  pcoa <- check_pcoa_batch_axes(distance, metadata = metadata, batch = batch)
+  variables <- unique(c(outcome, batch, covariates))
+  dispersion <- check_dispersion(distance, metadata = metadata, variables = variables, n_perm = n_perm)
+  dispersion$role <- classify_permanova_terms(
+    dispersion$variable,
+    outcome = outcome,
+    batch = batch,
+    covariates = covariates
+  )
+  dispersion <- dispersion[c("variable", "role", setdiff(names(dispersion), c("variable", "role")))]
+  permdisp <- batch_permdisp_from_dispersion(dispersion, batch = batch)
+  pcoa <- check_pcoa_axes(
+    distance,
+    metadata = metadata,
+    variables = variables,
+    outcome = outcome,
+    batch = batch,
+    covariates = covariates
+  )
   risk <- highest_batch_risk(c(
     permanova$risk,
-    highest_batch_risk(permdisp$risk),
-    highest_batch_risk(pcoa$risk)
+    highest_batch_risk(dispersion$risk),
+    pcoa$risk
   ))
 
   list(
     distance = distance_name,
     permanova = permanova,
+    dispersion = dispersion,
     permdisp = permdisp,
     pcoa = pcoa,
     risk = risk
@@ -407,24 +495,33 @@ assess_permanova_risk <- function(
 }
 
 #' @keywords internal
-check_permdisp <- function(distance, metadata, batch) {
-  rows <- lapply(batch, check_permdisp_variable, distance = distance, metadata = metadata)
-  result <- do.call(rbind, rows)
-  row.names(result) <- NULL
-  result
-}
+check_dispersion_variable <- function(variable, distance, metadata, n_perm = 999) {
+  group <- metadata[[variable]]
+  n_groups <- length(unique(group))
+  if (n_groups < 2) {
+    return(data.frame(
+      variable = variable,
+      status = "skipped",
+      n_groups = n_groups,
+      statistic = NA_real_,
+      p_value = NA_real_,
+      risk = "unknown",
+      error = "Variable has fewer than two groups.",
+      stringsAsFactors = FALSE
+    ))
+  }
 
-#' @keywords internal
-check_permdisp_variable <- function(batch, distance, metadata) {
   result <- tryCatch(
     {
-      dispersion <- vegan::betadisper(distance, group = as.factor(metadata[[batch]]))
-      test <- stats::anova(dispersion)
-      p_value <- test[["Pr(>F)"]][1]
-      statistic <- test[["F value"]][1]
+      dispersion <- vegan::betadisper(distance, group = as.factor(group))
+      test <- vegan::permutest(dispersion, permutations = n_perm)
+      table <- test$tab
+      p_value <- table[["Pr(>F)"]][1]
+      statistic <- table[["F"]][1]
       data.frame(
-        batch = batch,
+        variable = variable,
         status = "evaluated",
+        n_groups = n_groups,
         statistic = statistic,
         p_value = p_value,
         risk = assess_permdisp_risk(p_value),
@@ -434,8 +531,9 @@ check_permdisp_variable <- function(batch, distance, metadata) {
     },
     error = function(error) {
       data.frame(
-        batch = batch,
+        variable = variable,
         status = "error",
+        n_groups = n_groups,
         statistic = NA_real_,
         p_value = NA_real_,
         risk = "unknown",
@@ -446,6 +544,35 @@ check_permdisp_variable <- function(batch, distance, metadata) {
   )
 
   result
+}
+
+#' @keywords internal
+check_permdisp <- function(distance, metadata, batch, n_perm = 999) {
+  rows <- lapply(batch, check_permdisp_variable, distance = distance, metadata = metadata, n_perm = n_perm)
+  result <- do.call(rbind, rows)
+  row.names(result) <- NULL
+  result
+}
+
+#' @keywords internal
+check_permdisp_variable <- function(batch, distance, metadata, n_perm = 999) {
+  result <- check_dispersion_variable(
+    variable = batch,
+    distance = distance,
+    metadata = metadata,
+    n_perm = n_perm
+  )
+  names(result)[names(result) == "variable"] <- "batch"
+  result
+}
+
+#' @keywords internal
+batch_permdisp_from_dispersion <- function(dispersion, batch) {
+  rows <- dispersion[dispersion$variable %in% batch, , drop = FALSE]
+  names(rows)[names(rows) == "variable"] <- "batch"
+  rows$role <- NULL
+  row.names(rows) <- NULL
+  rows
 }
 
 #' @keywords internal
@@ -463,67 +590,42 @@ assess_permdisp_risk <- function(p_value) {
 }
 
 #' @keywords internal
-check_pcoa_batch_axes <- function(distance, metadata, batch) {
-  rows <- lapply(batch, check_pcoa_batch_variable, distance = distance, metadata = metadata)
-  result <- do.call(rbind, rows)
-  row.names(result) <- NULL
-  result
-}
-
-#' @keywords internal
-check_pcoa_batch_variable <- function(batch, distance, metadata) {
+check_pcoa_axes <- function(distance, metadata, variables, outcome, batch = NULL, covariates = NULL) {
   result <- tryCatch(
     {
-      ordination <- stats::cmdscale(distance, k = 2, eig = TRUE)
-      coordinates <- as.data.frame(ordination$points)
-      names(coordinates) <- paste0("axis", seq_len(ncol(coordinates)))
-      variance_explained <- pcoa_variance_explained(ordination$eig)
-      axis1 <- assess_pcoa_axis(coordinates$axis1, metadata[[batch]])
-      axis2 <- if ("axis2" %in% names(coordinates)) {
-        assess_pcoa_axis(coordinates$axis2, metadata[[batch]])
-      } else {
-        list(r2 = NA_real_, p_value = NA_real_)
-      }
-      max_axis_r2 <- max(c(axis1$r2, axis2$r2), na.rm = TRUE)
-      if (!is.finite(max_axis_r2)) {
-        max_axis_r2 <- NA_real_
-      }
-      min_p_value <- min(c(axis1$p_value, axis2$p_value), na.rm = TRUE)
-      if (!is.finite(min_p_value)) {
-        min_p_value <- NA_real_
-      }
-
-      data.frame(
+      n_samples <- attr(distance, "Size")
+      k <- min(5, n_samples - 1)
+      ordination <- stats::cmdscale(distance, k = k, eig = TRUE)
+      coordinates <- make_pcoa_coordinates(ordination$points, distance)
+      variance <- make_pcoa_variance(ordination$eig, n_axes = ncol(coordinates) - 1)
+      associations <- pcoa_axis_associations(
+        coordinates = coordinates,
+        metadata = metadata,
+        variables = variables,
+        outcome = outcome,
         batch = batch,
+        covariates = covariates
+      )
+
+      list(
         status = "evaluated",
-        axis1_variance = variance_explained[1],
-        axis2_variance = variance_explained[2],
-        axis1_r2 = axis1$r2,
-        axis1_p_value = axis1$p_value,
-        axis2_r2 = axis2$r2,
-        axis2_p_value = axis2$p_value,
-        max_axis_r2 = max_axis_r2,
-        min_p_value = min_p_value,
-        risk = assess_pcoa_risk(max_axis_r2, min_p_value),
-        error = NA_character_,
-        stringsAsFactors = FALSE
+        coordinates = coordinates,
+        variance = variance,
+        associations = associations,
+        risk = highest_batch_risk(associations$risk),
+        warnings = character(),
+        error = NA_character_
       )
     },
     error = function(error) {
-      data.frame(
-        batch = batch,
+      list(
         status = "error",
-        axis1_variance = NA_real_,
-        axis2_variance = NA_real_,
-        axis1_r2 = NA_real_,
-        axis1_p_value = NA_real_,
-        axis2_r2 = NA_real_,
-        axis2_p_value = NA_real_,
-        max_axis_r2 = NA_real_,
-        min_p_value = NA_real_,
+        coordinates = empty_pcoa_coordinates(),
+        variance = empty_pcoa_variance(),
+        associations = empty_pcoa_associations(),
         risk = "unknown",
-        error = conditionMessage(error),
-        stringsAsFactors = FALSE
+        warnings = conditionMessage(error),
+        error = conditionMessage(error)
       )
     }
   )
@@ -532,14 +634,224 @@ check_pcoa_batch_variable <- function(batch, distance, metadata) {
 }
 
 #' @keywords internal
-pcoa_variance_explained <- function(eigenvalues) {
+check_pcoa_batch_axes <- function(distance, metadata, batch) {
+  pcoa <- check_pcoa_axes(
+    distance = distance,
+    metadata = metadata,
+    variables = batch,
+    outcome = character(),
+    batch = batch
+  )
+  pcoa_compat_from_associations(pcoa)
+}
+
+#' @keywords internal
+check_pcoa_batch_variable <- function(batch, distance, metadata) {
+  result <- check_pcoa_batch_axes(distance = distance, metadata = metadata, batch = batch)
+  if (nrow(result) == 0) {
+    return(data.frame(
+      batch = batch,
+      status = "error",
+      axis1_variance = NA_real_,
+      axis2_variance = NA_real_,
+      axis1_r2 = NA_real_,
+      axis1_p_value = NA_real_,
+      axis2_r2 = NA_real_,
+      axis2_p_value = NA_real_,
+      max_axis_r2 = NA_real_,
+      min_p_value = NA_real_,
+      risk = "unknown",
+      error = "No PCoA associations were available.",
+      stringsAsFactors = FALSE
+    ))
+  }
+  result[result$batch == batch, , drop = FALSE]
+}
+
+#' @keywords internal
+pcoa_variance_explained <- function(eigenvalues, n_axes = 2) {
   positive <- eigenvalues[eigenvalues > 0]
   total <- sum(positive)
   if (length(positive) == 0 || total <= 0) {
-    return(c(NA_real_, NA_real_))
+    return(rep(NA_real_, n_axes))
   }
-  values <- eigenvalues[seq_len(min(2, length(eigenvalues)))] / total
-  c(values, rep(NA_real_, 2 - length(values)))
+  values <- eigenvalues[seq_len(min(n_axes, length(eigenvalues)))] / total
+  c(values, rep(NA_real_, n_axes - length(values)))
+}
+
+#' @keywords internal
+make_pcoa_coordinates <- function(points, distance) {
+  coordinates <- as.data.frame(points, stringsAsFactors = FALSE)
+  names(coordinates) <- paste0("axis", seq_len(ncol(coordinates)))
+  labels <- attr(distance, "Labels")
+  if (is.null(labels)) {
+    labels <- as.character(seq_len(nrow(coordinates)))
+  }
+  data.frame(sample = labels, coordinates, row.names = NULL, check.names = FALSE)
+}
+
+#' @keywords internal
+make_pcoa_variance <- function(eigenvalues, n_axes) {
+  variance <- pcoa_variance_explained(eigenvalues, n_axes = n_axes)
+  data.frame(
+    axis = paste0("axis", seq_len(n_axes)),
+    eigenvalue = eigenvalues[seq_len(n_axes)],
+    variance_explained = variance,
+    stringsAsFactors = FALSE
+  )
+}
+
+#' @keywords internal
+pcoa_axis_associations <- function(coordinates, metadata, variables, outcome, batch = NULL, covariates = NULL) {
+  axis_names <- grep("^axis[0-9]+$", names(coordinates), value = TRUE)
+  rows <- list()
+  for (axis in axis_names) {
+    for (variable in variables) {
+      rows[[length(rows) + 1]] <- pcoa_axis_association_row(
+        axis = axis,
+        variable = variable,
+        role = classify_permanova_terms(variable, outcome = outcome, batch = batch, covariates = covariates),
+        axis_values = coordinates[[axis]],
+        group = metadata[[variable]]
+      )
+    }
+  }
+
+  result <- do.call(rbind, rows)
+  row.names(result) <- NULL
+  result
+}
+
+#' @keywords internal
+pcoa_axis_association_row <- function(axis, variable, role, axis_values, group) {
+  result <- tryCatch(
+    assess_pcoa_axis(axis_values, group),
+    error = function(error) list(r2 = NA_real_, p_value = NA_real_, error = conditionMessage(error))
+  )
+  error <- result$error
+  if (is.null(error)) {
+    error <- NA_character_
+  }
+  status <- if (is.na(result$r2) && is.na(result$p_value) && !is.na(error)) "error" else "evaluated"
+  if (length(unique(group)) < 2) {
+    status <- "skipped"
+    error <- "Variable has fewer than two groups."
+  }
+  data.frame(
+    axis = axis,
+    variable = variable,
+    role = role,
+    status = status,
+    r2 = result$r2,
+    p_value = result$p_value,
+    risk = assess_pcoa_risk(result$r2, result$p_value),
+    error = error,
+    stringsAsFactors = FALSE
+  )
+}
+
+#' @keywords internal
+empty_pcoa_coordinates <- function() {
+  data.frame(sample = character(), stringsAsFactors = FALSE)
+}
+
+#' @keywords internal
+empty_pcoa_variance <- function() {
+  data.frame(
+    axis = character(),
+    eigenvalue = numeric(),
+    variance_explained = numeric(),
+    stringsAsFactors = FALSE
+  )
+}
+
+#' @keywords internal
+empty_pcoa_associations <- function() {
+  data.frame(
+    axis = character(),
+    variable = character(),
+    role = character(),
+    status = character(),
+    r2 = numeric(),
+    p_value = numeric(),
+    risk = character(),
+    error = character(),
+    stringsAsFactors = FALSE
+  )
+}
+
+#' @keywords internal
+pcoa_compat_from_associations <- function(pcoa) {
+  if (!is.list(pcoa) || !is.data.frame(pcoa$associations) || nrow(pcoa$associations) == 0) {
+    return(data.frame())
+  }
+  batch_rows <- pcoa$associations[pcoa$associations$role == "batch", , drop = FALSE]
+  if (nrow(batch_rows) == 0) {
+    return(data.frame())
+  }
+  rows <- lapply(split(batch_rows, batch_rows$variable), pcoa_compat_variable_row, variance = pcoa$variance)
+  result <- do.call(rbind, rows)
+  row.names(result) <- NULL
+  result
+}
+
+#' @keywords internal
+pcoa_compat_variable_row <- function(rows, variance) {
+  axis1 <- rows[rows$axis == "axis1", , drop = FALSE]
+  axis2 <- rows[rows$axis == "axis2", , drop = FALSE]
+  max_axis_r2 <- max(rows$r2, na.rm = TRUE)
+  if (!is.finite(max_axis_r2)) {
+    max_axis_r2 <- NA_real_
+  }
+  min_p_value <- min(rows$p_value, na.rm = TRUE)
+  if (!is.finite(min_p_value)) {
+    min_p_value <- NA_real_
+  }
+
+  data.frame(
+    batch = rows$variable[[1]],
+    status = highest_pcoa_status(rows$status),
+    axis1_variance = pcoa_axis_variance(variance, "axis1"),
+    axis2_variance = pcoa_axis_variance(variance, "axis2"),
+    axis1_r2 = if (nrow(axis1) == 0) NA_real_ else axis1$r2[[1]],
+    axis1_p_value = if (nrow(axis1) == 0) NA_real_ else axis1$p_value[[1]],
+    axis2_r2 = if (nrow(axis2) == 0) NA_real_ else axis2$r2[[1]],
+    axis2_p_value = if (nrow(axis2) == 0) NA_real_ else axis2$p_value[[1]],
+    max_axis_r2 = max_axis_r2,
+    min_p_value = min_p_value,
+    risk = highest_batch_risk(rows$risk),
+    error = first_non_missing(rows$error),
+    stringsAsFactors = FALSE
+  )
+}
+
+#' @keywords internal
+pcoa_axis_variance <- function(variance, axis) {
+  value <- variance$variance_explained[variance$axis == axis]
+  if (length(value) == 0) {
+    return(NA_real_)
+  }
+  value[[1]]
+}
+
+#' @keywords internal
+highest_pcoa_status <- function(status) {
+  if (any(status == "evaluated")) {
+    return("evaluated")
+  }
+  if (any(status == "error")) {
+    return("error")
+  }
+  "skipped"
+}
+
+#' @keywords internal
+first_non_missing <- function(x) {
+  x <- x[!is.na(x) & nzchar(x)]
+  if (length(x) == 0) {
+    return(NA_character_)
+  }
+  x[[1]]
 }
 
 #' @keywords internal
@@ -581,8 +893,9 @@ assess_pcoa_risk <- function(max_axis_r2, min_p_value) {
 make_batch_summary <- function(diagnostics) {
   rows <- lapply(diagnostics, function(x) {
     permanova <- x$permanova
+    dispersion_risk <- highest_batch_risk(x$dispersion$risk)
     permdisp_risk <- highest_batch_risk(x$permdisp$risk)
-    pcoa_risk <- highest_batch_risk(x$pcoa$risk)
+    pcoa_risk <- x$pcoa$risk
     data.frame(
       distance = x$distance,
       status = permanova$status,
@@ -591,6 +904,7 @@ make_batch_summary <- function(diagnostics) {
       covariate_r2 = permanova$covariate_r2,
       batch_dominance_score = permanova$batch_dominance_score,
       permanova_risk = permanova$risk,
+      dispersion_risk = dispersion_risk,
       permdisp_risk = permdisp_risk,
       pcoa_risk = pcoa_risk,
       risk = x$risk,
@@ -601,6 +915,40 @@ make_batch_summary <- function(diagnostics) {
   result <- do.call(rbind, rows)
   row.names(result) <- NULL
   result
+}
+
+#' @keywords internal
+batch_warnings <- function(diagnostics) {
+  warnings <- unlist(lapply(diagnostics, batch_distance_warnings), use.names = FALSE)
+  unique(warnings[nzchar(warnings)])
+}
+
+#' @keywords internal
+batch_distance_warnings <- function(x) {
+  warnings <- character()
+  outcome_dispersion <- x$dispersion[
+    x$dispersion$role == "outcome" &
+      normalize_audit_risk_vector(x$dispersion$risk) %in% c("moderate", "high"),
+    ,
+    drop = FALSE
+  ]
+  if (nrow(outcome_dispersion) > 0) {
+    warnings <- c(
+      warnings,
+      paste0(
+        "Outcome dispersion differs for ",
+        x$distance,
+        " distance (",
+        outcome_dispersion$variable,
+        " PERMDISP p = ",
+        format(signif(outcome_dispersion$p_value, 3), trim = TRUE),
+        ", risk = ",
+        normalize_audit_risk_vector(outcome_dispersion$risk),
+        "); PERMANOVA outcome effects may reflect dispersion differences."
+      )
+    )
+  }
+  warnings
 }
 
 #' @keywords internal
@@ -640,8 +988,10 @@ skipped_batch_result <- function() {
     risk = "unknown",
     summary = data.frame(),
     permanova = list(),
+    dispersion = list(),
     permdisp = list(),
     pcoa = list(),
+    warnings = character(),
     recommendations = "No batch variable provided; batch audit was not evaluated."
   )
 }

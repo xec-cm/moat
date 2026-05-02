@@ -59,7 +59,7 @@ search:
 reference:
 - title: "Start Here"
   desc: "Run a complete audit, summarize risk, plan downstream analysis, and visualize key diagnostics."
-- contents:
+  contents:
   - check_biome
   - summary.safebiome_audit
   - plan_analysis
@@ -68,8 +68,9 @@ reference:
 
 - title: "Design And Correction Audits"
   desc: "Audit metadata confounding and evaluate whether batch adjustment is identifiable."
-- contents:
+  contents:
   - check_design
+  - check_metadata_predictability
   - check_continuous_design
   - check_balance
   - check_model_matrix
@@ -77,24 +78,25 @@ reference:
 
 - title: "Microbiome Distances And Batch Effects"
   desc: "Transform microbiome data, compute distances, and audit distance-based batch effects."
-- contents:
+  contents:
   - transform_biome
   - compute_biome_distance
   - check_permanova
+  - check_dispersion
   - check_batch
 
 - title: "Leakage Audits"
   desc: "Detect repeated-measure and metadata-driven validation leakage risks."
-- contents:
+  contents:
   - check_repeated_measures
   - check_leakage
 
 - title: "Data And Audit Objects"
   desc: "Example data and lightweight audit object helpers."
-- contents:
+  contents:
   - toy_biome
   - is_biome_audit
 
 - title: "Package Helpers"
-- contents:
+  contents:
   - "%>%"
