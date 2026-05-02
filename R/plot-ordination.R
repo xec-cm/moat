@@ -10,6 +10,9 @@
 #' @param distance Optional character vector naming audited distances to plot.
 #'   When `NULL`, the first available distance is used. Use `"all"` to plot all
 #'   audited distances.
+#' @param aspect A single string controlling panel aspect. `"auto"` uses the
+#'   available plotting space and is easier to read when PC1 and PC2 have very
+#'   different ranges. `"equal"` preserves a 1:1 coordinate ratio.
 #'
 #' @return A [ggplot2::ggplot()] object.
 #' @export
@@ -18,10 +21,11 @@
 #' data("toy_biome")
 #' audit <- check_biome(toy_biome, outcome = "outcome", batch = "batch", n_perm = 99)
 #' plot_ordination(audit, color = "batch", distance = "bray")
-plot_ordination <- function(audit, color = NULL, distance = NULL) {
+plot_ordination <- function(audit, color = NULL, distance = NULL, aspect = c("auto", "equal")) {
   validate_biome_audit(audit)
   check_plot_variable(color, "color", allow_null = TRUE)
   check_plot_character(distance, "distance", allow_null = TRUE)
+  aspect <- match.arg(aspect)
 
   selected_distances <- resolve_ordination_distances(audit, distance)
   color <- resolve_ordination_color(audit, color, selected_distances)
@@ -32,6 +36,8 @@ plot_ordination <- function(audit, color = NULL, distance = NULL) {
     plot_data,
     ggplot2::aes(x = .data$axis1, y = .data$axis2, color = .data[[color]])
   ) +
+    ggplot2::geom_hline(yintercept = 0, linewidth = 0.25, color = "#D7DBDF") +
+    ggplot2::geom_vline(xintercept = 0, linewidth = 0.25, color = "#D7DBDF") +
     ggplot2::geom_point(size = 2.4, alpha = 0.86) +
     ggplot2::labs(
       title = "PCoA ordination",
@@ -40,8 +46,11 @@ plot_ordination <- function(audit, color = NULL, distance = NULL) {
       y = axis_labels$y,
       color = color
     ) +
-    ggplot2::coord_equal() +
     theme_safebiome_plot()
+
+  if (identical(aspect, "equal")) {
+    plot <- plot + ggplot2::coord_equal()
+  }
 
   if (length(selected_distances) > 1) {
     plot <- plot + ggplot2::facet_wrap(ggplot2::vars(.data$distance))

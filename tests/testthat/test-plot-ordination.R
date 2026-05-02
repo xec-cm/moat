@@ -10,10 +10,13 @@ test_that("plot_ordination returns a ggplot colored by batch or outcome", {
 
   batch_plot <- plot_ordination(audit, color = "batch", distance = "bray")
   outcome_plot <- plot_ordination(audit, color = "outcome", distance = "bray")
+  equal_plot <- plot_ordination(audit, color = "batch", distance = "bray", aspect = "equal")
   plot_data <- safebiome:::ordination_plot_data(audit, "bray", "batch")
 
   expect_s3_class(batch_plot, "ggplot")
   expect_s3_class(outcome_plot, "ggplot")
+  expect_equal(equal_plot$coordinates$ratio, 1)
+  expect_null(batch_plot$coordinates$ratio)
   expect_true(all(c("axis1", "axis2", "batch", "outcome") %in% names(plot_data)))
   expect_match(batch_plot$labels$x, "%")
   expect_equal(batch_plot$labels$colour, "batch")
