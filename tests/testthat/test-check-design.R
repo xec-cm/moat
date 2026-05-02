@@ -156,6 +156,8 @@ test_that("check_design combines batch and covariate audits", {
   expect_equal(result$variable_type, c("categorical", "categorical", "continuous"))
   expect_equal(attr(result, "risk"), "critical")
   expect_true(any(grepl("center", attr(result, "warnings"))))
+  expect_equal(attr(result, "metadata_predictability")$module, "metadata_predictability")
+  expect_equal(attr(result, "metadata_predictability")$risk, "high")
 })
 
 test_that("check_design handles partial or absent design variables", {

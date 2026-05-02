@@ -39,6 +39,8 @@ test_that("check_biome returns an evaluated audit with full public API parameter
   expect_equal(audit$design$variable, c("batch", "age"))
   expect_equal(audit$design$role, c("batch", "covariate"))
   expect_equal(audit$design$variable_type, c("categorical", "continuous"))
+  expect_equal(attr(audit$design, "metadata_predictability")$status, "evaluated")
+  expect_equal(attr(audit$design, "metadata_predictability")$module, "metadata_predictability")
   expect_equal(audit$correction$status, "evaluated")
   expect_equal(audit$correction$module, "correction")
   expect_equal(audit$correction$feasibility, "safe")

@@ -90,6 +90,7 @@ score_design_risk <- function(design) {
   }
 
   risk <- normalize_audit_risk(attr(design, "risk", exact = TRUE))
+  predictability <- attr(design, "metadata_predictability", exact = TRUE)
   flagged <- design[normalize_audit_risk_vector(design$risk) %in% c("moderate", "high", "critical"), , drop = FALSE]
   reasons <- if (nrow(flagged) > 0) {
     paste0(
@@ -108,14 +109,44 @@ score_design_risk <- function(design) {
   if (!is.null(warnings) && length(warnings) > 0) {
     reasons <- c(reasons, warnings)
   }
+  if (is.list(predictability) && identical(predictability$status, "evaluated")) {
+    predictability_risk <- normalize_audit_risk(predictability$risk)
+    risk <- highest_audit_risk(c(risk, predictability_risk))
+    if (predictability_risk %in% c("moderate", "high", "critical")) {
+      reasons <- c(
+        reasons,
+        paste0(
+          "Metadata-only outcome predictability has ",
+          predictability_risk,
+          " risk (CV balanced accuracy = ",
+          format(round(predictability$cv_balanced_accuracy, 3), nsmall = 3),
+          ")."
+        )
+      )
+    }
+  }
 
   module_risk_score(
     module = "design",
     status = "evaluated",
     risk = risk,
     reasons = reasons,
-    recommendations = character()
+    recommendations = metadata_predictability_recommendations_for_scoring(predictability)
   )
+}
+
+#' @keywords internal
+metadata_predictability_recommendations_for_scoring <- function(predictability) {
+  if (!is.list(predictability) || !identical(predictability$status, "evaluated")) {
+    return(character())
+  }
+
+  recommendations <- predictability$recommendations
+  if (is.null(recommendations)) {
+    return(character())
+  }
+
+  recommendations
 }
 
 #' @keywords internal
