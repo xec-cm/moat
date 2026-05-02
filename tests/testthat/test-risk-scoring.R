@@ -81,6 +81,30 @@ test_that("design critical risk is scored and explained", {
   expect_equal(result$modules$risk[result$modules$module == "design"], "critical")
 })
 
+test_that("metadata-only predictability contributes to design risk scoring", {
+  design <- data.frame(
+    variable = "center",
+    role = "batch",
+    risk = "low",
+    stringsAsFactors = FALSE
+  )
+  attr(design, "risk") <- "low"
+  attr(design, "metadata_predictability") <- list(
+    status = "evaluated",
+    module = "metadata_predictability",
+    risk = "high",
+    cv_balanced_accuracy = 0.9,
+    recommendations = "Use metadata-aware validation."
+  )
+
+  result <- safebiome:::score_audit_risk(design = design)
+
+  expect_equal(result$overall$risk, "high")
+  expect_true(any(grepl("Metadata-only", result$overall$reasons)))
+  expect_true(any(grepl("metadata-aware", result$recommendations)))
+  expect_equal(result$modules$risk[result$modules$module == "design"], "high")
+})
+
 test_that("manual audits receive a minimal risk summary", {
   audit <- safebiome:::biome_audit(
     risk = "medium",

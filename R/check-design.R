@@ -13,7 +13,9 @@
 #'
 #' @return A data frame with one row per audited variable. The result also
 #'   stores the global design risk in `attr(result, "risk")` and warnings in
-#'   `attr(result, "warnings")`.
+#'   `attr(result, "warnings")`. When design variables are provided,
+#'   metadata-only outcome predictability is stored in
+#'   `attr(result, "metadata_predictability")`.
 #' @export
 #'
 #' @examples
@@ -77,7 +79,13 @@ check_design <- function(
 
   result <- do.call(rbind, rows)
   row.names(result) <- NULL
-  attr(result, "risk") <- highest_design_risk(result$risk)
+  predictability <- check_metadata_predictability(
+    metadata = metadata,
+    outcome = outcome,
+    predictors = unique(c(batch, covariates))
+  )
+  attr(result, "metadata_predictability") <- predictability
+  attr(result, "risk") <- highest_design_risk(c(result$risk, predictability$risk))
   attr(result, "warnings") <- design_warnings(result)
   result
 }
@@ -480,6 +488,23 @@ design_warnings <- function(x) {
   flagged <- x$variable[normalize_audit_risk_vector(x$risk) %in% c("moderate", "high", "critical")]
   if (length(flagged) > 0) {
     warnings <- c(warnings, paste("Potential design association detected:", paste(flagged, collapse = ", ")))
+  }
+  predictability <- attr(x, "metadata_predictability", exact = TRUE)
+  if (
+    is.list(predictability) &&
+      identical(predictability$status, "evaluated") &&
+      normalize_audit_risk(predictability$risk) %in% c("moderate", "high", "critical")
+  ) {
+    warnings <- c(
+      warnings,
+      paste0(
+        "Metadata-only model predicts outcome with ",
+        normalize_audit_risk(predictability$risk),
+        " risk (CV balanced accuracy = ",
+        format(round(predictability$cv_balanced_accuracy, 3), nsmall = 3),
+        ")."
+      )
+    )
   }
   if (any(x$imbalance_ratio < 0.2, na.rm = TRUE)) {
     warnings <- c(warnings, "Outcome groups are strongly imbalanced.")

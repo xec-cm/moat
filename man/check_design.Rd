@@ -20,7 +20,9 @@ as categorical.}
 \value{
 A data frame with one row per audited variable. The result also
 stores the global design risk in \code{attr(result, "risk")} and warnings in
-\code{attr(result, "warnings")}.
+\code{attr(result, "warnings")}. When design variables are provided,
+metadata-only outcome predictability is stored in
+\code{attr(result, "metadata_predictability")}.
 }
 \description{
 \code{check_design()} combines categorical and continuous metadata audits into one
