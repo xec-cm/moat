@@ -40,8 +40,11 @@ values are those accepted by \code{\link[=compute_biome_distance]{compute_biome_
 A list with batch audit diagnostics and recommendations.
 }
 \description{
-\code{check_batch()} combines distance calculation, PERMANOVA, PERMDISP, and PCoA
-diagnostics into a batch-risk summary.
+\code{check_batch()} combines distance calculation, PERMANOVA, dispersion, and
+PCoA diagnostics into a batch-risk summary. Full dispersion diagnostics are
+stored in \code{dispersion}; \code{permdisp} remains as a batch-only compatibility
+table. PCoA diagnostics include coordinates, variance explained, and
+axis-by-metadata association tests.
 }
 \examples{
 data("toy_biome")

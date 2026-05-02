@@ -171,19 +171,14 @@ score_batch_risk <- function(batch) {
   if (is.data.frame(summary) && nrow(summary) > 0) {
     flagged <- summary[normalize_audit_risk_vector(summary$risk) %in% c("moderate", "high", "critical"), , drop = FALSE]
     if (nrow(flagged) > 0) {
-      reasons <- paste0(
-        "Batch audit for ",
-        flagged$distance,
-        " distance has ",
-        normalize_audit_risk_vector(flagged$risk),
-        " risk (batch R2 = ",
-        format(round(flagged$batch_r2, 3), nsmall = 3),
-        ")."
-      )
+      reasons <- vapply(seq_len(nrow(flagged)), function(i) batch_summary_reason(flagged[i, , drop = FALSE]), character(1))
     }
   }
   if (length(reasons) == 0) {
     reasons <- paste0("Batch audit risk is ", risk, ".")
+  }
+  if (!is.null(batch$warnings) && length(batch$warnings) > 0) {
+    reasons <- c(reasons, batch$warnings)
   }
 
   module_risk_score(
@@ -192,6 +187,29 @@ score_batch_risk <- function(batch) {
     risk = risk,
     reasons = reasons,
     recommendations = module_recommendations_for_scoring(batch)
+  )
+}
+
+#' @keywords internal
+batch_summary_reason <- function(row) {
+  diagnostics <- paste(
+    c(
+      paste0("PERMANOVA = ", normalize_audit_risk(row$permanova_risk)),
+      if ("dispersion_risk" %in% names(row)) paste0("dispersion = ", normalize_audit_risk(row$dispersion_risk)),
+      if ("pcoa_risk" %in% names(row)) paste0("PCoA = ", normalize_audit_risk(row$pcoa_risk))
+    ),
+    collapse = ", "
+  )
+  paste0(
+    "Batch audit for ",
+    row$distance,
+    " distance has ",
+    normalize_audit_risk(row$risk),
+    " risk (batch R2 = ",
+    format(round(row$batch_r2, 3), nsmall = 3),
+    "; ",
+    diagnostics,
+    ")."
   )
 }
 

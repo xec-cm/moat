@@ -22,6 +22,60 @@ test_that("check_permanova returns tidy terms and dominance metrics", {
   expect_equal(result$risk, "high")
 })
 
+test_that("check_dispersion detects simulated dispersion differences", {
+  set.seed(42)
+  group <- rep(c("A", "B"), each = 20)
+  coordinates <- rbind(
+    matrix(rnorm(40, mean = 0, sd = 0.1), ncol = 2),
+    matrix(rnorm(40, mean = 0, sd = 2), ncol = 2)
+  )
+  metadata <- data.frame(group = group)
+
+  result <- check_dispersion(
+    stats::dist(coordinates),
+    metadata = metadata,
+    variables = "group",
+    n_perm = 99
+  )
+
+  expect_equal(result$status, "evaluated")
+  expect_equal(result$n_groups, 2)
+  expect_lte(result$p_value, 0.05)
+  expect_equal(result$risk, "high")
+})
+
+test_that("check_dispersion reports low risk for equal-dispersion separated groups", {
+  set.seed(1)
+  coordinates <- rbind(
+    matrix(rnorm(40, mean = 0, sd = 1), ncol = 2),
+    matrix(rnorm(40, mean = 3, sd = 1), ncol = 2)
+  )
+  metadata <- data.frame(group = rep(c("A", "B"), each = 20))
+
+  result <- check_dispersion(
+    stats::dist(coordinates),
+    metadata = metadata,
+    variables = "group",
+    n_perm = 99
+  )
+
+  expect_equal(result$status, "evaluated")
+  expect_gt(result$p_value, 0.10)
+  expect_equal(result$risk, "low")
+})
+
+test_that("check_dispersion skips one-level variables and validates inputs", {
+  metadata <- data.frame(group = rep("A", 4))
+  distance <- stats::dist(matrix(seq_len(8), ncol = 2))
+
+  result <- check_dispersion(distance, metadata = metadata, variables = "group", n_perm = 9)
+
+  expect_equal(result$status, "skipped")
+  expect_equal(result$risk, "unknown")
+  expect_match(result$error, "fewer than two groups")
+  expect_error(check_dispersion("not a dist", metadata, variables = "group"), "dist")
+})
+
 test_that("check_batch detects a strong simulated batch effect", {
   se <- readRDS(test_path("fixtures/batch_effect_biome.rds"))
 
@@ -41,9 +95,60 @@ test_that("check_batch detects a strong simulated batch effect", {
   expect_true(all(result$summary$batch_r2 > 0.8))
   expect_true(all(result$summary$risk == "high"))
   expect_equal(names(result$permanova), c("aitchison", "bray"))
+  expect_equal(names(result$dispersion), c("aitchison", "bray"))
   expect_equal(names(result$permdisp), c("aitchison", "bray"))
   expect_equal(names(result$pcoa), c("aitchison", "bray"))
+  expect_true(all(c("outcome", "batch") %in% result$dispersion$bray$variable))
+  expect_true(all(c("coordinates", "variance", "associations") %in% names(result$pcoa$bray)))
+  expect_true(all(c("axis", "variable", "role", "p_value", "risk") %in% names(result$pcoa$bray$associations)))
+  expect_true(any(result$pcoa$bray$associations$variable == "batch" & result$pcoa$bray$associations$risk == "high"))
   expect_true(any(grepl("Batch signal is strong", result$recommendations)))
+})
+
+test_that("check_batch includes dispersion for outcome, batch, and covariates", {
+  se <- readRDS(test_path("fixtures/repeated_biome.rds"))
+  SummarizedExperiment::colData(se)$batch <- rep(c("A", "B"), each = 20)
+  SummarizedExperiment::colData(se)$age_group <- rep(c("young", "old"), times = 20)
+
+  result <- check_batch(
+    se,
+    outcome = "outcome",
+    batch = "batch",
+    covariates = "age_group",
+    distances = "bray",
+    n_perm = 99
+  )
+
+  expect_equal(result$dispersion$bray$variable, c("outcome", "batch", "age_group"))
+  expect_equal(result$dispersion$bray$role, c("outcome", "batch", "covariate"))
+  expect_equal(result$permdisp$bray$batch, "batch")
+  expect_true("dispersion_risk" %in% names(result$summary))
+  expect_true("pcoa_risk" %in% names(result$summary))
+  expect_true("age_group" %in% result$pcoa$bray$associations$variable)
+})
+
+test_that("outcome dispersion warnings appear in audit summaries", {
+  set.seed(42)
+  outcome <- rep(c("Control", "Disease"), each = 20)
+  batch <- rep(c("A", "B"), times = 20)
+  coordinates <- rbind(
+    matrix(rnorm(40, mean = 5, sd = 0.1), ncol = 2),
+    matrix(rnorm(40, mean = 5, sd = 2), ncol = 2)
+  )
+  coordinates[coordinates < 0.1] <- 0.1
+  counts <- t(coordinates) * 100
+  colnames(counts) <- paste0("S", seq_len(40))
+  rownames(counts) <- c("Taxon_1", "Taxon_2")
+  se <- SummarizedExperiment::SummarizedExperiment(
+    assays = list(counts = counts),
+    colData = data.frame(outcome = outcome, batch = batch, row.names = colnames(counts))
+  )
+
+  audit <- check_biome(se, outcome = "outcome", batch = "batch", distances = "bray", n_perm = 99)
+  audit_summary <- summary(audit)
+
+  expect_true(any(grepl("Outcome dispersion differs", audit$batch$warnings)))
+  expect_true(any(grepl("Outcome dispersion differs", audit_summary$risk_summary$overall$reasons)))
 })
 
 test_that("check_batch reports low risk on a clean balanced dataset", {
@@ -288,6 +393,10 @@ test_that("PCoA helpers handle degenerate variance and one-level groups", {
   expect_equal(
     safebiome:::pcoa_variance_explained(c(0, -1)),
     c(NA_real_, NA_real_)
+  )
+  expect_equal(
+    safebiome:::pcoa_variance_explained(c(0, -1), n_axes = 3),
+    c(NA_real_, NA_real_, NA_real_)
   )
 
   axis <- safebiome:::assess_pcoa_axis(seq_len(4), rep("A", 4))
