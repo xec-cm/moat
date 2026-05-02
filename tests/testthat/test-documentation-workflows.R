@@ -27,6 +27,7 @@ test_that("documentation workflow functions are exported", {
   workflow_functions <- c(
     "check_biome",
     "plan_analysis",
+    "report",
     "plot_design",
     "plot_variance"
   )

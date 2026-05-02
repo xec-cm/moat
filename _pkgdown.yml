@@ -64,6 +64,7 @@ reference:
   - summary.safebiome_audit
   - autoplot.safebiome_audit
   - plan_analysis
+  - report
   - plot_design
   - plot_ordination
   - plot_variance

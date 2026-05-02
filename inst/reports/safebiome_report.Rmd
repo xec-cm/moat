@@ -1,0 +1,355 @@
+---
+title: "safebiome audit report"
+output:
+  html_document:
+    self_contained: true
+    toc: true
+    toc_depth: 2
+    df_print: paged
+params:
+  audit: NULL
+  report_data: NULL
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,
+  warning = FALSE,
+  message = FALSE,
+  fig.width = 8.8,
+  fig.height = 5.2,
+  dpi = 120
+)
+
+audit <- params$audit
+report_data <- params$report_data
+
+field_value <- function(x, field) {
+  value <- x$value[x$field == field]
+  if (length(value) == 0 || is.na(value[[1]]) || !nzchar(value[[1]])) {
+    return("Not supplied")
+  }
+  value[[1]]
+}
+
+safe_table <- function(x, caption = NULL) {
+  if (!is.data.frame(x) || nrow(x) == 0) {
+    cat("No data available.\n")
+    return(invisible(NULL))
+  }
+  table <- knitr::kable(
+    x,
+    caption = caption,
+    format = "html",
+    table.attr = 'class="report-table"'
+  )
+  knitr::asis_output(paste0('<div class="table-scroll">', table, '</div>'))
+}
+
+safe_plot <- function(expr) {
+  tryCatch(
+    print(expr),
+    error = function(error) {
+      cat("*Plot unavailable:* ", conditionMessage(error), "\n", sep = "")
+    }
+  )
+}
+```
+
+```{=html}
+<style>
+:root {
+  --sb-ink: #1f2328;
+  --sb-muted: #667085;
+  --sb-line: #d9dee5;
+  --sb-panel: #ffffff;
+  --sb-bg: #f6f8fb;
+  --sb-blue: #246bfe;
+  --sb-green: #009e73;
+  --sb-amber: #e69f00;
+  --sb-orange: #d55e00;
+  --sb-red: #cc3311;
+}
+
+body {
+  background: var(--sb-bg);
+  color: var(--sb-ink);
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.main-container {
+  max-width: 1160px !important;
+  margin: 28px auto 56px auto;
+  padding: 0 24px 42px 24px;
+  background: transparent;
+}
+
+h1.title {
+  margin: 0 0 18px 0;
+  font-weight: 760;
+  letter-spacing: 0;
+}
+
+h1 {
+  margin-top: 34px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--sb-line);
+  font-size: 1.55rem;
+}
+
+h2 {
+  margin-top: 26px;
+  font-size: 1.18rem;
+}
+
+#TOC {
+  margin: 18px 0 26px 0;
+  padding: 14px 18px;
+  border: 1px solid var(--sb-line);
+  border-radius: 8px;
+  background: var(--sb-panel);
+}
+
+.report-hero {
+  margin: 18px 0 28px 0;
+  padding: 22px;
+  border: 1px solid var(--sb-line);
+  border-radius: 8px;
+  background: var(--sb-panel);
+  box-shadow: 0 8px 24px rgba(31, 35, 40, 0.06);
+}
+
+.report-hero-top {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.report-kicker {
+  margin: 0;
+  color: var(--sb-muted);
+  font-size: 0.86rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.report-title {
+  margin: 2px 0 0 0;
+  font-size: 1.7rem;
+  font-weight: 760;
+}
+
+.risk-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  color: white;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.risk-low { background: var(--sb-green); }
+.risk-moderate { background: var(--sb-amber); }
+.risk-high { background: var(--sb-orange); }
+.risk-critical { background: var(--sb-red); }
+.risk-unknown { background: #8b949e; }
+
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.metric {
+  padding: 14px;
+  border: 1px solid var(--sb-line);
+  border-radius: 8px;
+  background: #fbfcfe;
+}
+
+.metric-label {
+  color: var(--sb-muted);
+  font-size: 0.82rem;
+}
+
+.metric-value {
+  margin-top: 4px;
+  font-size: 1.28rem;
+  font-weight: 720;
+}
+
+.table-scroll {
+  width: 100%;
+  overflow-x: auto;
+  margin: 12px 0 20px 0;
+  border: 1px solid var(--sb-line);
+  border-radius: 8px;
+  background: var(--sb-panel);
+}
+
+.report-table {
+  width: 100%;
+  margin: 0 !important;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.report-table th {
+  background: #eef3fb;
+  color: #2f3437;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.report-table th,
+.report-table td {
+  padding: 9px 11px !important;
+  border-top: 1px solid var(--sb-line) !important;
+  vertical-align: top;
+}
+
+.report-table caption {
+  padding: 9px 11px;
+  color: var(--sb-muted);
+  text-align: left;
+}
+
+img {
+  max-width: 100%;
+  border-radius: 8px;
+  border: 1px solid var(--sb-line);
+  background: white;
+}
+
+pre {
+  border: 1px solid var(--sb-line);
+  border-radius: 8px;
+}
+
+ul {
+  padding-left: 1.25rem;
+}
+</style>
+```
+
+```{r report-hero, results='asis'}
+risk <- tolower(audit$risk)
+risk_class <- if (risk %in% c("low", "moderate", "high", "critical")) risk else "unknown"
+cat(
+  '<div class="report-hero">',
+  '<div class="report-hero-top">',
+  '<div><p class="report-kicker">safebiome audit</p>',
+  '<p class="report-title">Microbiome design risk report</p></div>',
+  '<span class="risk-badge risk-', risk_class, '">', toupper(audit$risk), '</span>',
+  '</div>',
+  '<div class="metric-grid">',
+  '<div class="metric"><div class="metric-label">Samples</div><div class="metric-value">', field_value(report_data$dataset, "Samples"), '</div></div>',
+  '<div class="metric"><div class="metric-label">Features</div><div class="metric-value">', field_value(report_data$dataset, "Features"), '</div></div>',
+  '<div class="metric"><div class="metric-label">Outcome</div><div class="metric-value">', field_value(report_data$dataset, "Outcome"), '</div></div>',
+  '<div class="metric"><div class="metric-label">Batch variables</div><div class="metric-value">', field_value(report_data$dataset, "Batch variables"), '</div></div>',
+  '</div>',
+  '</div>',
+  sep = ""
+)
+```
+
+# Dataset summary
+
+```{r dataset-summary}
+safe_table(report_data$dataset)
+```
+
+# Risk summary
+
+Overall risk: `r toupper(audit$risk)`
+
+```{r risk-summary-table}
+safe_table(report_data$risk)
+```
+
+```{r risk-dashboard, fig.alt="Module-level safebiome risk dashboard"}
+safe_plot(ggplot2::autoplot(audit))
+```
+
+# Design audit
+
+```{r design-audit-table}
+safe_table(report_data$design)
+```
+
+```{r design-audit-plot, fig.alt="Outcome distribution across the selected design variable"}
+safe_plot(safebiome::plot_design(audit))
+```
+
+# Correction feasibility
+
+```{r correction-feasibility-table}
+safe_table(report_data$correction)
+```
+
+# Microbiome batch audit
+
+```{r batch-audit-table}
+safe_table(report_data$batch)
+```
+
+```{r variance-plot, fig.alt="PERMANOVA variance explained by audit terms"}
+safe_plot(safebiome::plot_variance(audit, distance = "all"))
+```
+
+```{r ordination-plot, fig.alt="PCoA ordination colored by the default audit variable", fig.height=4.9}
+safe_plot(safebiome::plot_ordination(audit, distance = "all"))
+```
+
+# Leakage audit
+
+```{r leakage-audit-table}
+safe_table(report_data$leakage)
+```
+
+# Recommendations
+
+```{r recommendations}
+if (length(report_data$recommendations) == 0) {
+  cat("No recommendations were recorded for this audit.\n")
+} else {
+  for (recommendation in report_data$recommendations) {
+    cat("- ", recommendation, "\n", sep = "")
+  }
+}
+```
+
+## Suggested analysis plan
+
+```{r analysis-plan}
+plan <- report_data$plan
+safe_table(data.frame(
+  component = c(
+    "Differential abundance formula",
+    "PERMANOVA formula",
+    "Permutation scheme",
+    "Batch strategy",
+    "ML validation"
+  ),
+  value = c(
+    plan$da_formula$display,
+    plan$permanova_formula$display,
+    plan$permutation$scheme,
+    plan$batch_strategy$strategy,
+    plan$ml_validation$scheme
+  ),
+  stringsAsFactors = FALSE
+))
+```
+
+# Session info
+
+```{r session-info}
+utils::sessionInfo()
+```

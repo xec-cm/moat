@@ -39,6 +39,8 @@
 * Added `plot_design()` to visualize outcome distribution across audited
   categorical metadata variables.
 * Added `plot_variance()` to visualize PERMANOVA R2 terms and batch dominance.
+* Added `report()` to render offline HTML reports from `safebiome_audit`
+  objects.
 
 ## Documentation And Release Preparation
 

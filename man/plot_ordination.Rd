@@ -4,7 +4,7 @@
 \alias{plot_ordination}
 \title{Plot PCoA ordination coordinates from a batch audit}
 \usage{
-plot_ordination(audit, color = NULL, distance = NULL)
+plot_ordination(audit, color = NULL, distance = NULL, aspect = c("auto", "equal"))
 }
 \arguments{
 \item{audit}{A \code{safebiome_audit} object.}
@@ -15,6 +15,10 @@ the first batch variable is used when available, otherwise the outcome.}
 \item{distance}{Optional character vector naming audited distances to plot.
 When \code{NULL}, the first available distance is used. Use \code{"all"} to plot all
 audited distances.}
+
+\item{aspect}{A single string controlling panel aspect. \code{"auto"} uses the
+available plotting space and is easier to read when PC1 and PC2 have very
+different ranges. \code{"equal"} preserves a 1:1 coordinate ratio.}
 }
 \value{
 A \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object.
