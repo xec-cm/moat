@@ -76,3 +76,54 @@ test_that("plot_ordination validates unavailable diagnostics and variables", {
   expect_error(plot_ordination(audit, color = "missing"), "not available")
   expect_error(plot_ordination(audit, distance = "aitchison"), "not available")
 })
+
+test_that("plot_ordination helpers cover malformed stored PCoA diagnostics", {
+  unnamed_audit <- safebiome:::biome_audit(
+    batch = list(
+      status = "evaluated",
+      pcoa = list(list(coordinates = data.frame(), variance = data.frame()))
+    ),
+    params = list(outcome = "outcome")
+  )
+  expect_equal(safebiome:::resolve_ordination_distances(unnamed_audit), "1")
+
+  no_color_audit <- safebiome:::biome_audit(
+    batch = list(
+      status = "evaluated",
+      pcoa = list(bray = list(
+        coordinates = data.frame(sample = "S1", axis1 = 0, axis2 = 0),
+        variance = data.frame(axis = c("axis1", "axis2"), variance_explained = c(0.6, 0.4))
+      ))
+    ),
+    params = list()
+  )
+  expect_error(
+    safebiome:::resolve_ordination_color(no_color_audit, distances = "bray"),
+    "No outcome, batch, or covariate"
+  )
+
+  malformed_audit <- safebiome:::biome_audit(
+    batch = list(
+      status = "evaluated",
+      pcoa = list(
+        empty = list(coordinates = data.frame(), variance = data.frame()),
+        missing_axis = list(
+          coordinates = data.frame(sample = "S1", axis1 = 0, group = "A"),
+          variance = data.frame()
+        )
+      )
+    ),
+    params = list(outcome = "group")
+  )
+  expect_error(
+    safebiome:::ordination_plot_data(malformed_audit, c("empty", "missing_axis"), "group"),
+    "No plottable PCoA"
+  )
+  expect_equal(
+    safebiome:::ordination_axis_label(
+      data.frame(axis = "axis2", variance_explained = NA_real_),
+      "axis1"
+    ),
+    "PCoA axis 1"
+  )
+})

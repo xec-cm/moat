@@ -163,7 +163,7 @@ ordination_plot_data <- function(audit, distances, color) {
   rows <- rows[!vapply(rows, is.null, logical(1))]
   if (length(rows) == 0) {
     cli::cli_abort(
-      "No plottable PCoA coordinates are available for the selected distance{?s}.",
+      "No plottable PCoA coordinates are available for the selected distances.",
       class = "safebiome_error_plot_unavailable"
     )
   }
