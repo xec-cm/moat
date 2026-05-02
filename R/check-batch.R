@@ -597,7 +597,9 @@ check_pcoa_axes <- function(distance, metadata, variables, outcome, batch = NULL
       k <- min(5, n_samples - 1)
       ordination <- stats::cmdscale(distance, k = k, eig = TRUE)
       coordinates <- make_pcoa_coordinates(ordination$points, distance)
-      variance <- make_pcoa_variance(ordination$eig, n_axes = ncol(coordinates) - 1)
+      n_axes <- length(grep("^axis[0-9]+$", names(coordinates), value = TRUE))
+      coordinates <- add_pcoa_metadata(coordinates, metadata, variables)
+      variance <- make_pcoa_variance(ordination$eig, n_axes = n_axes)
       associations <- pcoa_axis_associations(
         coordinates = coordinates,
         metadata = metadata,
@@ -666,6 +668,17 @@ check_pcoa_batch_variable <- function(batch, distance, metadata) {
     ))
   }
   result[result$batch == batch, , drop = FALSE]
+}
+
+#' @keywords internal
+add_pcoa_metadata <- function(coordinates, metadata, variables) {
+  if (length(variables) == 0) {
+    return(coordinates)
+  }
+  cbind(
+    coordinates,
+    metadata[variables]
+  )
 }
 
 #' @keywords internal

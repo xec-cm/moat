@@ -76,6 +76,22 @@ test_that("check_dispersion skips one-level variables and validates inputs", {
   expect_error(check_dispersion("not a dist", metadata, variables = "group"), "dist")
 })
 
+test_that("check_dispersion validates variables and missing metadata values", {
+  distance <- stats::dist(matrix(seq_len(8), ncol = 2))
+  metadata <- data.frame(group = c("A", "A", "B", "B"))
+
+  expect_error(
+    check_dispersion(distance, metadata = metadata, variables = "missing", n_perm = 9),
+    "Missing variable"
+  )
+
+  metadata$group[1] <- NA_character_
+  expect_error(
+    check_dispersion(distance, metadata = metadata, variables = "group", n_perm = 9),
+    "Missing values"
+  )
+})
+
 test_that("check_batch detects a strong simulated batch effect", {
   se <- readRDS(test_path("fixtures/batch_effect_biome.rds"))
 
@@ -99,6 +115,7 @@ test_that("check_batch detects a strong simulated batch effect", {
   expect_equal(names(result$permdisp), c("aitchison", "bray"))
   expect_equal(names(result$pcoa), c("aitchison", "bray"))
   expect_true(all(c("outcome", "batch") %in% result$dispersion$bray$variable))
+  expect_true(all(c("outcome", "batch") %in% names(result$pcoa$bray$coordinates)))
   expect_true(all(c("coordinates", "variance", "associations") %in% names(result$pcoa$bray)))
   expect_true(all(c("axis", "variable", "role", "p_value", "risk") %in% names(result$pcoa$bray$associations)))
   expect_true(any(result$pcoa$bray$associations$variable == "batch" & result$pcoa$bray$associations$risk == "high"))
@@ -389,6 +406,24 @@ test_that("PERMDISP and PCoA helpers capture diagnostic errors", {
   expect_false(is.na(pcoa$error))
 })
 
+test_that("PERMDISP compatibility helper handles multiple batch variables", {
+  metadata <- data.frame(
+    batch = c("A", "A", "B", "B"),
+    site = c("X", "Y", "X", "Y")
+  )
+  distance <- stats::dist(matrix(seq_len(8), ncol = 2))
+
+  result <- suppressMessages(suppressWarnings(safebiome:::check_permdisp(
+    distance = distance,
+    metadata = metadata,
+    batch = c("batch", "site"),
+    n_perm = 9
+  )))
+
+  expect_equal(result$batch, c("batch", "site"))
+  expect_true(all(c("status", "risk", "p_value") %in% names(result)))
+})
+
 test_that("PCoA helpers handle degenerate variance and one-level groups", {
   expect_equal(
     safebiome:::pcoa_variance_explained(c(0, -1)),
@@ -403,4 +438,82 @@ test_that("PCoA helpers handle degenerate variance and one-level groups", {
 
   expect_true(is.na(axis$r2))
   expect_true(is.na(axis$p_value))
+})
+
+test_that("PCoA coordinate and compatibility helpers cover fallback branches", {
+  distance <- stats::dist(matrix(seq_len(8), ncol = 2))
+  attr(distance, "Labels") <- NULL
+  coordinates <- safebiome:::make_pcoa_coordinates(matrix(seq_len(8), ncol = 2), distance)
+
+  expect_equal(coordinates$sample, as.character(seq_len(4)))
+  expect_identical(
+    safebiome:::add_pcoa_metadata(coordinates, data.frame(group = letters[1:4]), character()),
+    coordinates
+  )
+
+  skipped <- safebiome:::pcoa_axis_association_row(
+    axis = "axis1",
+    variable = "group",
+    role = "batch",
+    axis_values = seq_len(4),
+    group = rep("A", 4)
+  )
+  expect_equal(skipped$status, "skipped")
+  expect_match(skipped$error, "fewer than two groups")
+
+  no_associations <- list(associations = data.frame(), variance = data.frame())
+  no_batch <- list(
+    associations = data.frame(
+      axis = "axis1",
+      variable = "outcome",
+      role = "outcome",
+      status = "evaluated",
+      r2 = 0.1,
+      p_value = 0.2,
+      risk = "low",
+      error = NA_character_
+    ),
+    variance = data.frame(axis = "axis1", variance_explained = 0.7)
+  )
+  expect_equal(nrow(safebiome:::pcoa_compat_from_associations(no_associations)), 0)
+  expect_equal(nrow(safebiome:::pcoa_compat_from_associations(no_batch)), 0)
+
+  rows <- data.frame(
+    axis = "axis3",
+    variable = "batch",
+    role = "batch",
+    status = "error",
+    r2 = NA_real_,
+    p_value = NA_real_,
+    risk = "unknown",
+    error = c(NA_character_),
+    stringsAsFactors = FALSE
+  )
+  compat <- suppressWarnings(safebiome:::pcoa_compat_variable_row(rows, variance = data.frame()))
+
+  expect_equal(compat$batch, "batch")
+  expect_equal(compat$status, "error")
+  expect_true(is.na(compat$axis1_variance))
+  expect_true(is.na(compat$axis2_r2))
+  expect_true(is.na(compat$max_axis_r2))
+  expect_true(is.na(compat$min_p_value))
+  expect_true(is.na(compat$error))
+  expect_equal(safebiome:::highest_pcoa_status("skipped"), "skipped")
+  expect_equal(safebiome:::first_non_missing(c(NA_character_, "", "first")), "first")
+})
+
+test_that("batch-only PCoA compatibility can return evaluated rows", {
+  se <- readRDS(test_path("fixtures/batch_effect_biome.rds"))
+  metadata <- as.data.frame(SummarizedExperiment::colData(se))
+  distance <- compute_biome_distance(se, distance = "bray")
+
+  result <- safebiome:::check_pcoa_batch_variable(
+    batch = "batch",
+    distance = distance,
+    metadata = metadata
+  )
+
+  expect_equal(result$batch, "batch")
+  expect_equal(result$status, "evaluated")
+  expect_true(all(c("axis1_r2", "axis2_r2", "max_axis_r2", "min_p_value") %in% names(result)))
 })
