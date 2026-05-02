@@ -69,7 +69,7 @@ check_permanova(distance, metadata, outcome = "outcome", batch = "batch", n_perm
 #> 
 #> $terms
 #>            term    role df sum_of_squares          r2  statistic p_value
-#> outcome outcome outcome  1    0.004004636 0.003494571   2.654277    0.08
+#> outcome outcome outcome  1    0.004004636 0.003494571   2.654277    0.07
 #> batch     batch   batch  1    1.086130965 0.947791939 719.888915    0.01
 #> 
 #> $outcome_r2

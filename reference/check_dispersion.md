@@ -42,6 +42,6 @@ metadata <- as.data.frame(SummarizedExperiment::colData(toy_biome))
 distance <- compute_biome_distance(toy_biome, distance = "bray")
 check_dispersion(distance, metadata, variables = c("outcome", "batch"), n_perm = 99)
 #>   variable    status n_groups    statistic p_value risk error
-#> 1  outcome evaluated        2 0.0009879928    0.97  low  <NA>
-#> 2    batch evaluated        2 0.4410051761    0.56  low  <NA>
+#> 1  outcome evaluated        2 0.0009879928    0.91  low  <NA>
+#> 2    batch evaluated        2 0.4410051761    0.49  low  <NA>
 ```

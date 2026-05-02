@@ -284,9 +284,9 @@ sessionInfo()
 #> [25] textshaping_1.0.5           Seqinfo_1.0.0              
 #> [27] permute_0.9-10              htmltools_0.5.9            
 #> [29] sass_0.4.10                 yaml_2.3.12                
-#> [31] pkgdown_2.2.0.9000          pillar_1.11.1              
+#> [31] pillar_1.11.1               pkgdown_2.2.0.9000         
 #> [33] jquerylib_0.1.4             MASS_7.3-65                
-#> [35] DelayedArray_0.36.1         cachem_1.1.0               
+#> [35] cachem_1.1.0                DelayedArray_0.36.1        
 #> [37] vegan_2.7-3                 abind_1.4-8                
 #> [39] nlme_3.1-169                tidyselect_1.2.1           
 #> [41] digest_0.6.39               dplyr_1.2.1                

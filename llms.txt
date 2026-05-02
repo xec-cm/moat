@@ -173,10 +173,14 @@ visualize key diagnostics.
   : Audit a microbiome study design
 - [`summary(`*`<safebiome_audit>`*`)`](https://xec-cm.github.io/safebiome/reference/summary.safebiome_audit.md)
   : Print a safebiome audit summary
+- [`autoplot(`*`<safebiome_audit>`*`)`](https://xec-cm.github.io/safebiome/reference/autoplot.safebiome_audit.md)
+  : Plot a safebiome audit risk dashboard
 - [`plan_analysis()`](https://xec-cm.github.io/safebiome/reference/plan_analysis.md)
   : Generate a downstream analysis plan from a safebiome audit
 - [`plot_design()`](https://xec-cm.github.io/safebiome/reference/plot_design.md)
   : Plot outcome distribution across a design variable
+- [`plot_ordination()`](https://xec-cm.github.io/safebiome/reference/plot_ordination.md)
+  : Plot PCoA ordination coordinates from a batch audit
 - [`plot_variance()`](https://xec-cm.github.io/safebiome/reference/plot_variance.md)
   : Plot PERMANOVA variance explained by audited terms
 
