@@ -187,6 +187,8 @@ identifiable.
 
 - [`check_design()`](https://xec-cm.github.io/safebiome/reference/check_design.md)
   : Check experimental design metadata associations with the outcome
+- [`check_metadata_predictability()`](https://xec-cm.github.io/safebiome/reference/check_metadata_predictability.md)
+  : Check whether metadata alone predicts the outcome
 - [`check_continuous_design()`](https://xec-cm.github.io/safebiome/reference/check_continuous_design.md)
   : Check continuous metadata associations with the outcome
 - [`check_balance()`](https://xec-cm.github.io/safebiome/reference/check_balance.md)
@@ -207,6 +209,8 @@ batch effects.
   : Compute distances between microbiome samples
 - [`check_permanova()`](https://xec-cm.github.io/safebiome/reference/check_permanova.md)
   : Check PERMANOVA variation explained by metadata variables
+- [`check_dispersion()`](https://xec-cm.github.io/safebiome/reference/check_dispersion.md)
+  : Check multivariate dispersion differences across metadata variables
 - [`check_batch()`](https://xec-cm.github.io/safebiome/reference/check_batch.md)
   : Check microbiome batch effects across distances
 

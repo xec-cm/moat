@@ -79,7 +79,9 @@ as categorical.</p></dd>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A data frame with one row per audited variable. The result also
 stores the global design risk in <code>attr(result, "risk")</code> and warnings in
-<code>attr(result, "warnings")</code>.</p>
+<code>attr(result, "warnings")</code>. When design variables are provided,
+metadata-only outcome predictability is stored in
+<code>attr(result, "metadata_predictability")</code>.</p>
     </div>
 
     <div class="section level2">

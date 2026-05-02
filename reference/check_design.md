@@ -34,7 +34,9 @@ check_design(metadata, outcome, batch = NULL, covariates = NULL)
 
 A data frame with one row per audited variable. The result also stores
 the global design risk in `attr(result, "risk")` and warnings in
-`attr(result, "warnings")`.
+`attr(result, "warnings")`. When design variables are provided,
+metadata-only outcome predictability is stored in
+`attr(result, "metadata_predictability")`.
 
 ## Examples
 

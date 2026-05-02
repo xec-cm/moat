@@ -71,7 +71,8 @@ summary(audit)
 #> 
 #> ── Main warnings ──
 #> 
-#> • Batch audit for bray distance has high risk (batch R2 = 0.948).
+#> • Batch audit for bray distance has high risk (batch R2 = 0.948; PERMANOVA =
+#> high, dispersion = low, PCoA = high).
 #> 
 #> ── Recommended next steps ──
 #> 
@@ -229,7 +230,7 @@ plan_analysis(audit)
 #> 
 #> ── Warnings ──
 #> 
-#> ! Batch audit for bray distance has high risk (batch R2 = 0.948).
+#> ! Batch audit for bray distance has high risk (batch R2 = 0.948; PERMANOVA = high, dispersion = low, PCoA = high).
 #> ! Batch-dominated microbiome signal requires explicit sensitivity analysis.
 ```
 
