@@ -69,6 +69,9 @@
 - Added
   [`plot_variance()`](https://xec-cm.github.io/safebiome/reference/plot_variance.md)
   to visualize PERMANOVA R2 terms and batch dominance.
+- Added
+  [`report()`](https://xec-cm.github.io/safebiome/reference/report.md)
+  to render offline HTML reports from `safebiome_audit` objects.
 
 ### Documentation And Release Preparation
 

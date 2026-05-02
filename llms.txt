@@ -177,6 +177,8 @@ visualize key diagnostics.
   : Plot a safebiome audit risk dashboard
 - [`plan_analysis()`](https://xec-cm.github.io/safebiome/reference/plan_analysis.md)
   : Generate a downstream analysis plan from a safebiome audit
+- [`report()`](https://xec-cm.github.io/safebiome/reference/report.md) :
+  Render a safebiome audit HTML report
 - [`plot_design()`](https://xec-cm.github.io/safebiome/reference/plot_design.md)
   : Plot outcome distribution across a design variable
 - [`plot_ordination()`](https://xec-cm.github.io/safebiome/reference/plot_ordination.md)

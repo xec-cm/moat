@@ -8,7 +8,7 @@ variable stored with the ordination coordinates.
 ## Usage
 
 ``` r
-plot_ordination(audit, color = NULL, distance = NULL)
+plot_ordination(audit, color = NULL, distance = NULL, aspect = c("auto", "equal"))
 ```
 
 ## Arguments
@@ -27,6 +27,12 @@ plot_ordination(audit, color = NULL, distance = NULL)
   Optional character vector naming audited distances to plot. When
   `NULL`, the first available distance is used. Use `"all"` to plot all
   audited distances.
+
+- aspect:
+
+  A single string controlling panel aspect. `"auto"` uses the available
+  plotting space and is easier to read when PC1 and PC2 have very
+  different ranges. `"equal"` preserves a 1:1 coordinate ratio.
 
 ## Value
 
