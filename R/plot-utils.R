@@ -26,6 +26,17 @@ safebiome_role_palette <- function() {
 }
 
 #' @keywords internal
+safebiome_risk_palette <- function() {
+  c(
+    unknown = "#9CA3AF",
+    low = "#009E73",
+    moderate = "#E69F00",
+    high = "#D55E00",
+    critical = "#CC3311"
+  )
+}
+
+#' @keywords internal
 check_plot_variable <- function(variable, name = "variable", allow_null = FALSE) {
   if (is.null(variable) && isTRUE(allow_null)) {
     return(invisible(TRUE))

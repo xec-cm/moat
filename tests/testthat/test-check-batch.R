@@ -99,6 +99,7 @@ test_that("check_batch detects a strong simulated batch effect", {
   expect_equal(names(result$permdisp), c("aitchison", "bray"))
   expect_equal(names(result$pcoa), c("aitchison", "bray"))
   expect_true(all(c("outcome", "batch") %in% result$dispersion$bray$variable))
+  expect_true(all(c("outcome", "batch") %in% names(result$pcoa$bray$coordinates)))
   expect_true(all(c("coordinates", "variance", "associations") %in% names(result$pcoa$bray)))
   expect_true(all(c("axis", "variable", "role", "p_value", "risk") %in% names(result$pcoa$bray$associations)))
   expect_true(any(result$pcoa$bray$associations$variable == "batch" & result$pcoa$bray$associations$risk == "high"))

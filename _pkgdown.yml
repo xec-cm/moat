@@ -62,8 +62,10 @@ reference:
   contents:
   - check_biome
   - summary.safebiome_audit
+  - autoplot.safebiome_audit
   - plan_analysis
   - plot_design
+  - plot_ordination
   - plot_variance
 
 - title: "Design And Correction Audits"
