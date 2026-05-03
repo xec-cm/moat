@@ -1,0 +1,237 @@
+---
+title: "Validation leakage in microbiome machine learning"
+author:
+  - name: Francesc Catala-Moll
+    affiliation: IrsiCaixa AIDS Research Institute
+package: safebiome
+output:
+  BiocStyle::html_document:
+    toc: true
+    toc_depth: 2
+vignette: >
+  %\VignetteIndexEntry{Validation leakage in microbiome machine learning}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.align = "center",
+  fig.width = 7,
+  fig.height = 4.2
+)
+```
+
+# Why Leakage Matters
+
+Microbiome machine-learning models often work with samples, but the scientific
+unit of generalization may be a subject, hospital, sequencing run, visit, or
+study site. If train and test folds split those units incorrectly, the model can
+learn repeated-subject structure or batch signatures instead of biology.
+
+This vignette focuses on three common leakage patterns:
+
+1. repeated measurements from the same subject,
+2. outcome labels aligned with batch or center,
+3. time-ordered samples from the same subjects.
+
+`safebiome` does not train the machine-learning model. It audits metadata before
+modeling and recommends validation schemes that make leakage harder to miss.
+
+```{r load-package}
+library(safebiome)
+data("toy_biome")
+```
+
+# Row-Wise Cross-Validation Can Be Overoptimistic
+
+Row-wise cross-validation treats each sample as independent. That assumption is
+fragile when several rows come from the same person. In the small simulated
+dataset below, every subject contributes two samples.
+
+```{r repeated-data}
+repeated_biome <- toy_biome
+SummarizedExperiment::colData(repeated_biome)$subject <- rep(
+  paste0("S", seq_len(ncol(repeated_biome) / 2)),
+  each = 2
+)
+SummarizedExperiment::colData(repeated_biome)$timepoint <- rep(
+  c("baseline", "followup"),
+  times = ncol(repeated_biome) / 2
+)
+metadata <- as.data.frame(SummarizedExperiment::colData(repeated_biome))
+
+head(metadata)
+```
+
+If ordinary row-wise folds are used, one sample from a subject can be in the
+training fold while another sample from the same subject is in the test fold.
+The test fold is then no longer an independent subject-level evaluation.
+
+```{r repeated-check}
+repeated <- check_repeated_measures(metadata, subject = "subject")
+
+repeated[c(
+  "n_samples",
+  "n_subjects",
+  "n_repeated_subjects",
+  "max_samples_per_subject",
+  "risk",
+  "recommended_cv"
+)]
+```
+
+The actionable recommendation is to keep samples from the same subject together
+inside each resampling split.
+
+```{r repeated-subject-counts}
+head(repeated$samples_per_subject)
+```
+
+# Use Grouped Cross-Validation
+
+`check_leakage()` combines repeated-measure, batch, and temporal diagnostics.
+For repeated measures without an explicit time variable, the recommended scheme
+is grouped cross-validation by subject.
+
+```{r grouped-cv}
+leakage_grouped <- check_leakage(
+  metadata,
+  outcome = "outcome",
+  subject = "subject"
+)
+
+leakage_grouped$recommended_cv
+leakage_grouped$recommendations
+```
+
+In downstream modeling, that means fold assignment should happen at subject
+level first. All rows from a subject should move together into train or test.
+
+# Leave-One-Center-Out For Batch Leakage
+
+Another failure mode appears when a center, site, or sequencing batch is aligned
+with the outcome. A model can then perform well by recognizing center-specific
+microbiome or technical signatures.
+
+```{r confounded-data}
+confounded_metadata <- data.frame(
+  outcome = rep(c("Control", "Disease"), each = 10),
+  batch = rep(c("Center_A", "Center_B"), each = 10)
+)
+
+table(confounded_metadata$batch, confounded_metadata$outcome)
+```
+
+Here each batch level contains only one outcome group. A random row-wise split
+can put both centers into both train and test, making center recognition look
+like outcome prediction.
+
+```{r batch-leakage}
+batch_leakage <- check_leakage(
+  confounded_metadata,
+  outcome = "outcome",
+  batch = "batch"
+)
+
+batch_leakage$risk
+batch_leakage$recommended_cv
+batch_leakage$batch_leakage$summary
+```
+
+For this scenario, a leave-one-batch-out strategy is a useful stress test. It
+asks whether the model still works when a whole center or batch is held out.
+
+# Time-Aware Validation
+
+Longitudinal data add another constraint: train folds should not silently use
+future samples from the same subject to predict earlier or held-out samples.
+When repeated subjects span timepoints, `safebiome` recommends a grouped
+time-aware strategy.
+
+```{r temporal-leakage}
+leakage_time <- check_leakage(
+  metadata,
+  outcome = "outcome",
+  subject = "subject",
+  time = "timepoint"
+)
+
+leakage_time$risk
+leakage_time$recommended_cv
+leakage_time$temporal_leakage[c(
+  "n_timepoints",
+  "subjects_with_multiple_timepoints",
+  "risk"
+)]
+```
+
+This does not replace a full temporal validation design. It flags that ordinary
+row-wise cross-validation is not enough for the metadata structure supplied.
+
+# Full Audit Integration
+
+The same leakage recommendations flow through `check_biome()` and
+`plan_analysis()`. This lets the validation choice sit next to design, batch,
+and correction diagnostics instead of being handled as an afterthought.
+
+```{r full-audit}
+audit <- check_biome(
+  repeated_biome,
+  outcome = "outcome",
+  subject = "subject",
+  time = "timepoint",
+  distances = "bray",
+  n_perm = 99,
+  verbose = FALSE
+)
+
+summary(audit)
+```
+
+```{r plan-validation}
+plan <- plan_analysis(audit)
+
+plan$ml_validation
+plan$permutation
+```
+
+# Preprocessing Leakage Checklist
+
+Validation leakage is not only about fold assignment. Any operation that learns
+from the full dataset before splitting can leak information into test folds.
+
+```{r preprocessing-checklist}
+audit$leakage$preprocessing_checklist
+```
+
+Before fitting a model, check that the following steps are estimated inside
+each training fold and then applied to the held-out fold:
+
+- feature filtering,
+- prevalence filtering,
+- normalization or scaling parameters,
+- imputation,
+- feature selection,
+- hyperparameter tuning.
+
+# Practical Checklist For ML Users
+
+Use this checklist before interpreting microbiome ML performance:
+
+- Are multiple samples from the same subject kept in the same fold?
+- If outcome is aligned with center or batch, is leave-one-center-out or
+  leave-one-batch-out performance reported?
+- For longitudinal data, does validation respect subject grouping and time?
+- Are preprocessing, filtering, scaling, and feature selection nested inside
+  resampling?
+- Are ordinary CV and leakage-aware CV results shown side by side when risk is
+  moderate or high?
+
+# Session Information
+
+```{r session-info}
+sessionInfo()
+```

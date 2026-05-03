@@ -45,5 +45,7 @@
 ## Documentation And Release Preparation
 
 * Added an introductory vignette covering the full audit workflow.
+* Added a validation-leakage vignette for microbiome machine-learning
+  workflows.
 * Updated README with current user-facing APIs.
 * Added citation metadata placeholder for the development package.
