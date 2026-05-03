@@ -30,7 +30,7 @@ A `moat_analysis_plan` object.
 
 ``` r
 data("toy_moat")
-audit <- check_biome(toy_moat, outcome = "outcome", batch = "batch", n_perm = 99)
+audit <- moat(toy_moat, outcome = "outcome", batch = "batch", n_perm = 99)
 plan_analysis(audit)
 #> 
 #> ── MOAT analysis plan ──────────────────────────────────────────────────────────

@@ -31,6 +31,6 @@ object.
 
 ``` r
 data("toy_moat")
-audit <- check_biome(toy_moat, outcome = "outcome", batch = "batch", n_perm = 99)
+audit <- moat(toy_moat, outcome = "outcome", batch = "batch", n_perm = 99)
 ggplot2::autoplot(audit)
 ```

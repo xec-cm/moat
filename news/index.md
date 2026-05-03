@@ -7,13 +7,15 @@
   crossing into microbiome analysis, check the moat.
 - Added `moat_audit`, `summary.moat_audit`, and `moat_analysis_plan` as
   the package object classes.
+- Replaced remaining legacy condition classes and audit-object helpers
+  with `moat_*` names; no compatibility aliases are provided.
 
 ### New Package
 
 - Initial development release prepared for future Bioconductor
   submission.
 - Added the `moat_audit` object returned by
-  [`check_biome()`](https://xec-cm.github.io/moat/reference/check_biome.md).
+  [`moat()`](https://xec-cm.github.io/moat/reference/moat.md).
 - Added input validation for `SummarizedExperiment`-like microbiome
   objects.
 - Added toy microbiome data for examples, tests, and vignettes.

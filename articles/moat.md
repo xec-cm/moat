@@ -56,7 +56,7 @@ analyses should generally use a larger value, such as the default `999`.
 
 ``` r
 
-audit <- check_biome(
+audit <- moat(
   toy_moat,
   outcome = "outcome",
   batch = "batch",
@@ -182,7 +182,7 @@ Validation leakage can occur when samples from the same subject, batch,
 or time structure are split across train and test folds in a way that
 makes prediction look better than it is. MOAT reports the recommended
 cross-validation scheme based on the metadata supplied to
-[`check_biome()`](https://xec-cm.github.io/moat/reference/check_biome.md).
+[`moat()`](https://xec-cm.github.io/moat/reference/moat.md).
 
 ``` r
 

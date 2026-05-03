@@ -4,7 +4,7 @@ pkgdown_sha: a6abe43ed48e58b1de42eba5e5541a5b6c46b46f
 articles:
   leakage-ml: leakage-ml.html
   moat: moat.html
-last_built: 2026-05-03T08:04Z
+last_built: 2026-05-03T08:29Z
 urls:
   reference: https://xec-cm.github.io/moat/reference
   article: https://xec-cm.github.io/moat/articles

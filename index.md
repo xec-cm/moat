@@ -34,7 +34,7 @@ library(moat)
 
 data("toy_moat")
 
-audit <- check_biome(
+audit <- moat(
     toy_moat,
     outcome = "outcome",
     batch = "batch",

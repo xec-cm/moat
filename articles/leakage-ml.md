@@ -224,15 +224,14 @@ structure supplied.
 ## Full Audit Integration
 
 The same leakage recommendations flow through
-[`check_biome()`](https://xec-cm.github.io/moat/reference/check_biome.md)
-and
+[`moat()`](https://xec-cm.github.io/moat/reference/moat.md) and
 [`plan_analysis()`](https://xec-cm.github.io/moat/reference/plan_analysis.md).
 This lets the validation choice sit next to design, batch, and
 correction diagnostics instead of being handled as an afterthought.
 
 ``` r
 
-audit <- check_biome(
+audit <- moat(
   repeated_biome,
   outcome = "outcome",
   subject = "subject",

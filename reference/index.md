@@ -5,8 +5,8 @@
 Run a complete audit, summarize risk, plan downstream analysis, and
 visualize key diagnostics.
 
-- [`check_biome()`](https://xec-cm.github.io/moat/reference/check_biome.md)
-  : Audit a microbiome study design
+- [`moat()`](https://xec-cm.github.io/moat/reference/moat.md) : Audit a
+  microbiome study design
 - [`summary(`*`<moat_audit>`*`)`](https://xec-cm.github.io/moat/reference/summary.moat_audit.md)
   : Print a MOAT audit summary
 - [`autoplot(`*`<moat_audit>`*`)`](https://xec-cm.github.io/moat/reference/autoplot.moat_audit.md)
@@ -71,7 +71,7 @@ Example data and lightweight audit object helpers.
 
 - [`toy_moat`](https://xec-cm.github.io/moat/reference/toy_moat.md) :
   Toy MOAT Microbiome Dataset
-- [`is_biome_audit()`](https://xec-cm.github.io/moat/reference/is_biome_audit.md)
+- [`is_moat_audit()`](https://xec-cm.github.io/moat/reference/is_moat_audit.md)
   : Test if an object is a moat_audit
 
 ## Package Helpers

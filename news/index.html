@@ -42,10 +42,11 @@
 <h2 class="pkg-version" data-toc-text="0.99.0" id="moat-0990">moat 0.99.0<a class="anchor" aria-label="anchor" href="#moat-0990"></a></h2>
 <ul><li>Renamed and repositioned the package as <code>moat</code>, the Microbiome Omics Audit Toolkit. MOAT is framed as a pre-analysis audit layer: before crossing into microbiome analysis, check the moat.</li>
 <li>Added <code>moat_audit</code>, <code>summary.moat_audit</code>, and <code>moat_analysis_plan</code> as the package object classes.</li>
+<li>Replaced remaining legacy condition classes and audit-object helpers with <code>moat_*</code> names; no compatibility aliases are provided.</li>
 </ul><div class="section level3">
 <h3 id="new-package-0-99-0">New Package<a class="anchor" aria-label="anchor" href="#new-package-0-99-0"></a></h3>
 <ul><li>Initial development release prepared for future Bioconductor submission.</li>
-<li>Added the <code>moat_audit</code> object returned by <code><a href="../reference/check_biome.html">check_biome()</a></code>.</li>
+<li>Added the <code>moat_audit</code> object returned by <code><a href="../reference/moat.html">moat()</a></code>.</li>
 <li>Added input validation for <code>SummarizedExperiment</code>-like microbiome objects.</li>
 <li>Added toy microbiome data for examples, tests, and vignettes.</li>
 </ul></div>

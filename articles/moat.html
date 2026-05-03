@@ -121,7 +121,7 @@ metadata.</p>
 Real analyses should generally use a larger value, such as the default
 <code>999</code>.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">audit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/check_biome.html">check_biome</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">audit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/moat.html">moat</a></span><span class="op">(</span></span>
 <span>  <span class="va">toy_moat</span>,</span>
 <span>  outcome <span class="op">=</span> <span class="st">"outcome"</span>,</span>
 <span>  batch <span class="op">=</span> <span class="st">"batch"</span>,</span>
@@ -229,7 +229,7 @@ downstream analysis needs explicit batch sensitivity checks.</p>
 batch, or time structure are split across train and test folds in a way
 that makes prediction look better than it is. MOAT reports the
 recommended cross-validation scheme based on the metadata supplied to
-<code><a href="../reference/check_biome.html">check_biome()</a></code>.</p>
+<code><a href="../reference/moat.html">moat()</a></code>.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">audit</span><span class="op">$</span><span class="va">leakage</span><span class="op">$</span><span class="va">recommended_cv</span></span>
 <span><span class="co">#&gt; [1] "standard_cv"</span></span>

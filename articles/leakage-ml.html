@@ -267,12 +267,12 @@ structure supplied.</p>
 <div class="section level2">
 <h2 id="full-audit-integration">Full Audit Integration<a class="anchor" aria-label="anchor" href="#full-audit-integration"></a>
 </h2>
-<p>The same leakage recommendations flow through
-<code><a href="../reference/check_biome.html">check_biome()</a></code> and <code><a href="../reference/plan_analysis.html">plan_analysis()</a></code>. This lets
-the validation choice sit next to design, batch, and correction
-diagnostics instead of being handled as an afterthought.</p>
+<p>The same leakage recommendations flow through <code><a href="../reference/moat.html">moat()</a></code> and
+<code><a href="../reference/plan_analysis.html">plan_analysis()</a></code>. This lets the validation choice sit next
+to design, batch, and correction diagnostics instead of being handled as
+an afterthought.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">audit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/check_biome.html">check_biome</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">audit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/moat.html">moat</a></span><span class="op">(</span></span>
 <span>  <span class="va">repeated_biome</span>,</span>
 <span>  outcome <span class="op">=</span> <span class="st">"outcome"</span>,</span>
 <span>  subject <span class="op">=</span> <span class="st">"subject"</span>,</span>
