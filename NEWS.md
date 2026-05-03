@@ -7,6 +7,8 @@
   package object classes.
 * Replaced remaining legacy condition classes and audit-object helpers with
   `moat_*` names; no compatibility aliases are provided.
+* Added tidy audit extraction helpers and a programmatic risk-threshold
+  reference for reports and methods documentation.
 
 ## New Package
 

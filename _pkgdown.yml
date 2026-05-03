@@ -32,6 +32,8 @@ navbar:
         href: articles/moat.html
       - text: "Validation leakage in ML"
         href: articles/leakage-ml.html
+      - text: "Risk thresholds"
+        href: articles/risk-thresholds.html
     news:
       text: "News"
       href: news/index.html
@@ -50,6 +52,7 @@ articles:
   contents:
   - moat
   - leakage-ml
+  - risk-thresholds
 
 search:
   exclude:
@@ -69,6 +72,10 @@ reference:
   - autoplot.moat_audit
   - plan_analysis
   - report
+  - module_risks
+  - audit_reasons
+  - audit_recommendations
+  - risk_thresholds
   - plot_design
   - plot_ordination
   - plot_variance

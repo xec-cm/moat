@@ -26,6 +26,7 @@ Imports:
     magrittr,
     methods,
     SummarizedExperiment,
+    tibble,
     vegan
 Suggests:
     BiocStyle,

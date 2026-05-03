@@ -71,6 +71,13 @@ audit <- moat(
 summary(audit)
 ```
 
+For compact reporting, `module_risks()` extracts the module-level status and
+main reason without requiring users to inspect the nested audit object.
+
+```{r module-risks}
+module_risks(audit)
+```
+
 # Interpret Design Risk
 
 The design module checks whether metadata variables are associated with the
@@ -110,6 +117,10 @@ audit$correction$recommendations
 
 This diagnostic is not a command to correct the data. It is a warning about
 what kinds of downstream adjustment are statistically defensible.
+
+Thresholds used by all risk modules are documented in the companion article
+`vignette("risk-thresholds", package = "moat")` and exposed as a table by
+`risk_thresholds()`.
 
 # Interpret Batch Risk
 
