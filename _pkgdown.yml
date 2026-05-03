@@ -29,6 +29,8 @@ navbar:
       menu:
       - text: "Full audit workflow"
         href: articles/safebiome.html
+      - text: "Validation leakage in ML"
+        href: articles/leakage-ml.html
     news:
       text: "News"
       href: news/index.html
@@ -46,6 +48,7 @@ articles:
   navbar: "Workflows"
   contents:
   - safebiome
+  - leakage-ml
 
 search:
   exclude:
