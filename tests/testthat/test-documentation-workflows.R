@@ -1,8 +1,8 @@
 test_that("README workflow runs with current exported APIs", {
-  data("toy_biome")
+  data("toy_moat")
 
   audit <- check_biome(
-    toy_biome,
+    toy_moat,
     outcome = "outcome",
     batch = "batch",
     distances = "bray",
@@ -14,9 +14,9 @@ test_that("README workflow runs with current exported APIs", {
   design_plot <- plot_design(audit, variable = "batch")
   variance_plot <- plot_variance(audit, distance = "bray")
 
-  expect_s3_class(audit, "safebiome_audit")
-  expect_s3_class(audit_summary, "summary.safebiome_audit")
-  expect_s3_class(plan, "safebiome_analysis_plan")
+  expect_s3_class(audit, "moat_audit")
+  expect_s3_class(audit_summary, "summary.moat_audit")
+  expect_s3_class(plan, "moat_analysis_plan")
   expect_s3_class(design_plot, "ggplot")
   expect_s3_class(variance_plot, "ggplot")
   expect_equal(audit$params$outcome, "outcome")
@@ -32,12 +32,12 @@ test_that("documentation workflow functions are exported", {
     "plot_variance"
   )
 
-  expect_true(all(workflow_functions %in% getNamespaceExports("safebiome")))
+  expect_true(all(workflow_functions %in% getNamespaceExports("moat")))
 })
 
 test_that("package citation metadata is available", {
-  citation <- utils::citation("safebiome")
+  citation <- suppressWarnings(utils::citation("moat"))
 
   expect_s3_class(citation, "citation")
-  expect_true(any(grepl("safebiome", format(citation), fixed = TRUE)))
+  expect_true(any(grepl("moat", format(citation), fixed = TRUE)))
 })

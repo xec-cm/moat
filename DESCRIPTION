@@ -1,15 +1,20 @@
-Package: safebiome
-Title: Audit Microbiome Study Designs Before Downstream Analysis
+Package: moat
+Title: Microbiome Omics Audit Toolkit for Pre-Analysis Risk Assessment
 Version: 0.99.0
+Author: Francesc Català-Moll [aut, cre] (<https://orcid.org/0000-0002-2354-8648>)
+Maintainer: Francesc Català-Moll <fcatala@irsicaixa.es>
 Authors@R: 
     person("Francesc", "Català-Moll", , "fcatala@irsicaixa.es", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-2354-8648"))
-Description: Audits microbiome studies for design confounding, batch
-    effects, correction feasibility, and validation leakage before downstream
-    statistical analysis.
+Description: Microbiome Omics Audit Toolkit (MOAT) provides a pre-analysis
+    audit layer for microbiome and omics studies. It checks design confounding,
+    batch-associated microbiome structure, correction identifiability, validation
+    leakage, and risk diagnostics, then turns those diagnostics into conservative
+    analysis-plan recommendations before downstream statistical or machine
+    learning workflows are run.
 License: MIT + file LICENSE
-URL: https://github.com/xec-cm/safebiome, https://xec-cm.github.io/safebiome/
-BugReports: https://github.com/xec-cm/safebiome/issues
+URL: https://github.com/xec-cm/moat, https://xec-cm.github.io/moat/
+BugReports: https://github.com/xec-cm/moat/issues
 biocViews: Software, Microbiome, Metagenomics, Sequencing, ExperimentalDesign,
     QualityControl, StatisticalMethod
 Encoding: UTF-8

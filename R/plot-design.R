@@ -4,7 +4,7 @@
 #' for a categorical batch or covariate variable. Empty cells are outlined so
 #' confounding and complete separation are visible at a glance.
 #'
-#' @param audit A `safebiome_audit` object.
+#' @param audit A `moat_audit` object.
 #' @param variable Optional single string naming a categorical variable audited
 #'   by [check_design()]. When `NULL`, the first audited batch variable is used;
 #'   if no batch variable is available, the first categorical covariate is used.
@@ -15,8 +15,8 @@
 #' @export
 #'
 #' @examples
-#' data("toy_biome")
-#' audit <- check_biome(toy_biome, outcome = "outcome", batch = "batch", n_perm = 99)
+#' data("toy_moat")
+#' audit <- check_biome(toy_moat, outcome = "outcome", batch = "batch", n_perm = 99)
 #' plot_design(audit, variable = "batch")
 plot_design <- function(audit, variable = NULL, type = c("count", "proportion")) {
   validate_biome_audit(audit)

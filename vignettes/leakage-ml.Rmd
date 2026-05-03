@@ -3,7 +3,7 @@ title: "Validation leakage in microbiome machine learning"
 author:
   - name: Francesc Catala-Moll
     affiliation: IrsiCaixa AIDS Research Institute
-package: safebiome
+package: moat
 output:
   BiocStyle::html_document:
     toc: true
@@ -37,12 +37,12 @@ This vignette focuses on three common leakage patterns:
 2. outcome labels aligned with batch or center,
 3. time-ordered samples from the same subjects.
 
-`safebiome` does not train the machine-learning model. It audits metadata before
+MOAT does not train the machine-learning model. It audits metadata before
 modeling and recommends validation schemes that make leakage harder to miss.
 
 ```{r load-package}
-library(safebiome)
-data("toy_biome")
+library(moat)
+data("toy_moat")
 ```
 
 # Row-Wise Cross-Validation Can Be Overoptimistic
@@ -52,7 +52,7 @@ fragile when several rows come from the same person. In the small simulated
 dataset below, every subject contributes two samples.
 
 ```{r repeated-data}
-repeated_biome <- toy_biome
+repeated_biome <- toy_moat
 SummarizedExperiment::colData(repeated_biome)$subject <- rep(
   paste0("S", seq_len(ncol(repeated_biome) / 2)),
   each = 2
@@ -148,7 +148,7 @@ asks whether the model still works when a whole center or batch is held out.
 
 Longitudinal data add another constraint: train folds should not silently use
 future samples from the same subject to predict earlier or held-out samples.
-When repeated subjects span timepoints, `safebiome` recommends a grouped
+When repeated subjects span timepoints, MOAT recommends a grouped
 time-aware strategy.
 
 ```{r temporal-leakage}

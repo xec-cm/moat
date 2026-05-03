@@ -350,16 +350,16 @@ module_recommendations_for_scoring <- function(x) {
   format_biome_recommendations(x$recommendations)
 }
 
-#' Print a safebiome audit summary
+#' Print a MOAT audit summary
 #'
-#' @param object A `safebiome_audit` object.
+#' @param object A `moat_audit` object.
 #' @param verbose A single logical value. When `TRUE`, include all module
 #'   reasons and recommendations. Defaults to `FALSE`.
 #' @param ... Additional arguments passed to methods.
 #'
-#' @return A `summary.safebiome_audit` object.
+#' @return A `summary.moat_audit` object.
 #' @export
-summary.safebiome_audit <- function(object, verbose = FALSE, ...) {
+summary.moat_audit <- function(object, verbose = FALSE, ...) {
   validate_biome_audit(object)
   check_flag(verbose, "verbose")
 
@@ -370,13 +370,13 @@ summary.safebiome_audit <- function(object, verbose = FALSE, ...) {
       recommendations = format_biome_recommendations(object$recommendations),
       verbose = verbose
     ),
-    class = "summary.safebiome_audit"
+    class = "summary.moat_audit"
   )
 }
 
 #' @export
-print.summary.safebiome_audit <- function(x, ...) {
-  cli::cli_h1("safebiome audit")
+print.summary.moat_audit <- function(x, ...) {
+  cli::cli_h1("MOAT audit")
   cli::cli_alert_info("Overall risk: {toupper(x$risk)}")
 
   reasons <- x$risk_summary$overall$reasons

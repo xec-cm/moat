@@ -1,11 +1,11 @@
 test_that("plan_analysis returns the required structured components", {
-  audit <- safebiome:::biome_audit(
+  audit <- moat:::biome_audit(
     params = list(outcome = "condition")
   )
 
   plan <- plan_analysis(audit)
 
-  expect_s3_class(plan, "safebiome_analysis_plan")
+  expect_s3_class(plan, "moat_analysis_plan")
   expect_named(
     plan,
     c(
@@ -112,7 +112,7 @@ test_that("identifiable batch adjustment is included cautiously in DA formula", 
 })
 
 test_that("plan_analysis print method is readable and invisible", {
-  audit <- safebiome:::biome_audit(
+  audit <- moat:::biome_audit(
     params = list(outcome = "condition"),
     risk = "moderate"
   )
@@ -121,7 +121,7 @@ test_that("plan_analysis print method is readable and invisible", {
   printed <- capture.output(returned <- print(plan), type = "message")
 
   expect_identical(returned, plan)
-  expect_true(any(grepl("safebiome analysis plan", printed)))
+  expect_true(any(grepl("MOAT analysis plan", printed)))
   expect_true(any(grepl("Recommended formulas", printed)))
   expect_true(any(grepl("Differential abundance:.*~ condition", printed)))
   expect_false(any(grepl("Differential abundance:.*`condition`", printed, fixed = FALSE)))
@@ -129,7 +129,7 @@ test_that("plan_analysis print method is readable and invisible", {
 })
 
 test_that("plan_analysis display keeps quoting only when names need it", {
-  audit <- safebiome:::biome_audit(
+  audit <- moat:::biome_audit(
     params = list(outcome = "case status", batch = "batch")
   )
 
@@ -144,31 +144,31 @@ test_that("plan_analysis display keeps quoting only when names need it", {
 test_that("plan_analysis validates inputs", {
   expect_error(plan_analysis(list()), "must inherit")
 
-  audit <- safebiome:::biome_audit()
+  audit <- moat:::biome_audit()
   expect_error(plan_analysis(audit, verbose = NA), "logical value")
 })
 
 test_that("plan_analysis covers fallback formulas and display colors", {
-  audit <- safebiome:::biome_audit(params = list())
+  audit <- moat:::biome_audit(params = list())
 
-  da_formula <- safebiome:::recommend_da_formula(audit, audit$params)
-  permanova_formula <- safebiome:::recommend_permanova_formula(audit$params)
+  da_formula <- moat:::recommend_da_formula(audit, audit$params)
+  permanova_formula <- moat:::recommend_permanova_formula(audit$params)
 
   expect_equal(da_formula$formula, "~ 1")
   expect_equal(da_formula$display, "~ 1")
   expect_equal(permanova_formula$formula, "distance ~ 1")
   expect_equal(permanova_formula$display, "distance ~ 1")
-  expect_equal(safebiome:::da_formula_reason(audit, include_batch = FALSE), "No batch variable was supplied; use outcome and covariates only.")
-  expect_true(is.function(safebiome:::analysis_validation_color("batch_sensitivity")))
-  expect_true(is.function(safebiome:::analysis_batch_strategy_color("none")))
-  expect_true(is.function(safebiome:::analysis_batch_strategy_color("adjust_with_caution")))
-  expect_true(is.function(safebiome:::analysis_batch_strategy_color("sensitivity_required")))
-  expect_true(is.function(safebiome:::analysis_batch_strategy_color("avoid_naive_correction")))
-  expect_true(is.function(safebiome:::analysis_batch_strategy_color("custom")))
+  expect_equal(moat:::da_formula_reason(audit, include_batch = FALSE), "No batch variable was supplied; use outcome and covariates only.")
+  expect_true(is.function(moat:::analysis_validation_color("batch_sensitivity")))
+  expect_true(is.function(moat:::analysis_batch_strategy_color("none")))
+  expect_true(is.function(moat:::analysis_batch_strategy_color("adjust_with_caution")))
+  expect_true(is.function(moat:::analysis_batch_strategy_color("sensitivity_required")))
+  expect_true(is.function(moat:::analysis_batch_strategy_color("avoid_naive_correction")))
+  expect_true(is.function(moat:::analysis_batch_strategy_color("custom")))
 })
 
 test_that("plan_analysis covers repeated-only permutation and cautious batch strategy", {
-  repeated_audit <- safebiome:::biome_audit(
+  repeated_audit <- moat:::biome_audit(
     leakage = list(
       repeated_measures = list(status = "evaluated", risk = "high"),
       temporal_leakage = list(status = "skipped"),
@@ -176,16 +176,16 @@ test_that("plan_analysis covers repeated-only permutation and cautious batch str
     ),
     params = list(subject = "subject", batch = "batch")
   )
-  permutation <- safebiome:::recommend_permutation(repeated_audit, repeated_audit$params)
+  permutation <- moat:::recommend_permutation(repeated_audit, repeated_audit$params)
   expect_equal(permutation$scheme, "restricted_by_subject")
   expect_equal(permutation$strata, "subject")
 
-  cautious_audit <- safebiome:::biome_audit(
+  cautious_audit <- moat:::biome_audit(
     batch = list(status = "evaluated", risk = "low"),
     correction = list(feasibility = "safe"),
     params = list(batch = "batch")
   )
-  batch_strategy <- safebiome:::recommend_batch_strategy(cautious_audit)
+  batch_strategy <- moat:::recommend_batch_strategy(cautious_audit)
   expect_equal(batch_strategy$strategy, "adjust_with_caution")
   expect_match(batch_strategy$reason, "identifiable")
 })
@@ -212,7 +212,7 @@ test_that("plan_analysis verbose print includes module-level rationale rows", {
       ),
       verbose = TRUE
     ),
-    class = c("safebiome_analysis_plan", "list")
+    class = c("moat_analysis_plan", "list")
   )
 
   printed <- capture.output(returned <- print(plan), type = "message")

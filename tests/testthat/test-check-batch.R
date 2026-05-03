@@ -299,7 +299,7 @@ test_that("metadata alignment follows distance labels when row names are availab
   distance <- stats::dist(matrix(seq_len(6), ncol = 2))
   attr(distance, "Labels") <- c("S1", "S2", "S3")
 
-  aligned <- safebiome:::align_metadata_to_distance(metadata, distance)
+  aligned <- moat:::align_metadata_to_distance(metadata, distance)
 
   expect_equal(row.names(aligned), c("S1", "S2", "S3"))
   expect_equal(aligned$outcome, c("Control", "Control", "Disease"))
@@ -314,7 +314,7 @@ test_that("PERMANOVA tidy helpers cover unselected and missing terms", {
   )
 
   expect_equal(
-    unname(safebiome:::classify_permanova_terms(
+    unname(moat:::classify_permanova_terms(
       c("outcome", "batch", "age", "other_term"),
       outcome = "outcome",
       batch = "batch",
@@ -322,20 +322,20 @@ test_that("PERMANOVA tidy helpers cover unselected and missing terms", {
     )),
     c("outcome", "batch", "covariate", "other")
   )
-  expect_true(is.na(safebiome:::sum_terms_r2(terms, character())))
-  expect_equal(safebiome:::sum_terms_r2(terms, "missing"), 0)
-  expect_true(is.na(safebiome:::min_terms_p_value(terms, character())))
-  expect_true(is.na(safebiome:::min_terms_p_value(terms, "batch")))
+  expect_true(is.na(moat:::sum_terms_r2(terms, character())))
+  expect_equal(moat:::sum_terms_r2(terms, "missing"), 0)
+  expect_true(is.na(moat:::min_terms_p_value(terms, character())))
+  expect_true(is.na(moat:::min_terms_p_value(terms, "batch")))
 })
 
 test_that("batch risk helpers cover edge thresholds", {
-  expect_equal(safebiome:::compute_batch_dominance_score(0.1, 0.0), Inf)
-  expect_equal(safebiome:::compute_batch_dominance_score(0.0, 0.0), 0)
-  expect_true(is.na(safebiome:::compute_batch_dominance_score(NA_real_, 0.1)))
-  expect_equal(safebiome:::compute_batch_dominance_score(0.1, 0.1, TRUE), Inf)
+  expect_equal(moat:::compute_batch_dominance_score(0.1, 0.0), Inf)
+  expect_equal(moat:::compute_batch_dominance_score(0.0, 0.0), 0)
+  expect_true(is.na(moat:::compute_batch_dominance_score(NA_real_, 0.1)))
+  expect_equal(moat:::compute_batch_dominance_score(0.1, 0.1, TRUE), Inf)
 
   expect_equal(
-    safebiome:::assess_permanova_risk(
+    moat:::assess_permanova_risk(
       batch_r2 = NA_real_,
       batch_dominance_score = NA_real_,
       batch_p_value = NA_real_
@@ -343,7 +343,7 @@ test_that("batch risk helpers cover edge thresholds", {
     "unknown"
   )
   expect_equal(
-    safebiome:::assess_permanova_risk(
+    moat:::assess_permanova_risk(
       batch_r2 = 0.01,
       batch_dominance_score = 0.1,
       batch_p_value = 0.2
@@ -351,7 +351,7 @@ test_that("batch risk helpers cover edge thresholds", {
     "low"
   )
   expect_equal(
-    safebiome:::assess_permanova_risk(
+    moat:::assess_permanova_risk(
       batch_r2 = 0.03,
       batch_dominance_score = 1.2,
       batch_p_value = 0.2
@@ -359,7 +359,7 @@ test_that("batch risk helpers cover edge thresholds", {
     "moderate"
   )
   expect_equal(
-    safebiome:::assess_permanova_risk(
+    moat:::assess_permanova_risk(
       batch_r2 = 0.06,
       batch_dominance_score = 2,
       batch_p_value = 0.2
@@ -367,32 +367,32 @@ test_that("batch risk helpers cover edge thresholds", {
     "high"
   )
 
-  expect_equal(safebiome:::assess_permdisp_risk(NA_real_), "unknown")
-  expect_equal(safebiome:::assess_permdisp_risk(0.04), "high")
-  expect_equal(safebiome:::assess_permdisp_risk(0.08), "moderate")
-  expect_equal(safebiome:::assess_permdisp_risk(0.2), "low")
+  expect_equal(moat:::assess_permdisp_risk(NA_real_), "unknown")
+  expect_equal(moat:::assess_permdisp_risk(0.04), "high")
+  expect_equal(moat:::assess_permdisp_risk(0.08), "moderate")
+  expect_equal(moat:::assess_permdisp_risk(0.2), "low")
 
-  expect_equal(safebiome:::assess_pcoa_risk(NA_real_, NA_real_), "unknown")
-  expect_equal(safebiome:::assess_pcoa_risk(0.25, 0.2), "high")
-  expect_equal(safebiome:::assess_pcoa_risk(0.12, 0.2), "moderate")
-  expect_equal(safebiome:::assess_pcoa_risk(0.02, 0.2), "low")
+  expect_equal(moat:::assess_pcoa_risk(NA_real_, NA_real_), "unknown")
+  expect_equal(moat:::assess_pcoa_risk(0.25, 0.2), "high")
+  expect_equal(moat:::assess_pcoa_risk(0.12, 0.2), "moderate")
+  expect_equal(moat:::assess_pcoa_risk(0.02, 0.2), "low")
 
-  expect_equal(safebiome:::highest_batch_risk(character()), "unknown")
-  expect_equal(safebiome:::highest_batch_risk(c("mystery", NA_character_)), "unknown")
-  expect_equal(safebiome:::highest_batch_risk(c("low", "high", "medium")), "high")
-  expect_match(safebiome:::batch_recommendations("moderate"), "detectable")
-  expect_match(safebiome:::batch_recommendations("unknown"), "could not be determined")
+  expect_equal(moat:::highest_batch_risk(character()), "unknown")
+  expect_equal(moat:::highest_batch_risk(c("mystery", NA_character_)), "unknown")
+  expect_equal(moat:::highest_batch_risk(c("low", "high", "medium")), "high")
+  expect_match(moat:::batch_recommendations("moderate"), "detectable")
+  expect_match(moat:::batch_recommendations("unknown"), "could not be determined")
 })
 
 test_that("PERMDISP and PCoA helpers capture diagnostic errors", {
   metadata <- data.frame(batch = c("A", "A", "B", "B"))
 
-  permdisp <- safebiome:::check_permdisp_variable(
+  permdisp <- moat:::check_permdisp_variable(
     batch = "batch",
     distance = "not a distance",
     metadata = metadata
   )
-  pcoa <- safebiome:::check_pcoa_batch_variable(
+  pcoa <- moat:::check_pcoa_batch_variable(
     batch = "batch",
     distance = "not a distance",
     metadata = metadata
@@ -413,7 +413,7 @@ test_that("PERMDISP compatibility helper handles multiple batch variables", {
   )
   distance <- stats::dist(matrix(seq_len(8), ncol = 2))
 
-  result <- suppressMessages(suppressWarnings(safebiome:::check_permdisp(
+  result <- suppressMessages(suppressWarnings(moat:::check_permdisp(
     distance = distance,
     metadata = metadata,
     batch = c("batch", "site"),
@@ -426,15 +426,15 @@ test_that("PERMDISP compatibility helper handles multiple batch variables", {
 
 test_that("PCoA helpers handle degenerate variance and one-level groups", {
   expect_equal(
-    safebiome:::pcoa_variance_explained(c(0, -1)),
+    moat:::pcoa_variance_explained(c(0, -1)),
     c(NA_real_, NA_real_)
   )
   expect_equal(
-    safebiome:::pcoa_variance_explained(c(0, -1), n_axes = 3),
+    moat:::pcoa_variance_explained(c(0, -1), n_axes = 3),
     c(NA_real_, NA_real_, NA_real_)
   )
 
-  axis <- safebiome:::assess_pcoa_axis(seq_len(4), rep("A", 4))
+  axis <- moat:::assess_pcoa_axis(seq_len(4), rep("A", 4))
 
   expect_true(is.na(axis$r2))
   expect_true(is.na(axis$p_value))
@@ -443,15 +443,15 @@ test_that("PCoA helpers handle degenerate variance and one-level groups", {
 test_that("PCoA coordinate and compatibility helpers cover fallback branches", {
   distance <- stats::dist(matrix(seq_len(8), ncol = 2))
   attr(distance, "Labels") <- NULL
-  coordinates <- safebiome:::make_pcoa_coordinates(matrix(seq_len(8), ncol = 2), distance)
+  coordinates <- moat:::make_pcoa_coordinates(matrix(seq_len(8), ncol = 2), distance)
 
   expect_equal(coordinates$sample, as.character(seq_len(4)))
   expect_identical(
-    safebiome:::add_pcoa_metadata(coordinates, data.frame(group = letters[1:4]), character()),
+    moat:::add_pcoa_metadata(coordinates, data.frame(group = letters[1:4]), character()),
     coordinates
   )
 
-  skipped <- safebiome:::pcoa_axis_association_row(
+  skipped <- moat:::pcoa_axis_association_row(
     axis = "axis1",
     variable = "group",
     role = "batch",
@@ -475,8 +475,8 @@ test_that("PCoA coordinate and compatibility helpers cover fallback branches", {
     ),
     variance = data.frame(axis = "axis1", variance_explained = 0.7)
   )
-  expect_equal(nrow(safebiome:::pcoa_compat_from_associations(no_associations)), 0)
-  expect_equal(nrow(safebiome:::pcoa_compat_from_associations(no_batch)), 0)
+  expect_equal(nrow(moat:::pcoa_compat_from_associations(no_associations)), 0)
+  expect_equal(nrow(moat:::pcoa_compat_from_associations(no_batch)), 0)
 
   rows <- data.frame(
     axis = "axis3",
@@ -489,7 +489,7 @@ test_that("PCoA coordinate and compatibility helpers cover fallback branches", {
     error = c(NA_character_),
     stringsAsFactors = FALSE
   )
-  compat <- suppressWarnings(safebiome:::pcoa_compat_variable_row(rows, variance = data.frame()))
+  compat <- suppressWarnings(moat:::pcoa_compat_variable_row(rows, variance = data.frame()))
 
   expect_equal(compat$batch, "batch")
   expect_equal(compat$status, "error")
@@ -498,8 +498,8 @@ test_that("PCoA coordinate and compatibility helpers cover fallback branches", {
   expect_true(is.na(compat$max_axis_r2))
   expect_true(is.na(compat$min_p_value))
   expect_true(is.na(compat$error))
-  expect_equal(safebiome:::highest_pcoa_status("skipped"), "skipped")
-  expect_equal(safebiome:::first_non_missing(c(NA_character_, "", "first")), "first")
+  expect_equal(moat:::highest_pcoa_status("skipped"), "skipped")
+  expect_equal(moat:::first_non_missing(c(NA_character_, "", "first")), "first")
 })
 
 test_that("batch-only PCoA compatibility can return evaluated rows", {
@@ -507,7 +507,7 @@ test_that("batch-only PCoA compatibility can return evaluated rows", {
   metadata <- as.data.frame(SummarizedExperiment::colData(se))
   distance <- compute_biome_distance(se, distance = "bray")
 
-  result <- safebiome:::check_pcoa_batch_variable(
+  result <- moat:::check_pcoa_batch_variable(
     batch = "batch",
     distance = distance,
     metadata = metadata

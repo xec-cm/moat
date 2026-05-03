@@ -1,15 +1,15 @@
 ---
-title: "Auditing microbiome study designs with safebiome"
+title: "Auditing microbiome study designs with MOAT"
 author:
   - name: Francesc Catala-Moll
     affiliation: IrsiCaixa AIDS Research Institute
-package: safebiome
+package: moat
 output:
   BiocStyle::html_document:
     toc: true
     toc_depth: 2
 vignette: >
-  %\VignetteIndexEntry{Auditing microbiome study designs with safebiome}
+  %\VignetteIndexEntry{Auditing microbiome study designs with MOAT}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -32,25 +32,25 @@ identity. When this happens, downstream analyses can report biological
 differences that are partly or entirely driven by technical or design
 structure.
 
-`safebiome` audits those risks before analysis. It does not automatically
-correct counts or decide the final model. Instead, it returns diagnostics,
-warnings, plots, and analysis-plan recommendations that help make the study
-design explicit.
+MOAT audits those risks before analysis. It does not automatically correct
+counts or decide the final model. Instead, it returns diagnostics, warnings,
+plots, and analysis-plan recommendations that help make the study design
+explicit. Before crossing into microbiome analysis, check the moat.
 
 # Load the Toy Dataset
 
 ```{r load-package}
-library(safebiome)
-data("toy_biome")
+library(moat)
+data("toy_moat")
 
-toy_biome
+toy_moat
 ```
 
 The example dataset is a small simulated `SummarizedExperiment` with count data
 and sample metadata.
 
 ```{r inspect-metadata}
-head(SummarizedExperiment::colData(toy_biome))
+head(SummarizedExperiment::colData(toy_moat))
 ```
 
 # Run the Audit
@@ -60,7 +60,7 @@ should generally use a larger value, such as the default `999`.
 
 ```{r run-audit}
 audit <- check_biome(
-  toy_biome,
+  toy_moat,
   outcome = "outcome",
   batch = "batch",
   distances = "bray",
@@ -142,7 +142,7 @@ plot_variance(audit, distance = "bray")
 
 Validation leakage can occur when samples from the same subject, batch, or time
 structure are split across train and test folds in a way that makes prediction
-look better than it is. `safebiome` reports the recommended cross-validation
+look better than it is. MOAT reports the recommended cross-validation
 scheme based on the metadata supplied to `check_biome()`.
 
 ```{r leakage-summary}

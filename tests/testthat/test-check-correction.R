@@ -246,7 +246,7 @@ test_that("check_model_matrix validates inputs", {
 
 test_that("correction risk helpers cover moderate, caution, and non-finite branches", {
   expect_equal(
-    safebiome:::assess_balance_risk(
+    moat:::assess_balance_risk(
       empty_cells = 0,
       min_cell_count = 3,
       batch_levels_single_outcome = 0,
@@ -256,15 +256,15 @@ test_that("correction risk helpers cover moderate, caution, and non-finite branc
     "moderate"
   )
   expect_equal(
-    safebiome:::assess_model_matrix_risk(
+    moat:::assess_model_matrix_risk(
       rank_deficient = FALSE,
       condition_number = 1e4
     ),
     "caution"
   )
-  expect_equal(safebiome:::model_matrix_condition_number(matrix(0, nrow = 2, ncol = 2)), Inf)
+  expect_equal(moat:::model_matrix_condition_number(matrix(0, nrow = 2, ncol = 2)), Inf)
   expect_equal(
-    safebiome:::correction_recommendations(
+    moat:::correction_recommendations(
       feasibility = "mystery",
       balance = data.frame(),
       model_matrix = data.frame()

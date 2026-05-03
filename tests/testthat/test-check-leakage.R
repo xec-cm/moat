@@ -138,7 +138,7 @@ test_that("leakage helpers cover moderate and skipped recommendation branches", 
   summary <- data.frame(batch = "center", risk = "moderate")
 
   expect_equal(
-    safebiome:::assess_batch_leakage_risk(
+    moat:::assess_batch_leakage_risk(
       batch_levels_single_outcome = 0,
       n_batch_levels = 2,
       positivity_score = 0.8,
@@ -146,16 +146,16 @@ test_that("leakage helpers cover moderate and skipped recommendation branches", 
     ),
     "moderate"
   )
-  expect_equal(safebiome:::assess_temporal_leakage_risk(0), "moderate")
-  expect_equal(safebiome:::highest_leakage_risk(character()), "unknown")
-  expect_equal(safebiome:::highest_leakage_risk(c("low", "high")), "high")
+  expect_equal(moat:::assess_temporal_leakage_risk(0), "moderate")
+  expect_equal(moat:::highest_leakage_risk(character()), "unknown")
+  expect_equal(moat:::highest_leakage_risk(c("low", "high")), "high")
   expect_equal(
-    safebiome:::batch_leakage_recommendations(summary, "leave_one_center_out_cv"),
+    moat:::batch_leakage_recommendations(summary, "leave_one_center_out_cv"),
     "Outcome is associated with batch variable(s) center; use leave_one_center_out_cv to test batch-driven leakage."
   )
   expect_match(
-    safebiome:::module_recommendations(list(recommendations = "Review validation.")),
+    moat:::module_recommendations(list(recommendations = "Review validation.")),
     "Review validation"
   )
-  expect_equal(safebiome:::module_recommendations(list()), character())
+  expect_equal(moat:::module_recommendations(list()), character())
 })

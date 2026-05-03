@@ -17,7 +17,7 @@ test_that("check_biome returns an evaluated audit with full public API parameter
     verbose = FALSE
   )
 
-  expect_s3_class(audit, "safebiome_audit")
+  expect_s3_class(audit, "moat_audit")
   expect_true(is_biome_audit(audit))
   expect_equal(audit$risk, "high")
   expect_true(length(audit$recommendations) > 0)
@@ -59,7 +59,7 @@ test_that("check_biome handles missing optional arguments gracefully", {
 
   audit <- check_biome(se, outcome = "outcome")
 
-  expect_s3_class(audit, "safebiome_audit")
+  expect_s3_class(audit, "moat_audit")
   expect_null(audit$params$batch)
   expect_null(audit$params$covariates)
   expect_null(audit$params$subject)

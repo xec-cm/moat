@@ -4,10 +4,15 @@
 \alias{plot_ordination}
 \title{Plot PCoA ordination coordinates from a batch audit}
 \usage{
-plot_ordination(audit, color = NULL, distance = NULL, aspect = c("auto", "equal"))
+plot_ordination(
+  audit,
+  color = NULL,
+  distance = NULL,
+  aspect = c("auto", "equal")
+)
 }
 \arguments{
-\item{audit}{A \code{safebiome_audit} object.}
+\item{audit}{A \code{moat_audit} object.}
 
 \item{color}{Optional single string naming a metadata variable. When \code{NULL},
 the first batch variable is used when available, otherwise the outcome.}
@@ -29,7 +34,7 @@ A \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object.
 covariate variable stored with the ordination coordinates.
 }
 \examples{
-data("toy_biome")
-audit <- check_biome(toy_biome, outcome = "outcome", batch = "batch", n_perm = 99)
+data("toy_moat")
+audit <- check_biome(toy_moat, outcome = "outcome", batch = "batch", n_perm = 99)
 plot_ordination(audit, color = "batch", distance = "bray")
 }

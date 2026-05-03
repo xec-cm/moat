@@ -1,4 +1,4 @@
-#' Toy Microbiome Dataset
+#' Toy MOAT Microbiome Dataset
 #'
 #' A small, simulated `SummarizedExperiment` object for examples and testing.
 #' This dataset contains artificial read counts for 50 taxa across 40 samples,
@@ -17,16 +17,16 @@
 #'   }
 #' }
 #' @source Simulated data. See `data-raw/simulate_toy_data.R` for the generation script.
-#' @usage data(toy_biome)
+#' @usage data(toy_moat)
 #' @examples
-#' data("toy_biome")
+#' data("toy_moat")
 #' 
 #' # Inspect the object dimensions
-#' dim(toy_biome)
+#' dim(toy_moat)
 #' 
 #' # Check sample metadata
-#' head(SummarizedExperiment::colData(toy_biome))
+#' head(SummarizedExperiment::colData(toy_moat))
 #' 
 #' # View assay counts for the first 5 taxa and 5 samples
-#' SummarizedExperiment::assay(toy_biome)[1:5, 1:5]
-"toy_biome"
+#' SummarizedExperiment::assay(toy_moat)[1:5, 1:5]
+"toy_moat"

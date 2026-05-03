@@ -4,7 +4,7 @@
 #' audit. Outcome, batch, covariate, and other terms are colored separately so
 #' batch dominance is easy to inspect.
 #'
-#' @param audit A `safebiome_audit` object.
+#' @param audit A `moat_audit` object.
 #' @param distance Optional character vector naming audited distances to plot.
 #'   When `NULL`, the first available distance is used. Use `"all"` to plot all
 #'   audited distances.
@@ -13,8 +13,8 @@
 #' @export
 #'
 #' @examples
-#' data("toy_biome")
-#' audit <- check_biome(toy_biome, outcome = "outcome", batch = "batch", n_perm = 99)
+#' data("toy_moat")
+#' audit <- check_biome(toy_moat, outcome = "outcome", batch = "batch", n_perm = 99)
 #' plot_variance(audit, distance = "bray")
 plot_variance <- function(audit, distance = NULL) {
   validate_biome_audit(audit)

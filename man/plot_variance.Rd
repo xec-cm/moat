@@ -7,7 +7,7 @@
 plot_variance(audit, distance = NULL)
 }
 \arguments{
-\item{audit}{A \code{safebiome_audit} object.}
+\item{audit}{A \code{moat_audit} object.}
 
 \item{distance}{Optional character vector naming audited distances to plot.
 When \code{NULL}, the first available distance is used. Use \code{"all"} to plot all
@@ -22,7 +22,7 @@ audit. Outcome, batch, covariate, and other terms are colored separately so
 batch dominance is easy to inspect.
 }
 \examples{
-data("toy_biome")
-audit <- check_biome(toy_biome, outcome = "outcome", batch = "batch", n_perm = 99)
+data("toy_moat")
+audit <- check_biome(toy_moat, outcome = "outcome", batch = "batch", n_perm = 99)
 plot_variance(audit, distance = "bray")
 }

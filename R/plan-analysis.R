@@ -1,20 +1,20 @@
-#' Generate a downstream analysis plan from a safebiome audit
+#' Generate a downstream analysis plan from a MOAT audit
 #'
-#' `plan_analysis()` converts a `safebiome_audit` object into a structured,
+#' `plan_analysis()` converts a `moat_audit` object into a structured,
 #' readable downstream analysis plan. It does not rerun audit statistics; it
 #' summarizes the existing audit diagnostics into recommended formulas,
 #' validation schemes, batch strategy, and sensitivity analyses.
 #'
-#' @param audit A `safebiome_audit` object.
+#' @param audit A `moat_audit` object.
 #' @param verbose A single logical value. When `TRUE`, include module-level risk
 #'   reasons in the printed plan. Defaults to `FALSE`.
 #'
-#' @return A `safebiome_analysis_plan` object.
+#' @return A `moat_analysis_plan` object.
 #' @export
 #'
 #' @examples
-#' data("toy_biome")
-#' audit <- check_biome(toy_biome, outcome = "outcome", batch = "batch", n_perm = 99)
+#' data("toy_moat")
+#' audit <- check_biome(toy_moat, outcome = "outcome", batch = "batch", n_perm = 99)
 #' plan_analysis(audit)
 plan_analysis <- function(audit, verbose = FALSE) {
   validate_biome_audit(audit)
@@ -48,17 +48,17 @@ plan_analysis <- function(audit, verbose = FALSE) {
       ),
       verbose = verbose
     ),
-    class = c("safebiome_analysis_plan", "list")
+    class = c("moat_analysis_plan", "list")
   )
 }
 
 #' @export
-print.safebiome_analysis_plan <- function(x, ...) {
+print.moat_analysis_plan <- function(x, ...) {
   risk_color <- biome_risk_color(x$risk$overall)
   validation_color <- analysis_validation_color(x$ml_validation$scheme)
   batch_color <- analysis_batch_strategy_color(x$batch_strategy$strategy)
 
-  cli::cli_h1("safebiome analysis plan")
+  cli::cli_h1("MOAT analysis plan")
   cli::cli_alert_info("Overall risk: {risk_color(toupper(x$risk$overall))}")
 
   cli::cli_h2("Recommended formulas")

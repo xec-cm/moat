@@ -1,8 +1,8 @@
-citHeader("To cite safebiome in publications, please use:")
+citHeader("To cite MOAT in publications, please use:")
 
 bibentry(
   bibtype = "Manual",
-  title = "safebiome: Audit Microbiome Study Designs Before Downstream Analysis",
+  title = "moat: Microbiome Omics Audit Toolkit for Pre-Analysis Risk Assessment",
   author = person(
     given = "Francesc",
     family = "Catala-Moll",
@@ -11,5 +11,5 @@ bibentry(
   ),
   year = "2026",
   note = "R package version 0.99.0",
-  url = "https://github.com/xec-cm/safebiome"
+  url = "https://github.com/xec-cm/moat"
 )

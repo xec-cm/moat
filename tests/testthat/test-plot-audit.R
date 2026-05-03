@@ -1,4 +1,4 @@
-test_that("autoplot.safebiome_audit returns a risk dashboard ggplot", {
+test_that("autoplot.moat_audit returns a risk dashboard ggplot", {
   se <- readRDS(test_path("fixtures/batch_effect_biome.rds"))
   audit <- check_biome(
     se,
@@ -9,7 +9,7 @@ test_that("autoplot.safebiome_audit returns a risk dashboard ggplot", {
   )
 
   plot <- ggplot2::autoplot(audit)
-  plot_data <- safebiome:::audit_risk_dashboard_data(audit)
+  plot_data <- moat:::audit_risk_dashboard_data(audit)
 
   expect_s3_class(plot, "ggplot")
   expect_equal(as.character(rev(levels(plot_data$module))), c("design", "batch", "correction", "leakage"))
@@ -18,11 +18,11 @@ test_that("autoplot.safebiome_audit returns a risk dashboard ggplot", {
   expect_match(plot$labels$subtitle, "Overall risk")
 })
 
-test_that("autoplot.safebiome_audit works with incomplete modules", {
-  audit <- safebiome:::biome_audit(risk = "unknown")
+test_that("autoplot.moat_audit works with incomplete modules", {
+  audit <- moat:::biome_audit(risk = "unknown")
 
   plot <- ggplot2::autoplot(audit)
-  plot_data <- safebiome:::audit_risk_dashboard_data(audit)
+  plot_data <- moat:::audit_risk_dashboard_data(audit)
 
   expect_s3_class(plot, "ggplot")
   expect_equal(nrow(plot_data), 4)

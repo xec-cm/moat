@@ -1,3 +1,3 @@
 test_that("package can be loaded", {
-  expect_true("safebiome" %in% loadedNamespaces())
+  expect_true("moat" %in% loadedNamespaces())
 })

@@ -2,27 +2,27 @@
 % Please edit documentation in R/plan-analysis.R
 \name{plan_analysis}
 \alias{plan_analysis}
-\title{Generate a downstream analysis plan from a safebiome audit}
+\title{Generate a downstream analysis plan from a MOAT audit}
 \usage{
 plan_analysis(audit, verbose = FALSE)
 }
 \arguments{
-\item{audit}{A \code{safebiome_audit} object.}
+\item{audit}{A \code{moat_audit} object.}
 
 \item{verbose}{A single logical value. When \code{TRUE}, include module-level risk
 reasons in the printed plan. Defaults to \code{FALSE}.}
 }
 \value{
-A \code{safebiome_analysis_plan} object.
+A \code{moat_analysis_plan} object.
 }
 \description{
-\code{plan_analysis()} converts a \code{safebiome_audit} object into a structured,
+\code{plan_analysis()} converts a \code{moat_audit} object into a structured,
 readable downstream analysis plan. It does not rerun audit statistics; it
 summarizes the existing audit diagnostics into recommended formulas,
 validation schemes, batch strategy, and sensitivity analyses.
 }
 \examples{
-data("toy_biome")
-audit <- check_biome(toy_biome, outcome = "outcome", batch = "batch", n_perm = 99)
+data("toy_moat")
+audit <- check_biome(toy_moat, outcome = "outcome", batch = "batch", n_perm = 99)
 plan_analysis(audit)
 }

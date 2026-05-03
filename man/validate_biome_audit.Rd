@@ -2,7 +2,7 @@
 % Please edit documentation in R/audit-object.R
 \name{validate_biome_audit}
 \alias{validate_biome_audit}
-\title{Validate a safebiome_audit object}
+\title{Validate a moat_audit object}
 \usage{
 validate_biome_audit(x)
 }
@@ -10,9 +10,9 @@ validate_biome_audit(x)
 \item{x}{An object to validate.}
 }
 \value{
-The validated \code{safebiome_audit} object.
+The validated \code{moat_audit} object.
 }
 \description{
-Validate a safebiome_audit object
+Validate a moat_audit object
 }
 \keyword{internal}

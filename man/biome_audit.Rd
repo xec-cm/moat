@@ -2,7 +2,7 @@
 % Please edit documentation in R/audit-object.R
 \name{biome_audit}
 \alias{biome_audit}
-\title{Helper to create a validated safebiome_audit object}
+\title{Helper to create a validated moat_audit object}
 \usage{
 biome_audit(
   input = list(),
@@ -36,7 +36,7 @@ biome_audit(
 \item{params}{A list of parameters used for the audit.}
 }
 \value{
-A validated \code{safebiome_audit} object.
+A validated \code{moat_audit} object.
 }
 \description{
 This is the official constructor that should be used by other functions

@@ -2,7 +2,7 @@
 % Please edit documentation in R/audit-object.R
 \name{new_biome_audit}
 \alias{new_biome_audit}
-\title{Create a safebiome_audit object}
+\title{Create a moat_audit object}
 \usage{
 new_biome_audit(
   input = list(),
@@ -36,9 +36,9 @@ new_biome_audit(
 \item{params}{A list of parameters used for the audit.}
 }
 \value{
-A \code{safebiome_audit} object.
+A \code{moat_audit} object.
 }
 \description{
-Create a safebiome_audit object
+Create a moat_audit object
 }
 \keyword{internal}

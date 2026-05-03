@@ -1,10 +1,10 @@
-#' Plot a safebiome audit risk dashboard
+#' Plot a MOAT audit risk dashboard
 #'
-#' `autoplot.safebiome_audit()` provides the default visual summary for a
-#' `safebiome_audit` object. It shows module-level risk across design, batch,
+#' `autoplot.moat_audit()` provides the default visual summary for a
+#' `moat_audit` object. It shows module-level risk across design, batch,
 #' correction, and leakage diagnostics.
 #'
-#' @param object A `safebiome_audit` object.
+#' @param object A `moat_audit` object.
 #' @param ... Additional arguments passed to methods.
 #'
 #' @return A [ggplot2::ggplot()] object.
@@ -12,10 +12,10 @@
 #' @importFrom ggplot2 autoplot
 #'
 #' @examples
-#' data("toy_biome")
-#' audit <- check_biome(toy_biome, outcome = "outcome", batch = "batch", n_perm = 99)
+#' data("toy_moat")
+#' audit <- check_biome(toy_moat, outcome = "outcome", batch = "batch", n_perm = 99)
 #' ggplot2::autoplot(audit)
-autoplot.safebiome_audit <- function(object, ...) {
+autoplot.moat_audit <- function(object, ...) {
   validate_biome_audit(object)
   plot_data <- audit_risk_dashboard_data(object)
   caption <- audit_risk_dashboard_caption(object)
@@ -39,7 +39,7 @@ autoplot.safebiome_audit <- function(object, ...) {
     ) +
     ggplot2::scale_fill_manual(values = safebiome_risk_palette(), drop = FALSE, name = "Risk") +
     ggplot2::labs(
-      title = "safebiome risk dashboard",
+      title = "MOAT risk dashboard",
       subtitle = paste("Overall risk:", toupper(normalize_audit_risk(object$risk))),
       x = NULL,
       y = "Risk level",

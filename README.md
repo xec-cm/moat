@@ -1,14 +1,18 @@
 
-# safebiome
+# moat
 
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 
-`safebiome` audits microbiome study designs before downstream
-statistical analysis. It checks whether outcome, batch, covariates,
-repeated measures, and microbiome distance structure create risks that
-should be reported before differential abundance, PERMANOVA, ordination,
-or machine-learning analyses.
+MOAT is the Microbiome Omics Audit Toolkit. Before crossing into
+microbiome analysis, check the moat.
+
+`moat` audits microbiome and omics study designs before downstream
+statistical or machine-learning analysis. It checks whether outcome,
+batch, covariates, repeated measures, correction identifiability, and
+microbiome distance structure create risks that should be reported
+before differential abundance, PERMANOVA, ordination, or predictive
+modeling.
 
 The package is a study-audit layer. It does not silently correct counts,
 remove samples, or choose the final model. Instead, it returns
@@ -19,18 +23,18 @@ suggestions that analysts can review and report.
 
 ``` r
 # install.packages("pak")
-pak::pak("xec-cm/safebiome")
+pak::pak("xec-cm/moat")
 ```
 
 ## Quick Start
 
 ``` r
-library(safebiome)
+library(moat)
 
-data("toy_biome")
+data("toy_moat")
 
 audit <- check_biome(
-    toy_biome,
+    toy_moat,
     outcome = "outcome",
     batch = "batch",
     distances = "bray",
@@ -40,12 +44,13 @@ audit <- check_biome(
 
 summary(audit)
 #> 
-#> ── safebiome audit ─────────────────────────────────────────────────────────────
+#> ── MOAT audit ──────────────────────────────────────────────────────────────────
 #> ℹ Overall risk: HIGH
 #> 
 #> ── Main warnings ──
 #> 
-#> • Batch audit for bray distance has high risk (batch R2 = 0.948).
+#> • Batch audit for bray distance has high risk (batch R2 = 0.948; PERMANOVA =
+#> high, dispersion = low, PCoA = high).
 #> 
 #> ── Recommended next steps ──
 #> 
@@ -82,7 +87,7 @@ guidance:
 ``` r
 plan_analysis(audit)
 #> 
-#> ── safebiome analysis plan ─────────────────────────────────────────────────────
+#> ── MOAT analysis plan ──────────────────────────────────────────────────────────
 #> ℹ Overall risk: HIGH
 #> 
 #> ── Recommended formulas ──
@@ -108,7 +113,7 @@ plan_analysis(audit)
 #> 
 #> ── Warnings ──
 #> 
-#> ! Batch audit for bray distance has high risk (batch R2 = 0.948).
+#> ! Batch audit for bray distance has high risk (batch R2 = 0.948; PERMANOVA = high, dispersion = low, PCoA = high).
 #> ! Batch-dominated microbiome signal requires explicit sensitivity analysis.
 ```
 
@@ -126,7 +131,7 @@ plot_design(audit, variable = "batch")
 plot_variance(audit, distance = "bray")
 ```
 
-## What safebiome Checks
+## What MOAT Checks
 
 - **Design confounding:** whether outcome is associated with batch or
   covariates in metadata.
@@ -142,11 +147,11 @@ plot_variance(audit, distance = "bray")
 
 ## Scientific Position
 
-`safebiome` is intentionally conservative. A high-risk audit does not
-prove that an analysis is invalid, and a low-risk audit does not prove
-that all downstream models are safe. The package is designed to make
-design limitations explicit so that conclusions are interpreted with the
-right sensitivity analyses and reporting context.
+`moat` is intentionally conservative. A high-risk audit does not prove
+that an analysis is invalid, and a low-risk audit does not prove that
+all downstream models are safe. The package is designed to make design
+limitations explicit so that conclusions are interpreted with the right
+sensitivity analyses and reporting context.
 
 ## Development Checks
 

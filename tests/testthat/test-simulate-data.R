@@ -21,16 +21,16 @@ test_that("Simulated datasets are valid SummarizedExperiment objects", {
   expect_true(all(c("outcome", "subject", "timepoint") %in% colnames(SummarizedExperiment::colData(repeated_biome))))
 })
 
-test_that("toy_biome dataset loads correctly", {
-  # For testing, since data("toy_biome") might not work during dev until loaded:
-  # usethis saves to data/toy_biome.rda, we can try to use it
-  if (file.exists(test_path("../../data/toy_biome.rda"))) {
-    load(test_path("../../data/toy_biome.rda"))
+test_that("toy_moat dataset loads correctly", {
+  # For testing, since data("toy_moat") might not work during dev until loaded:
+  # usethis saves to data/toy_moat.rda, we can try to use it
+  if (file.exists(test_path("../../data/toy_moat.rda"))) {
+    load(test_path("../../data/toy_moat.rda"))
   } else {
-    data("toy_biome", package = "safebiome")
+    data("toy_moat", package = "moat")
   }
   
-  expect_s4_class(toy_biome, "SummarizedExperiment")
-  expect_equal(dim(toy_biome), c(50, 40))
-  expect_true(all(c("outcome", "batch") %in% colnames(SummarizedExperiment::colData(toy_biome))))
+  expect_s4_class(toy_moat, "SummarizedExperiment")
+  expect_equal(dim(toy_moat), c(50, 40))
+  expect_true(all(c("outcome", "batch") %in% colnames(SummarizedExperiment::colData(toy_moat))))
 })

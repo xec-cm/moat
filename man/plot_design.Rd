@@ -7,7 +7,7 @@
 plot_design(audit, variable = NULL, type = c("count", "proportion"))
 }
 \arguments{
-\item{audit}{A \code{safebiome_audit} object.}
+\item{audit}{A \code{moat_audit} object.}
 
 \item{variable}{Optional single string naming a categorical variable audited
 by \code{\link[=check_design]{check_design()}}. When \code{NULL}, the first audited batch variable is used;
@@ -25,7 +25,7 @@ for a categorical batch or covariate variable. Empty cells are outlined so
 confounding and complete separation are visible at a glance.
 }
 \examples{
-data("toy_biome")
-audit <- check_biome(toy_biome, outcome = "outcome", batch = "batch", n_perm = 99)
+data("toy_moat")
+audit <- check_biome(toy_moat, outcome = "outcome", batch = "batch", n_perm = 99)
 plot_design(audit, variable = "batch")
 }

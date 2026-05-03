@@ -2,7 +2,7 @@
 % Please edit documentation in R/audit-object.R
 \name{is_biome_audit}
 \alias{is_biome_audit}
-\title{Test if an object is a safebiome_audit}
+\title{Test if an object is a moat_audit}
 \usage{
 is_biome_audit(x)
 }
@@ -10,13 +10,14 @@ is_biome_audit(x)
 \item{x}{An object to test.}
 }
 \value{
-\code{TRUE} if the object inherits from \code{safebiome_audit}, \code{FALSE} otherwise.
+\code{TRUE} if the object inherits from \code{moat_audit},
+\code{FALSE} otherwise.
 }
 \description{
-Test if an object is a safebiome_audit
+Test if an object is a moat_audit
 }
 \examples{
 # This is an internal object structure, but can be tested:
-audit <- safebiome:::biome_audit(risk = "low")
+audit <- moat:::biome_audit(risk = "low")
 is_biome_audit(audit)
 }

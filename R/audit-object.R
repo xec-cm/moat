@@ -1,4 +1,4 @@
-#' Create a safebiome_audit object
+#' Create a moat_audit object
 #'
 #' @param input A list with input summary.
 #' @param design A list with design audit results.
@@ -10,7 +10,7 @@
 #' @param risk A single string indicating the overall risk.
 #' @param params A list of parameters used for the audit.
 #'
-#' @return A \code{safebiome_audit} object.
+#' @return A \code{moat_audit} object.
 #' @keywords internal
 new_biome_audit <- function(
   input = list(),
@@ -40,21 +40,21 @@ new_biome_audit <- function(
       risk = risk,
       params = normalize_biome_audit_params(params)
     ),
-    class = c("safebiome_audit", "list")
+    class = c("moat_audit", "list")
   )
 }
 
-#' Validate a safebiome_audit object
+#' Validate a moat_audit object
 #'
 #' @param x An object to validate.
 #'
-#' @return The validated \code{safebiome_audit} object.
+#' @return The validated \code{moat_audit} object.
 #' @keywords internal
 validate_biome_audit <- function(x) {
-  if (!inherits(x, "safebiome_audit")) {
+  if (!inherits(x, "moat_audit")) {
     cli::cli_abort(
       c(
-        "Object must inherit from {.cls safebiome_audit}.",
+        "Object must inherit from {.cls moat_audit}.",
         "x" = "Object has class {.cls {class(x)}}."
       ),
       class = "safebiome_error_invalid_class"
@@ -63,7 +63,7 @@ validate_biome_audit <- function(x) {
 
   if (!is.list(x)) {
     cli::cli_abort(
-      "The underlying structure of a {.cls safebiome_audit} must be a list.",
+      "The underlying structure of a {.cls moat_audit} must be a list.",
       class = "safebiome_error_invalid_structure"
     )
   }
@@ -75,7 +75,7 @@ validate_biome_audit <- function(x) {
   if (length(missing_names) > 0) {
     cli::cli_abort(
       c(
-        "Missing required components in {.cls safebiome_audit} object.",
+        "Missing required components in {.cls moat_audit} object.",
         "x" = "Missing: {.val {missing_names}}."
       ),
       class = "safebiome_error_missing_components"
@@ -85,7 +85,7 @@ validate_biome_audit <- function(x) {
   if (length(unexpected_names) > 0) {
     cli::cli_abort(
       c(
-        "Unexpected components found in {.cls safebiome_audit} object.",
+        "Unexpected components found in {.cls moat_audit} object.",
         "x" = "Unexpected: {.val {unexpected_names}}."
       ),
       class = "safebiome_error_unexpected_components"
@@ -144,13 +144,13 @@ validate_biome_audit <- function(x) {
   x
 }
 
-#' Helper to create a validated safebiome_audit object
+#' Helper to create a validated moat_audit object
 #'
 #' This is the official constructor that should be used by other functions
 #' in the package to generate the final audit report.
 #'
 #' @inheritParams new_biome_audit
-#' @return A validated \code{safebiome_audit} object.
+#' @return A validated \code{moat_audit} object.
 #' @keywords internal
 biome_audit <- function(
   input = list(),
@@ -178,28 +178,29 @@ biome_audit <- function(
   validate_biome_audit(res)
 }
 
-#' Test if an object is a safebiome_audit
+#' Test if an object is a moat_audit
 #'
 #' @param x An object to test.
 #'
-#' @return \code{TRUE} if the object inherits from \code{safebiome_audit}, \code{FALSE} otherwise.
+#' @return \code{TRUE} if the object inherits from \code{moat_audit},
+#'   \code{FALSE} otherwise.
 #' @export
 #' @examples
 #' # This is an internal object structure, but can be tested:
-#' audit <- safebiome:::biome_audit(risk = "low")
+#' audit <- moat:::biome_audit(risk = "low")
 #' is_biome_audit(audit)
-is_biome_audit <- function(x) { inherits(x, "safebiome_audit") }
+is_biome_audit <- function(x) { inherits(x, "moat_audit") }
 
-#' Print a safebiome_audit object
+#' Print a moat_audit object
 #'
-#' @param x A \code{safebiome_audit} object.
+#' @param x A \code{moat_audit} object.
 #' @param ... Additional arguments passed to print methods.
 #'
 #' @return The object \code{x}, invisibly.
 #' @export
 #' @keywords internal
-print.safebiome_audit <- function(x, ...) {
-  cli::cli_h1("safebiome Audit Report")
+print.moat_audit <- function(x, ...) {
+  cli::cli_h1("MOAT Audit Report")
 
   risk_color <- biome_risk_color(x$risk)
   cli::cli_alert_info("Overall Risk: {risk_color(x$risk)}")

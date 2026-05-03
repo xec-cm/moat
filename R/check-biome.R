@@ -1,8 +1,8 @@
 #' Audit a microbiome study design
 #'
-#' `check_biome()` is the main entry point for `safebiome`. It validates a
+#' `check_biome()` is the main entry point for MOAT. It validates a
 #' `SummarizedExperiment`-like object, records the audit parameters, and returns
-#' a stable `safebiome_audit` object. Design and correction diagnostics are
+#' a stable `moat_audit` object. Design and correction diagnostics are
 #' evaluated from metadata; batch diagnostics combine distance-based PERMANOVA,
 #' PERMDISP, and PCoA audits. Leakage diagnostics evaluate repeated measures,
 #' batch-driven validation leakage, and optional temporal leakage.
@@ -29,14 +29,14 @@
 #' @param verbose A single logical value indicating whether future audit modules
 #'   should report progress. Defaults to `TRUE`.
 #'
-#' @return A `safebiome_audit` object.
+#' @return A `moat_audit` object.
 #' @export
 #'
 #' @examples
-#' data("toy_biome")
+#' data("toy_moat")
 #'
 #' audit <- check_biome(
-#'   toy_biome,
+#'   toy_moat,
 #'   outcome = "outcome",
 #'   batch = "batch"
 #' )

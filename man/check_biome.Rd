@@ -52,21 +52,21 @@ permutations for downstream audit modules. Defaults to \code{999}.}
 should report progress. Defaults to \code{TRUE}.}
 }
 \value{
-A \code{safebiome_audit} object.
+A \code{moat_audit} object.
 }
 \description{
-\code{check_biome()} is the main entry point for \code{safebiome}. It validates a
+\code{check_biome()} is the main entry point for MOAT. It validates a
 \code{SummarizedExperiment}-like object, records the audit parameters, and returns
-a stable \code{safebiome_audit} object. Design and correction diagnostics are
+a stable \code{moat_audit} object. Design and correction diagnostics are
 evaluated from metadata; batch diagnostics combine distance-based PERMANOVA,
 PERMDISP, and PCoA audits. Leakage diagnostics evaluate repeated measures,
 batch-driven validation leakage, and optional temporal leakage.
 }
 \examples{
-data("toy_biome")
+data("toy_moat")
 
 audit <- check_biome(
-  toy_biome,
+  toy_moat,
   outcome = "outcome",
   batch = "batch"
 )

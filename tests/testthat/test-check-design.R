@@ -2,8 +2,8 @@ test_that("compute_cramers_v returns zero for independence and one for perfect a
   independent <- matrix(c(5, 5, 5, 5), nrow = 2)
   perfect <- matrix(c(10, 0, 0, 10), nrow = 2)
 
-  expect_equal(safebiome:::compute_cramers_v(independent), 0)
-  expect_equal(safebiome:::compute_cramers_v(perfect), 1)
+  expect_equal(moat:::compute_cramers_v(independent), 0)
+  expect_equal(moat:::compute_cramers_v(perfect), 1)
 })
 
 test_that("categorical design audit flags perfectly confounded variables", {
@@ -12,7 +12,7 @@ test_that("categorical design audit flags perfectly confounded variables", {
     center = rep(c("Center_A", "Center_B"), each = 10)
   )
 
-  result <- safebiome:::check_categorical_design(
+  result <- moat:::check_categorical_design(
     metadata,
     outcome = "outcome",
     variables = "center"
@@ -37,7 +37,7 @@ test_that("categorical design audit assigns low risk to balanced variables", {
     center = rep(c("Center_A", "Center_B"), times = 10)
   )
 
-  result <- safebiome:::check_categorical_design(
+  result <- moat:::check_categorical_design(
     metadata,
     outcome = "outcome",
     variables = "center"
@@ -58,7 +58,7 @@ test_that("categorical design audit uses Fisher test for sparse tables", {
     center = c("Center_A", "Center_B", "Center_A", "Center_B")
   )
 
-  result <- safebiome:::check_categorical_design(
+  result <- moat:::check_categorical_design(
     metadata,
     outcome = "outcome",
     variables = "center"
@@ -207,30 +207,30 @@ test_that("check_design rejects outcomes with fewer than two levels", {
 })
 
 test_that("design helper edge cases return stable values", {
-  expect_equal(safebiome:::split_design_rows(safebiome:::empty_design_result(), "batch"), list())
+  expect_equal(moat:::split_design_rows(moat:::empty_design_result(), "batch"), list())
 
-  expect_error(safebiome:::compute_cramers_v(1), "contingency table")
-  expect_true(is.na(safebiome:::compute_cramers_v(matrix(1, nrow = 1))))
+  expect_error(moat:::compute_cramers_v(1), "contingency table")
+  expect_true(is.na(moat:::compute_cramers_v(matrix(1, nrow = 1))))
   expect_true(is.na(
-    safebiome:::compute_standardized_mean_difference(
+    moat:::compute_standardized_mean_difference(
       values = c(1, 2, 3),
       groups = c("A", "A", "A")
     )
   ))
   expect_equal(
-    safebiome:::compute_standardized_mean_difference(
+    moat:::compute_standardized_mean_difference(
       values = c(1, 1, 2, 2),
       groups = c("A", "A", "B", "B")
     ),
     Inf
   )
-  expect_true(is.na(safebiome:::pooled_standard_deviation(1, 2)))
-  expect_false(safebiome:::detect_complete_separation(matrix(1, nrow = 1)))
+  expect_true(is.na(moat:::pooled_standard_deviation(1, 2)))
+  expect_false(moat:::detect_complete_separation(matrix(1, nrow = 1)))
 })
 
 test_that("design risk helpers cover unknown, high and moderate branches", {
   expect_equal(
-    safebiome:::assess_categorical_design_risk(
+    moat:::assess_categorical_design_risk(
       p_value = NA_real_,
       cramers_v = 0.1,
       empty_cells = 0,
@@ -240,7 +240,7 @@ test_that("design risk helpers cover unknown, high and moderate branches", {
     "unknown"
   )
   expect_equal(
-    safebiome:::assess_categorical_design_risk(
+    moat:::assess_categorical_design_risk(
       p_value = 0.5,
       cramers_v = 0.8,
       empty_cells = 0,
@@ -250,7 +250,7 @@ test_that("design risk helpers cover unknown, high and moderate branches", {
     "high"
   )
   expect_equal(
-    safebiome:::assess_continuous_design_risk(
+    moat:::assess_continuous_design_risk(
       p_value = 0.5,
       standardized_difference = 0.6,
       imbalance_ratio = 1
@@ -258,7 +258,7 @@ test_that("design risk helpers cover unknown, high and moderate branches", {
     "moderate"
   )
   expect_equal(
-    safebiome:::assess_continuous_design_risk(
+    moat:::assess_continuous_design_risk(
       p_value = NA_real_,
       standardized_difference = 0.1,
       imbalance_ratio = 1
@@ -274,5 +274,5 @@ test_that("design warnings include outcome imbalance", {
     imbalance_ratio = 0.1
   )
 
-  expect_true(any(grepl("imbalanced", safebiome:::design_warnings(result))))
+  expect_true(any(grepl("imbalanced", moat:::design_warnings(result))))
 })

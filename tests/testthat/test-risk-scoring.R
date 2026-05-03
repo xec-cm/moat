@@ -1,11 +1,11 @@
 test_that("risk normalization maps legacy and module-specific labels", {
-  expect_equal(safebiome:::normalize_audit_risk("medium"), "moderate")
-  expect_equal(safebiome:::normalize_audit_risk("caution"), "moderate")
-  expect_equal(safebiome:::normalize_audit_risk("unsafe"), "high")
-  expect_equal(safebiome:::normalize_audit_risk("non_identifiable"), "critical")
-  expect_equal(safebiome:::normalize_audit_risk(NA_character_), "unknown")
+  expect_equal(moat:::normalize_audit_risk("medium"), "moderate")
+  expect_equal(moat:::normalize_audit_risk("caution"), "moderate")
+  expect_equal(moat:::normalize_audit_risk("unsafe"), "high")
+  expect_equal(moat:::normalize_audit_risk("non_identifiable"), "critical")
+  expect_equal(moat:::normalize_audit_risk(NA_character_), "unknown")
   expect_equal(
-    safebiome:::highest_audit_risk(c("low", "moderate", "high", "critical")),
+    moat:::highest_audit_risk(c("low", "moderate", "high", "critical")),
     "critical"
   )
 })
@@ -22,7 +22,7 @@ test_that("critical correction risk dominates overall scoring", {
   )
   batch <- list(status = "evaluated", module = "batch", risk = "high", summary = data.frame())
 
-  result <- safebiome:::score_audit_risk(
+  result <- moat:::score_audit_risk(
     design = data.frame(),
     batch = batch,
     correction = correction,
@@ -53,7 +53,7 @@ test_that("batch and leakage high risks produce explainable global high risk", {
     recommendations = "Use grouped cross-validation."
   )
 
-  result <- safebiome:::score_audit_risk(
+  result <- moat:::score_audit_risk(
     batch = batch,
     correction = list(status = "skipped"),
     leakage = leakage
@@ -74,7 +74,7 @@ test_that("design critical risk is scored and explained", {
   attr(design, "risk") <- "critical"
   attr(design, "warnings") <- "Design variable center is strongly associated with outcome."
 
-  result <- safebiome:::score_audit_risk(design = design)
+  result <- moat:::score_audit_risk(design = design)
 
   expect_equal(result$overall$risk, "critical")
   expect_true(any(grepl("center", result$overall$reasons)))
@@ -97,7 +97,7 @@ test_that("metadata-only predictability contributes to design risk scoring", {
     recommendations = "Use metadata-aware validation."
   )
 
-  result <- safebiome:::score_audit_risk(design = design)
+  result <- moat:::score_audit_risk(design = design)
 
   expect_equal(result$overall$risk, "high")
   expect_true(any(grepl("Metadata-only", result$overall$reasons)))
@@ -106,7 +106,7 @@ test_that("metadata-only predictability contributes to design risk scoring", {
 })
 
 test_that("manual audits receive a minimal risk summary", {
-  audit <- safebiome:::biome_audit(
+  audit <- moat:::biome_audit(
     risk = "medium",
     recommendations = "Review design."
   )
@@ -117,8 +117,8 @@ test_that("manual audits receive a minimal risk summary", {
   expect_equal(audit$risk_summary$recommendations, "Review design.")
 })
 
-test_that("summary.safebiome_audit returns and prints readable risk summaries", {
-  audit <- safebiome:::biome_audit(
+test_that("summary.moat_audit returns and prints readable risk summaries", {
+  audit <- moat:::biome_audit(
     risk = "critical",
     risk_summary = list(
       status = "evaluated",
@@ -139,12 +139,12 @@ test_that("summary.safebiome_audit returns and prints readable risk summaries", 
   )
   audit$risk_summary$modules$reasons <- I(list("Correction model is non-identifiable."))
   audit$risk_summary$modules$recommendations <- I(list("Do not rely on batch correction."))
-  audit <- safebiome:::validate_biome_audit(audit)
+  audit <- moat:::validate_biome_audit(audit)
 
   summary_object <- summary(audit, verbose = TRUE)
   printed <- capture.output(returned <- print(summary_object), type = "message")
 
-  expect_s3_class(summary_object, "summary.safebiome_audit")
+  expect_s3_class(summary_object, "summary.moat_audit")
   expect_identical(returned, summary_object)
   expect_true(any(grepl("Overall risk: CRITICAL", printed)))
   expect_true(any(grepl("Main warnings", printed)))

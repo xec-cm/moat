@@ -1,9 +1,15 @@
-# safebiome 0.99.0
+# moat 0.99.0
+
+* Renamed and repositioned the package as `moat`, the Microbiome Omics Audit
+  Toolkit. MOAT is framed as a pre-analysis audit layer: before crossing into
+  microbiome analysis, check the moat.
+* Added `moat_audit`, `summary.moat_audit`, and `moat_analysis_plan` as the
+  package object classes.
 
 ## New Package
 
 * Initial development release prepared for future Bioconductor submission.
-* Added the `safebiome_audit` object returned by `check_biome()`.
+* Added the `moat_audit` object returned by `check_biome()`.
 * Added input validation for `SummarizedExperiment`-like microbiome objects.
 * Added toy microbiome data for examples, tests, and vignettes.
 
@@ -28,7 +34,7 @@
 
 * Added `check_repeated_measures()` and `check_leakage()` for subject, batch,
   and time-aware validation risk.
-* Added central risk scoring and `summary.safebiome_audit()`.
+* Added central risk scoring and `summary.moat_audit()`.
 * Added conservative `low`, `moderate`, `high`, `critical`, and `unknown` risk
   handling.
 
@@ -39,7 +45,7 @@
 * Added `plot_design()` to visualize outcome distribution across audited
   categorical metadata variables.
 * Added `plot_variance()` to visualize PERMANOVA R2 terms and batch dominance.
-* Added `report()` to render offline HTML reports from `safebiome_audit`
+* Added `report()` to render offline HTML reports from `moat_audit`
   objects.
 
 ## Documentation And Release Preparation

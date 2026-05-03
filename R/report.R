@@ -1,11 +1,11 @@
-#' Render a safebiome audit HTML report
+#' Render a MOAT audit HTML report
 #'
-#' `report()` renders a self-contained HTML report from a `safebiome_audit`
+#' `report()` renders a self-contained HTML report from a `moat_audit`
 #' object. The report uses a package-local R Markdown template, so it does not
 #' require internet access while rendering.
 #'
-#' @param audit A `safebiome_audit` object.
-#' @param file Output HTML file path. Defaults to `"safebiome_report.html"`.
+#' @param audit A `moat_audit` object.
+#' @param file Output HTML file path. Defaults to `"moat_report.html"`.
 #' @param quiet A single logical value passed to [rmarkdown::render()].
 #'   Defaults to `TRUE`.
 #' @param ... Additional arguments passed to [rmarkdown::render()].
@@ -15,17 +15,17 @@
 #'
 #' @examples
 #' \dontrun{
-#' data("toy_biome")
-#' audit <- check_biome(toy_biome, outcome = "outcome", batch = "batch", n_perm = 99)
+#' data("toy_moat")
+#' audit <- check_biome(toy_moat, outcome = "outcome", batch = "batch", n_perm = 99)
 #' report(audit)
 #' }
-report <- function(audit, file = "safebiome_report.html", quiet = TRUE, ...) {
+report <- function(audit, file = "moat_report.html", quiet = TRUE, ...) {
   validate_biome_audit(audit)
   check_string(file, "file")
   check_flag(quiet, "quiet")
   check_report_dependencies()
 
-  template <- safebiome_report_template()
+  template <- moat_report_template()
   output_file <- normalizePath(file, mustWork = FALSE)
   output_dir <- dirname(output_file)
   if (!dir.exists(output_dir)) {
@@ -62,14 +62,14 @@ rmarkdown_render <- function(...) {
 check_report_dependencies <- function() {
   if (!report_has_rmarkdown()) {
     cli::cli_abort(
-      "{.pkg rmarkdown} must be installed to render safebiome reports.",
+      "{.pkg rmarkdown} must be installed to render MOAT reports.",
       class = "safebiome_error_missing_suggested_package"
     )
   }
 
   if (!report_has_pandoc()) {
     cli::cli_abort(
-      "Pandoc must be available to render safebiome reports.",
+      "Pandoc must be available to render MOAT reports.",
       class = "safebiome_error_missing_pandoc"
     )
   }
@@ -88,14 +88,14 @@ report_has_pandoc <- function() {
 }
 
 #' @keywords internal
-safebiome_report_template <- function() {
-  template <- system.file("reports", "safebiome_report.Rmd", package = "safebiome", mustWork = FALSE)
+moat_report_template <- function() {
+  template <- system.file("reports", "moat_report.Rmd", package = "moat", mustWork = FALSE)
   if (!nzchar(template) || !file.exists(template)) {
-    template <- file.path(getwd(), "inst", "reports", "safebiome_report.Rmd")
+    template <- file.path(getwd(), "inst", "reports", "moat_report.Rmd")
   }
   if (!file.exists(template)) {
     cli::cli_abort(
-      "The safebiome report template could not be found.",
+      "The MOAT report template could not be found.",
       class = "safebiome_error_missing_report_template"
     )
   }

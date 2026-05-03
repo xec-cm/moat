@@ -47,6 +47,6 @@ table. PCoA diagnostics include coordinates, variance explained, and
 axis-by-metadata association tests.
 }
 \examples{
-data("toy_biome")
-check_batch(toy_biome, outcome = "outcome", batch = "batch", n_perm = 99)
+data("toy_moat")
+check_batch(toy_moat, outcome = "outcome", batch = "batch", n_perm = 99)
 }

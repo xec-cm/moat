@@ -1,4 +1,4 @@
 library(testthat)
-library(safebiome)
+library(moat)
 
-test_check("safebiome")
+test_check("moat")

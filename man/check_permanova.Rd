@@ -34,8 +34,8 @@ A list with PERMANOVA diagnostics.
 matrix and reports tidy R2, p-value, and batch-dominance diagnostics.
 }
 \examples{
-data("toy_biome")
-metadata <- as.data.frame(SummarizedExperiment::colData(toy_biome))
-distance <- compute_biome_distance(toy_biome, distance = "bray")
+data("toy_moat")
+metadata <- as.data.frame(SummarizedExperiment::colData(toy_moat))
+distance <- compute_biome_distance(toy_moat, distance = "bray")
 check_permanova(distance, metadata, outcome = "outcome", batch = "batch", n_perm = 99)
 }

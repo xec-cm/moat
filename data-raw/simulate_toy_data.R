@@ -89,8 +89,8 @@ confounded_biome <- simulate_confounded_biome()
 batch_effect_biome <- simulate_batch_effect_biome()
 repeated_biome <- simulate_repeated_biome()
 
-# Create toy_biome (We'll use a mix of outcome and batch, similar to batch_effect_biome)
-toy_biome <- batch_effect_biome
+# Create toy_moat (a compact example with outcome and batch structure)
+toy_moat <- batch_effect_biome
 
 # Ensure directories exist
 dir.create("tests/testthat/fixtures", showWarnings = FALSE, recursive = TRUE)
@@ -101,5 +101,5 @@ saveRDS(confounded_biome, "tests/testthat/fixtures/confounded_biome.rds")
 saveRDS(batch_effect_biome, "tests/testthat/fixtures/batch_effect_biome.rds")
 saveRDS(repeated_biome, "tests/testthat/fixtures/repeated_biome.rds")
 
-# Save toy_biome to data/
-usethis::use_data(toy_biome, overwrite = TRUE)
+# Save toy_moat to data/
+usethis::use_data(toy_moat, overwrite = TRUE)

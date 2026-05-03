@@ -1,4 +1,4 @@
-url: https://xec-cm.github.io/safebiome/
+url: https://xec-cm.github.io/moat/
 
 template:
   bootstrap: 5
@@ -8,10 +8,11 @@ development:
   mode: auto
 
 home:
-  title: "safebiome: microbiome study-design audits"
+  title: "MOAT: Microbiome Omics Audit Toolkit"
   description: >
-    Audit microbiome studies for design confounding, batch effects,
-    correction feasibility, and validation leakage before downstream analysis.
+    Before crossing into microbiome analysis, check the moat. MOAT audits
+    design confounding, batch-associated structure, correction identifiability,
+    and validation leakage before downstream analysis.
 
 navbar:
   structure:
@@ -20,7 +21,7 @@ navbar:
   components:
     intro:
       text: "Get started"
-      href: articles/safebiome.html
+      href: articles/moat.html
     reference:
       text: "Reference"
       href: reference/index.html
@@ -28,7 +29,7 @@ navbar:
       text: "Articles"
       menu:
       - text: "Full audit workflow"
-        href: articles/safebiome.html
+        href: articles/moat.html
       - text: "Validation leakage in ML"
         href: articles/leakage-ml.html
     news:
@@ -36,7 +37,7 @@ navbar:
       href: news/index.html
     github:
       icon: fab fa-github
-      href: https://github.com/xec-cm/safebiome/
+      href: https://github.com/xec-cm/moat/
       aria-label: "GitHub repository"
 
 authors:
@@ -47,15 +48,15 @@ articles:
 - title: "Workflows"
   navbar: "Workflows"
   contents:
-  - safebiome
+  - moat
   - leakage-ml
 
 search:
   exclude:
   - reference/biome_audit.html
   - reference/new_biome_audit.html
-  - reference/print.safebiome_audit.html
-  - reference/safebiome-package.html
+  - reference/print.moat_audit.html
+  - reference/moat-package.html
   - reference/validate_biome_audit.html
   - reference/validate_biome_input.html
 
@@ -64,8 +65,8 @@ reference:
   desc: "Run a complete audit, summarize risk, plan downstream analysis, and visualize key diagnostics."
   contents:
   - check_biome
-  - summary.safebiome_audit
-  - autoplot.safebiome_audit
+  - summary.moat_audit
+  - autoplot.moat_audit
   - plan_analysis
   - report
   - plot_design
@@ -100,7 +101,7 @@ reference:
 - title: "Data And Audit Objects"
   desc: "Example data and lightweight audit object helpers."
   contents:
-  - toy_biome
+  - toy_moat
   - is_biome_audit
 
 - title: "Package Helpers"

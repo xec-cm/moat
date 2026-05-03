@@ -3,7 +3,7 @@ test_that("plot_design returns a ggplot for categorical design variables", {
     outcome = rep(c("Control", "Disease"), each = 4),
     center = rep(c("A", "B"), times = 4)
   )
-  audit <- safebiome:::biome_audit(
+  audit <- moat:::biome_audit(
     design = check_design(metadata, outcome = "outcome", batch = "center"),
     params = list(outcome = "outcome", batch = "center")
   )
@@ -20,13 +20,13 @@ test_that("plot_design makes perfect confounding visible with empty cells", {
     outcome = rep(c("Control", "Disease"), each = 4),
     center = rep(c("A", "B"), each = 4)
   )
-  audit <- safebiome:::biome_audit(
+  audit <- moat:::biome_audit(
     design = check_design(metadata, outcome = "outcome", batch = "center"),
     params = list(outcome = "outcome", batch = "center")
   )
 
   plot <- plot_design(audit)
-  plot_data <- safebiome:::design_contingency_plot_data(
+  plot_data <- moat:::design_contingency_plot_data(
     audit$design$contingency_table[[1]],
     type = "count"
   )
@@ -41,13 +41,13 @@ test_that("plot_design can plot proportions within variable levels", {
     outcome = c("Control", "Control", "Disease", "Disease", "Disease", "Control"),
     center = c("A", "A", "A", "B", "B", "B")
   )
-  audit <- safebiome:::biome_audit(
+  audit <- moat:::biome_audit(
     design = check_design(metadata, outcome = "outcome", batch = "center"),
     params = list(outcome = "outcome", batch = "center")
   )
 
   plot <- plot_design(audit, variable = "center", type = "proportion")
-  plot_data <- safebiome:::design_contingency_plot_data(
+  plot_data <- moat:::design_contingency_plot_data(
     audit$design$contingency_table[[1]],
     type = "proportion"
   )
@@ -84,7 +84,7 @@ test_that("plot_design handles complex multi-variable categorical designs", {
     age = c(42, 45, 47, 50, 51, 53, 60, 61, 63, 64, 70, 72),
     check.names = FALSE
   )
-  audit <- safebiome:::biome_audit(
+  audit <- moat:::biome_audit(
     design = check_design(
       metadata,
       outcome = "outcome",
@@ -101,7 +101,7 @@ test_that("plot_design handles complex multi-variable categorical designs", {
   default_plot <- plot_design(audit)
   extraction_plot <- plot_design(audit, variable = "extraction", type = "proportion")
   extraction_row <- audit$design[audit$design$variable == "extraction", , drop = FALSE]
-  extraction_data <- safebiome:::design_contingency_plot_data(
+  extraction_data <- moat:::design_contingency_plot_data(
     extraction_row$contingency_table[[1]],
     type = "proportion"
   )
@@ -130,7 +130,7 @@ test_that("plot_design validates unavailable design variables", {
     outcome = rep(c("Control", "Disease"), each = 4),
     age = seq_len(8)
   )
-  audit <- safebiome:::biome_audit(
+  audit <- moat:::biome_audit(
     design = check_design(metadata, outcome = "outcome", covariates = "age"),
     params = list(outcome = "outcome", covariates = "age")
   )
@@ -144,7 +144,7 @@ test_that("plot_design reports missing categorical variables clearly", {
     outcome = rep(c("Control", "Disease"), each = 4),
     center = rep(c("A", "B"), times = 4)
   )
-  audit <- safebiome:::biome_audit(
+  audit <- moat:::biome_audit(
     design = check_design(metadata, outcome = "outcome", batch = "center"),
     params = list(outcome = "outcome", batch = "center")
   )

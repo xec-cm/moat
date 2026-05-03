@@ -14,9 +14,9 @@
 #' @export
 #'
 #' @examples
-#' data("toy_biome")
-#' metadata <- as.data.frame(SummarizedExperiment::colData(toy_biome))
-#' distance <- compute_biome_distance(toy_biome, distance = "bray")
+#' data("toy_moat")
+#' metadata <- as.data.frame(SummarizedExperiment::colData(toy_moat))
+#' distance <- compute_biome_distance(toy_moat, distance = "bray")
 #' check_permanova(distance, metadata, outcome = "outcome", batch = "batch", n_perm = 99)
 check_permanova <- function(
   distance,
@@ -116,9 +116,9 @@ check_permanova <- function(
 #' @export
 #'
 #' @examples
-#' data("toy_biome")
-#' metadata <- as.data.frame(SummarizedExperiment::colData(toy_biome))
-#' distance <- compute_biome_distance(toy_biome, distance = "bray")
+#' data("toy_moat")
+#' metadata <- as.data.frame(SummarizedExperiment::colData(toy_moat))
+#' distance <- compute_biome_distance(toy_moat, distance = "bray")
 #' check_dispersion(distance, metadata, variables = c("outcome", "batch"), n_perm = 99)
 check_dispersion <- function(
   distance,
@@ -189,8 +189,8 @@ check_dispersion <- function(
 #' @export
 #'
 #' @examples
-#' data("toy_biome")
-#' check_batch(toy_biome, outcome = "outcome", batch = "batch", n_perm = 99)
+#' data("toy_moat")
+#' check_batch(toy_moat, outcome = "outcome", batch = "batch", n_perm = 99)
 check_batch <- function(
   x,
   metadata = NULL,

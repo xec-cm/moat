@@ -11,7 +11,7 @@ test_that("plot_ordination returns a ggplot colored by batch or outcome", {
   batch_plot <- plot_ordination(audit, color = "batch", distance = "bray")
   outcome_plot <- plot_ordination(audit, color = "outcome", distance = "bray")
   equal_plot <- plot_ordination(audit, color = "batch", distance = "bray", aspect = "equal")
-  plot_data <- safebiome:::ordination_plot_data(audit, "bray", "batch")
+  plot_data <- moat:::ordination_plot_data(audit, "bray", "batch")
 
   expect_s3_class(batch_plot, "ggplot")
   expect_s3_class(outcome_plot, "ggplot")
@@ -32,8 +32,8 @@ test_that("plot_ordination defaults to first distance and batch color", {
     n_perm = 99
   )
 
-  selected <- safebiome:::resolve_ordination_distances(audit, distance = NULL)
-  color <- safebiome:::resolve_ordination_color(audit, color = NULL, distances = selected)
+  selected <- moat:::resolve_ordination_distances(audit, distance = NULL)
+  color <- moat:::resolve_ordination_color(audit, color = NULL, distances = selected)
   plot <- plot_ordination(audit)
 
   expect_equal(selected, "bray")
@@ -52,7 +52,7 @@ test_that("plot_ordination supports all audited distances", {
   )
 
   plot <- plot_ordination(audit, color = "outcome", distance = "all")
-  plot_data <- safebiome:::ordination_plot_data(audit, c("aitchison", "bray"), "outcome")
+  plot_data <- moat:::ordination_plot_data(audit, c("aitchison", "bray"), "outcome")
 
   expect_s3_class(plot, "ggplot")
   expect_equal(sort(unique(plot_data$distance)), c("aitchison", "bray"))
@@ -60,8 +60,8 @@ test_that("plot_ordination supports all audited distances", {
 })
 
 test_that("plot_ordination validates unavailable diagnostics and variables", {
-  audit <- safebiome:::biome_audit(
-    batch = safebiome:::skipped_batch_result(),
+  audit <- moat:::biome_audit(
+    batch = moat:::skipped_batch_result(),
     params = list(outcome = "outcome")
   )
 
@@ -81,16 +81,16 @@ test_that("plot_ordination validates unavailable diagnostics and variables", {
 })
 
 test_that("plot_ordination helpers cover malformed stored PCoA diagnostics", {
-  unnamed_audit <- safebiome:::biome_audit(
+  unnamed_audit <- moat:::biome_audit(
     batch = list(
       status = "evaluated",
       pcoa = list(list(coordinates = data.frame(), variance = data.frame()))
     ),
     params = list(outcome = "outcome")
   )
-  expect_equal(safebiome:::resolve_ordination_distances(unnamed_audit), "1")
+  expect_equal(moat:::resolve_ordination_distances(unnamed_audit), "1")
 
-  no_color_audit <- safebiome:::biome_audit(
+  no_color_audit <- moat:::biome_audit(
     batch = list(
       status = "evaluated",
       pcoa = list(bray = list(
@@ -101,11 +101,11 @@ test_that("plot_ordination helpers cover malformed stored PCoA diagnostics", {
     params = list()
   )
   expect_error(
-    safebiome:::resolve_ordination_color(no_color_audit, distances = "bray"),
+    moat:::resolve_ordination_color(no_color_audit, distances = "bray"),
     "No outcome, batch, or covariate"
   )
 
-  malformed_audit <- safebiome:::biome_audit(
+  malformed_audit <- moat:::biome_audit(
     batch = list(
       status = "evaluated",
       pcoa = list(
@@ -119,11 +119,11 @@ test_that("plot_ordination helpers cover malformed stored PCoA diagnostics", {
     params = list(outcome = "group")
   )
   expect_error(
-    safebiome:::ordination_plot_data(malformed_audit, c("empty", "missing_axis"), "group"),
+    moat:::ordination_plot_data(malformed_audit, c("empty", "missing_axis"), "group"),
     "No plottable PCoA"
   )
   expect_equal(
-    safebiome:::ordination_axis_label(
+    moat:::ordination_axis_label(
       data.frame(axis = "axis2", variance_explained = NA_real_),
       "axis1"
     ),

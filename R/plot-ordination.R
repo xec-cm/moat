@@ -4,7 +4,7 @@
 #' [check_batch()]. Points can be colored by any audited outcome, batch, or
 #' covariate variable stored with the ordination coordinates.
 #'
-#' @param audit A `safebiome_audit` object.
+#' @param audit A `moat_audit` object.
 #' @param color Optional single string naming a metadata variable. When `NULL`,
 #'   the first batch variable is used when available, otherwise the outcome.
 #' @param distance Optional character vector naming audited distances to plot.
@@ -18,8 +18,8 @@
 #' @export
 #'
 #' @examples
-#' data("toy_biome")
-#' audit <- check_biome(toy_biome, outcome = "outcome", batch = "batch", n_perm = 99)
+#' data("toy_moat")
+#' audit <- check_biome(toy_moat, outcome = "outcome", batch = "batch", n_perm = 99)
 #' plot_ordination(audit, color = "batch", distance = "bray")
 plot_ordination <- function(audit, color = NULL, distance = NULL, aspect = c("auto", "equal")) {
   validate_biome_audit(audit)
