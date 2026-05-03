@@ -37,9 +37,9 @@ A data frame with one row per variable.
 ## Examples
 
 ``` r
-data("toy_biome")
-metadata <- as.data.frame(SummarizedExperiment::colData(toy_biome))
-distance <- compute_biome_distance(toy_biome, distance = "bray")
+data("toy_moat")
+metadata <- as.data.frame(SummarizedExperiment::colData(toy_moat))
+distance <- compute_biome_distance(toy_moat, distance = "bray")
 check_dispersion(distance, metadata, variables = c("outcome", "batch"), n_perm = 99)
 #>   variable    status n_groups    statistic p_value risk error
 #> 1  outcome evaluated        2 0.0009879928    0.91  low  <NA>

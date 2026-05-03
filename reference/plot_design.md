@@ -14,12 +14,12 @@ plot_design(audit, variable = NULL, type = c("count", "proportion"))
 
 - audit:
 
-  A `safebiome_audit` object.
+  A `moat_audit` object.
 
 - variable:
 
   Optional single string naming a categorical variable audited by
-  [`check_design()`](https://xec-cm.github.io/safebiome/reference/check_design.md).
+  [`check_design()`](https://xec-cm.github.io/moat/reference/check_design.md).
   When `NULL`, the first audited batch variable is used; if no batch
   variable is available, the first categorical covariate is used.
 
@@ -37,7 +37,7 @@ object.
 ## Examples
 
 ``` r
-data("toy_biome")
-audit <- check_biome(toy_biome, outcome = "outcome", batch = "batch", n_perm = 99)
+data("toy_moat")
+audit <- check_biome(toy_moat, outcome = "outcome", batch = "batch", n_perm = 99)
 plot_design(audit, variable = "batch")
 ```

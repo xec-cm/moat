@@ -55,7 +55,7 @@ check_batch(
 
   A character vector naming microbiome distances. Supported values are
   those accepted by
-  [`compute_biome_distance()`](https://xec-cm.github.io/safebiome/reference/compute_biome_distance.md).
+  [`compute_biome_distance()`](https://xec-cm.github.io/moat/reference/compute_biome_distance.md).
 
 - n_perm:
 
@@ -68,8 +68,8 @@ A list with batch audit diagnostics and recommendations.
 ## Examples
 
 ``` r
-data("toy_biome")
-check_batch(toy_biome, outcome = "outcome", batch = "batch", n_perm = 99)
+data("toy_moat")
+check_batch(toy_moat, outcome = "outcome", batch = "batch", n_perm = 99)
 #> $status
 #> [1] "evaluated"
 #> 

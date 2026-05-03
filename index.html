@@ -5,15 +5,15 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>safebiome: microbiome study-design audits • safebiome</title>
+<title>MOAT: Microbiome Omics Audit Toolkit • moat</title>
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="safebiome: microbiome study-design audits">
-<meta name="description" content="Audit microbiome studies for design confounding, batch effects, correction feasibility, and validation leakage before downstream analysis.
+<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="MOAT: Microbiome Omics Audit Toolkit">
+<meta name="description" content="Before crossing into microbiome analysis, check the moat. MOAT audits design confounding, batch-associated structure, correction identifiability, and validation leakage before downstream analysis.
 ">
-<meta property="og:description" content="Audit microbiome studies for design confounding, batch effects, correction feasibility, and validation leakage before downstream analysis.
+<meta property="og:description" content="Before crossing into microbiome analysis, check the moat. MOAT audits design confounding, batch-associated structure, correction identifiability, and validation leakage before downstream analysis.
 ">
 </head>
 <body>
@@ -22,7 +22,7 @@
 
     <nav class="navbar navbar-expand-lg fixed-top bg-primary" data-bs-theme="dark" aria-label="Site navigation"><div class="container">
 
-    <a class="navbar-brand me-2" href="index.html">safebiome</a>
+    <a class="navbar-brand me-2" href="index.html">moat</a>
 
     <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.99.0</small>
 
@@ -33,12 +33,12 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
-<li class="nav-item"><a class="nav-link" href="articles/safebiome.html">Get started</a></li>
+<li class="nav-item"><a class="nav-link" href="articles/moat.html">Get started</a></li>
 <li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="articles/safebiome.html">Full audit workflow</a></li>
+<li><a class="dropdown-item" href="articles/moat.html">Full audit workflow</a></li>
     <li><a class="dropdown-item" href="articles/leakage-ml.html">Validation leakage in ML</a></li>
   </ul>
 </li>
@@ -48,7 +48,7 @@
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="search.json">
 </form></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/xec-cm/safebiome/" aria-label="GitHub repository"><span class="fa fab fa-github"></span></a></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/xec-cm/moat/" aria-label="GitHub repository"><span class="fa fab fa-github"></span></a></li>
       </ul>
 </div>
 
@@ -57,28 +57,29 @@
 </nav><div class="container template-home">
 <div class="row">
   <main id="main" class="col-md-9"><div class="section level1">
-<div class="page-header"><h1 id="safebiome">safebiome<a class="anchor" aria-label="anchor" href="#safebiome"></a>
+<div class="page-header"><h1 id="moat">moat<a class="anchor" aria-label="anchor" href="#moat"></a>
 </h1></div>
 <p><a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="https://img.shields.io/badge/lifecycle-experimental-orange.svg" alt="Lifecycle: experimental"></a></p>
-<p><code>safebiome</code> audits microbiome study designs before downstream statistical analysis. It checks whether outcome, batch, covariates, repeated measures, and microbiome distance structure create risks that should be reported before differential abundance, PERMANOVA, ordination, or machine-learning analyses.</p>
+<p>MOAT is the Microbiome Omics Audit Toolkit. Before crossing into microbiome analysis, check the moat.</p>
+<p><code>moat</code> audits microbiome and omics study designs before downstream statistical or machine-learning analysis. It checks whether outcome, batch, covariates, repeated measures, correction identifiability, and microbiome distance structure create risks that should be reported before differential abundance, PERMANOVA, ordination, or predictive modeling.</p>
 <p>The package is a study-audit layer. It does not silently correct counts, remove samples, or choose the final model. Instead, it returns structured diagnostics, risk levels, warnings, plots, and analysis-plan suggestions that analysts can review and report.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("pak")</span></span>
-<span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"xec-cm/safebiome"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"xec-cm/moat"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="quick-start">Quick Start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
 </h2>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/xec-cm/safebiome" class="external-link">safebiome</a></span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/xec-cm/moat" class="external-link">moat</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"toy_biome"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"toy_moat"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">audit</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/check_biome.html">check_biome</a></span><span class="op">(</span></span>
-<span>    <span class="va">toy_biome</span>,</span>
+<span>    <span class="va">toy_moat</span>,</span>
 <span>    outcome <span class="op">=</span> <span class="st">"outcome"</span>,</span>
 <span>    batch <span class="op">=</span> <span class="st">"batch"</span>,</span>
 <span>    distances <span class="op">=</span> <span class="st">"bray"</span>,</span>
@@ -88,12 +89,13 @@
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">audit</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ── safebiome audit ─────────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; ── MOAT audit ──────────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt; ℹ Overall risk: HIGH</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── Main warnings ──</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; • Batch audit for bray distance has high risk (batch R2 = 0.948).</span></span>
+<span><span class="co">#&gt; • Batch audit for bray distance has high risk (batch R2 = 0.948; PERMANOVA =</span></span>
+<span><span class="co">#&gt; high, dispersion = low, PCoA = high).</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── Recommended next steps ──</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -123,7 +125,7 @@
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/plan_analysis.html">plan_analysis</a></span><span class="op">(</span><span class="va">audit</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ── safebiome analysis plan ─────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; ── MOAT analysis plan ──────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt; ℹ Overall risk: HIGH</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── Recommended formulas ──</span></span>
@@ -149,7 +151,7 @@
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── Warnings ──</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ! Batch audit for bray distance has high risk (batch R2 = 0.948).</span></span>
+<span><span class="co">#&gt; ! Batch audit for bray distance has high risk (batch R2 = 0.948; PERMANOVA = high, dispersion = low, PCoA = high).</span></span>
 <span><span class="co">#&gt; ! Batch-dominated microbiome signal requires explicit sensitivity analysis.</span></span></code></pre></div>
 </div>
 <div class="section level2">
@@ -162,7 +164,7 @@
 <span><span class="fu"><a href="reference/plot_variance.html">plot_variance</a></span><span class="op">(</span><span class="va">audit</span>, distance <span class="op">=</span> <span class="st">"bray"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="what-safebiome-checks">What safebiome Checks<a class="anchor" aria-label="anchor" href="#what-safebiome-checks"></a>
+<h2 id="what-moat-checks">What MOAT Checks<a class="anchor" aria-label="anchor" href="#what-moat-checks"></a>
 </h2>
 <ul>
 <li>
@@ -180,7 +182,7 @@
 <div class="section level2">
 <h2 id="scientific-position">Scientific Position<a class="anchor" aria-label="anchor" href="#scientific-position"></a>
 </h2>
-<p><code>safebiome</code> is intentionally conservative. A high-risk audit does not prove that an analysis is invalid, and a low-risk audit does not prove that all downstream models are safe. The package is designed to make design limitations explicit so that conclusions are interpreted with the right sensitivity analyses and reporting context.</p>
+<p><code>moat</code> is intentionally conservative. A high-risk audit does not prove that an analysis is invalid, and a low-risk audit does not prove that all downstream models are safe. The package is designed to make design limitations explicit so that conclusions are interpreted with the right sensitivity analyses and reporting context.</p>
 </div>
 <div class="section level2">
 <h2 id="development-checks">Development Checks<a class="anchor" aria-label="anchor" href="#development-checks"></a>
@@ -194,8 +196,8 @@
   </main><aside class="col-md-3"><div class="links">
 <h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
-<li><a href="https://github.com/xec-cm/safebiome/" class="external-link">Browse source code</a></li>
-<li><a href="https://github.com/xec-cm/safebiome/issues" class="external-link">Report a bug</a></li>
+<li><a href="https://github.com/xec-cm/moat/" class="external-link">Browse source code</a></li>
+<li><a href="https://github.com/xec-cm/moat/issues" class="external-link">Report a bug</a></li>
 </ul>
 </div>
 
@@ -211,7 +213,7 @@
 <div class="citation">
 <h2 data-toc-skip>Citation</h2>
 <ul class="list-unstyled">
-<li><a href="authors.html#citation">Citing safebiome</a></li>
+<li><a href="authors.html#citation">Citing moat</a></li>
 </ul>
 </div>
 

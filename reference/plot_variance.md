@@ -14,7 +14,7 @@ plot_variance(audit, distance = NULL)
 
 - audit:
 
-  A `safebiome_audit` object.
+  A `moat_audit` object.
 
 - distance:
 
@@ -31,7 +31,7 @@ object.
 ## Examples
 
 ``` r
-data("toy_biome")
-audit <- check_biome(toy_biome, outcome = "outcome", batch = "batch", n_perm = 99)
+data("toy_moat")
+audit <- check_biome(toy_moat, outcome = "outcome", batch = "batch", n_perm = 99)
 plot_variance(audit, distance = "bray")
 ```

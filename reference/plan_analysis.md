@@ -1,6 +1,6 @@
-# Generate a downstream analysis plan from a safebiome audit
+# Generate a downstream analysis plan from a MOAT audit
 
-`plan_analysis()` converts a `safebiome_audit` object into a structured,
+`plan_analysis()` converts a `moat_audit` object into a structured,
 readable downstream analysis plan. It does not rerun audit statistics;
 it summarizes the existing audit diagnostics into recommended formulas,
 validation schemes, batch strategy, and sensitivity analyses.
@@ -15,7 +15,7 @@ plan_analysis(audit, verbose = FALSE)
 
 - audit:
 
-  A `safebiome_audit` object.
+  A `moat_audit` object.
 
 - verbose:
 
@@ -24,16 +24,16 @@ plan_analysis(audit, verbose = FALSE)
 
 ## Value
 
-A `safebiome_analysis_plan` object.
+A `moat_analysis_plan` object.
 
 ## Examples
 
 ``` r
-data("toy_biome")
-audit <- check_biome(toy_biome, outcome = "outcome", batch = "batch", n_perm = 99)
+data("toy_moat")
+audit <- check_biome(toy_moat, outcome = "outcome", batch = "batch", n_perm = 99)
 plan_analysis(audit)
 #> 
-#> ── safebiome analysis plan ─────────────────────────────────────────────────────
+#> ── MOAT analysis plan ──────────────────────────────────────────────────────────
 #> ℹ Overall risk: HIGH
 #> 
 #> ── Recommended formulas ──

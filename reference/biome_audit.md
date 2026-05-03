@@ -1,4 +1,4 @@
-# Helper to create a validated safebiome_audit object
+# Helper to create a validated moat_audit object
 
 This is the official constructor that should be used by other functions
 in the package to generate the final audit report.
@@ -59,4 +59,4 @@ biome_audit(
 
 ## Value
 
-A validated `safebiome_audit` object.
+A validated `moat_audit` object.

@@ -1,6 +1,6 @@
-# Test if an object is a safebiome_audit
+# Test if an object is a moat_audit
 
-Test if an object is a safebiome_audit
+Test if an object is a moat_audit
 
 ## Usage
 
@@ -16,13 +16,13 @@ is_biome_audit(x)
 
 ## Value
 
-`TRUE` if the object inherits from `safebiome_audit`, `FALSE` otherwise.
+`TRUE` if the object inherits from `moat_audit`, `FALSE` otherwise.
 
 ## Examples
 
 ``` r
 # This is an internal object structure, but can be tested:
-audit <- safebiome:::biome_audit(risk = "low")
+audit <- moat:::biome_audit(risk = "low")
 is_biome_audit(audit)
 #> [1] TRUE
 ```

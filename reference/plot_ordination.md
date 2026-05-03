@@ -1,21 +1,26 @@
 # Plot PCoA ordination coordinates from a batch audit
 
 `plot_ordination()` visualizes the first two PCoA axes stored by
-[`check_batch()`](https://xec-cm.github.io/safebiome/reference/check_batch.md).
+[`check_batch()`](https://xec-cm.github.io/moat/reference/check_batch.md).
 Points can be colored by any audited outcome, batch, or covariate
 variable stored with the ordination coordinates.
 
 ## Usage
 
 ``` r
-plot_ordination(audit, color = NULL, distance = NULL, aspect = c("auto", "equal"))
+plot_ordination(
+  audit,
+  color = NULL,
+  distance = NULL,
+  aspect = c("auto", "equal")
+)
 ```
 
 ## Arguments
 
 - audit:
 
-  A `safebiome_audit` object.
+  A `moat_audit` object.
 
 - color:
 
@@ -43,7 +48,7 @@ object.
 ## Examples
 
 ``` r
-data("toy_biome")
-audit <- check_biome(toy_biome, outcome = "outcome", batch = "batch", n_perm = 99)
+data("toy_moat")
+audit <- check_biome(toy_moat, outcome = "outcome", batch = "batch", n_perm = 99)
 plot_ordination(audit, color = "batch", distance = "bray")
 ```

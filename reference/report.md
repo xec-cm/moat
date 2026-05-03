@@ -1,24 +1,24 @@
-# Render a safebiome audit HTML report
+# Render a MOAT audit HTML report
 
-`report()` renders a self-contained HTML report from a `safebiome_audit`
+`report()` renders a self-contained HTML report from a `moat_audit`
 object. The report uses a package-local R Markdown template, so it does
 not require internet access while rendering.
 
 ## Usage
 
 ``` r
-report(audit, file = "safebiome_report.html", quiet = TRUE, ...)
+report(audit, file = "moat_report.html", quiet = TRUE, ...)
 ```
 
 ## Arguments
 
 - audit:
 
-  A `safebiome_audit` object.
+  A `moat_audit` object.
 
 - file:
 
-  Output HTML file path. Defaults to `"safebiome_report.html"`.
+  Output HTML file path. Defaults to `"moat_report.html"`.
 
 - quiet:
 
@@ -39,8 +39,8 @@ The normalized output file path, invisibly.
 
 ``` r
 if (FALSE) { # \dontrun{
-data("toy_biome")
-audit <- check_biome(toy_biome, outcome = "outcome", batch = "batch", n_perm = 99)
+data("toy_moat")
+audit <- check_biome(toy_moat, outcome = "outcome", batch = "batch", n_perm = 99)
 report(audit)
 } # }
 ```

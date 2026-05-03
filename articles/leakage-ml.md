@@ -14,14 +14,14 @@ This vignette focuses on three common leakage patterns:
 2.  outcome labels aligned with batch or center,
 3.  time-ordered samples from the same subjects.
 
-`safebiome` does not train the machine-learning model. It audits
-metadata before modeling and recommends validation schemes that make
-leakage harder to miss.
+MOAT does not train the machine-learning model. It audits metadata
+before modeling and recommends validation schemes that make leakage
+harder to miss.
 
 ``` r
 
-library(safebiome)
-data("toy_biome")
+library(moat)
+data("toy_moat")
 ```
 
 ## Row-Wise Cross-Validation Can Be Overoptimistic
@@ -33,7 +33,7 @@ samples.
 
 ``` r
 
-repeated_biome <- toy_biome
+repeated_biome <- toy_moat
 SummarizedExperiment::colData(repeated_biome)$subject <- rep(
   paste0("S", seq_len(ncol(repeated_biome) / 2)),
   each = 2
@@ -107,7 +107,7 @@ head(repeated$samples_per_subject)
 
 ## Use Grouped Cross-Validation
 
-[`check_leakage()`](https://xec-cm.github.io/safebiome/reference/check_leakage.md)
+[`check_leakage()`](https://xec-cm.github.io/moat/reference/check_leakage.md)
 combines repeated-measure, batch, and temporal diagnostics. For repeated
 measures without an explicit time variable, the recommended scheme is
 grouped cross-validation by subject.
@@ -186,7 +186,7 @@ is held out.
 
 Longitudinal data add another constraint: train folds should not
 silently use future samples from the same subject to predict earlier or
-held-out samples. When repeated subjects span timepoints, `safebiome`
+held-out samples. When repeated subjects span timepoints, MOAT
 recommends a grouped time-aware strategy.
 
 ``` r
@@ -224,9 +224,9 @@ structure supplied.
 ## Full Audit Integration
 
 The same leakage recommendations flow through
-[`check_biome()`](https://xec-cm.github.io/safebiome/reference/check_biome.md)
+[`check_biome()`](https://xec-cm.github.io/moat/reference/check_biome.md)
 and
-[`plan_analysis()`](https://xec-cm.github.io/safebiome/reference/plan_analysis.md).
+[`plan_analysis()`](https://xec-cm.github.io/moat/reference/plan_analysis.md).
 This lets the validation choice sit next to design, batch, and
 correction diagnostics instead of being handled as an afterthought.
 
@@ -244,7 +244,7 @@ audit <- check_biome(
 
 summary(audit)
 #> 
-#> ── safebiome audit ─────────────────────────────────────────────────────────────
+#> ── MOAT audit ──────────────────────────────────────────────────────────────────
 #> ℹ Overall risk: HIGH
 #> 
 #> ── Main warnings ──
@@ -353,7 +353,7 @@ sessionInfo()
 #> [1] stats     graphics  grDevices utils     datasets  methods   base     
 #> 
 #> other attached packages:
-#> [1] safebiome_0.99.0 BiocStyle_2.38.0
+#> [1] moat_0.99.0      BiocStyle_2.38.0
 #> 
 #> loaded via a namespace (and not attached):
 #>  [1] sass_0.4.10                 generics_0.1.4             

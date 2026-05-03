@@ -1,6 +1,6 @@
-# Create a safebiome_audit object
+# Create a moat_audit object
 
-Create a safebiome_audit object
+Create a moat_audit object
 
 ## Usage
 
@@ -58,4 +58,4 @@ new_biome_audit(
 
 ## Value
 
-A `safebiome_audit` object.
+A `moat_audit` object.

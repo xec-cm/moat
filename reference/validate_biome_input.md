@@ -1,9 +1,9 @@
 # Validate microbiome audit input
 
 Checks that the input object and metadata variables satisfy the minimum
-requirements for running a `safebiome` audit. The function is
-intentionally internal: exported user-facing functions should call it
-before dispatching to design, batch, correction, or leakage modules.
+requirements for running a MOAT audit. The function is intentionally
+internal: exported user-facing functions should call it before
+dispatching to design, batch, correction, or leakage modules.
 
 ## Usage
 

@@ -8,16 +8,16 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/xec-cm/safebiome/blob/devel/inst/CITATION)
+[`inst/CITATION`](https://github.com/xec-cm/moat/blob/devel/inst/CITATION)
 
-Catala-Moll F (2026). *safebiome: Audit Microbiome Study Designs Before
-Downstream Analysis*. R package version 0.99.0,
-<https://github.com/xec-cm/safebiome>.
+Catala-Moll F (2026). *moat: Microbiome Omics Audit Toolkit for
+Pre-Analysis Risk Assessment*. R package version 0.99.0,
+<https://github.com/xec-cm/moat>.
 
     @Manual{,
-      title = {safebiome: Audit Microbiome Study Designs Before Downstream Analysis},
+      title = {moat: Microbiome Omics Audit Toolkit for Pre-Analysis Risk Assessment},
       author = {Francesc Catala-Moll},
       year = {2026},
       note = {R package version 0.99.0},
-      url = {https://github.com/xec-cm/safebiome},
+      url = {https://github.com/xec-cm/moat},
     }

@@ -1,6 +1,6 @@
-# Validate a safebiome_audit object
+# Validate a moat_audit object
 
-Validate a safebiome_audit object
+Validate a moat_audit object
 
 ## Usage
 
@@ -16,4 +16,4 @@ validate_biome_audit(x)
 
 ## Value
 
-The validated `safebiome_audit` object.
+The validated `moat_audit` object.
