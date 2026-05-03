@@ -1,9 +1,9 @@
-test_that("check_biome returns an evaluated audit with full public API parameters", {
+test_that("moat returns an evaluated audit with full public API parameters", {
   se <- readRDS(test_path("fixtures/repeated_biome.rds"))
   SummarizedExperiment::colData(se)$batch <- rep(c("A", "B"), each = 20)
   SummarizedExperiment::colData(se)$age <- seq_len(40)
 
-  audit <- check_biome(
+  audit <- moat(
     se,
     outcome = "outcome",
     batch = "batch",
@@ -18,7 +18,7 @@ test_that("check_biome returns an evaluated audit with full public API parameter
   )
 
   expect_s3_class(audit, "moat_audit")
-  expect_true(is_biome_audit(audit))
+  expect_true(is_moat_audit(audit))
   expect_equal(audit$risk, "high")
   expect_true(length(audit$recommendations) > 0)
 
@@ -54,10 +54,10 @@ test_that("check_biome returns an evaluated audit with full public API parameter
   expect_equal(audit$leakage$recommended_cv, "grouped_time_aware_cv_by_subject")
 })
 
-test_that("check_biome handles missing optional arguments gracefully", {
+test_that("moat handles missing optional arguments gracefully", {
   se <- readRDS(test_path("fixtures/clean_biome.rds"))
 
-  audit <- check_biome(se, outcome = "outcome")
+  audit <- moat(se, outcome = "outcome")
 
   expect_s3_class(audit, "moat_audit")
   expect_null(audit$params$batch)
@@ -76,35 +76,35 @@ test_that("check_biome handles missing optional arguments gracefully", {
   expect_equal(audit$correction$feasibility, "not_applicable")
 })
 
-test_that("check_biome validates issue 6 public API arguments", {
+test_that("moat validates issue 6 public API arguments", {
   se <- readRDS(test_path("fixtures/repeated_biome.rds"))
 
   expect_error(
-    check_biome(se, outcome = "outcome", time = "missing_time"),
+    moat(se, outcome = "outcome", time = "missing_time"),
     "Missing variable"
   )
   expect_error(
-    check_biome(se, outcome = "outcome", subject = c("subject", "timepoint")),
+    moat(se, outcome = "outcome", subject = c("subject", "timepoint")),
     "single non-missing string"
   )
   expect_error(
-    check_biome(se, outcome = "outcome", time = c("timepoint", "subject")),
+    moat(se, outcome = "outcome", time = c("timepoint", "subject")),
     "single non-missing string"
   )
   expect_error(
-    check_biome(se, outcome = "outcome", transform = ""),
+    moat(se, outcome = "outcome", transform = ""),
     "single non-missing string"
   )
   expect_error(
-    check_biome(se, outcome = "outcome", distances = character()),
+    moat(se, outcome = "outcome", distances = character()),
     "non-empty character vector"
   )
   expect_error(
-    check_biome(se, outcome = "outcome", n_perm = 0),
+    moat(se, outcome = "outcome", n_perm = 0),
     "positive integer"
   )
   expect_error(
-    check_biome(se, outcome = "outcome", verbose = NA),
+    moat(se, outcome = "outcome", verbose = NA),
     "logical value"
   )
 })

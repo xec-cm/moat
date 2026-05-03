@@ -1,6 +1,6 @@
 test_that("autoplot.moat_audit returns a risk dashboard ggplot", {
   se <- readRDS(test_path("fixtures/batch_effect_biome.rds"))
-  audit <- check_biome(
+  audit <- moat(
     se,
     outcome = "outcome",
     batch = "batch",
@@ -19,7 +19,7 @@ test_that("autoplot.moat_audit returns a risk dashboard ggplot", {
 })
 
 test_that("autoplot.moat_audit works with incomplete modules", {
-  audit <- moat:::biome_audit(risk = "unknown")
+  audit <- moat:::moat_audit(risk = "unknown")
 
   plot <- ggplot2::autoplot(audit)
   plot_data <- moat:::audit_risk_dashboard_data(audit)

@@ -16,10 +16,10 @@
 #'
 #' @examples
 #' data("toy_moat")
-#' audit <- check_biome(toy_moat, outcome = "outcome", batch = "batch", n_perm = 99)
+#' audit <- moat(toy_moat, outcome = "outcome", batch = "batch", n_perm = 99)
 #' plot_design(audit, variable = "batch")
 plot_design <- function(audit, variable = NULL, type = c("count", "proportion")) {
-  validate_biome_audit(audit)
+  validate_moat_audit(audit)
   check_plot_variable(variable, "variable", allow_null = TRUE)
   type <- match.arg(type)
 
@@ -51,7 +51,7 @@ plot_design <- function(audit, variable = NULL, type = c("count", "proportion"))
       caption = "Cells outlined in orange have zero samples."
     ) +
     ggplot2::coord_equal() +
-    theme_safebiome_plot()
+    theme_moat_plot()
 
   if (any(plot_data$empty)) {
     plot <- plot +
@@ -72,7 +72,7 @@ resolve_design_plot_row <- function(audit, variable = NULL) {
   if (!is.data.frame(design) || nrow(design) == 0) {
     cli::cli_abort(
       "No evaluated categorical design diagnostics are available in {.arg audit}.",
-      class = "safebiome_error_plot_unavailable"
+      class = "moat_error_plot_unavailable"
     )
   }
 
@@ -82,7 +82,7 @@ resolve_design_plot_row <- function(audit, variable = NULL) {
   if (nrow(categorical) == 0) {
     cli::cli_abort(
       "No categorical design variable with a contingency table is available in {.arg audit}.",
-      class = "safebiome_error_plot_unavailable"
+      class = "moat_error_plot_unavailable"
     )
   }
 
@@ -101,7 +101,7 @@ resolve_design_plot_row <- function(audit, variable = NULL) {
         "Variable {.val {variable}} is not an audited categorical design variable.",
         "i" = "Available categorical variables: {.val {categorical$variable}}."
       ),
-      class = "safebiome_error_plot_variable_unavailable"
+      class = "moat_error_plot_variable_unavailable"
     )
   }
 

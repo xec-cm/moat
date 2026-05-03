@@ -26,6 +26,6 @@ confounding and complete separation are visible at a glance.
 }
 \examples{
 data("toy_moat")
-audit <- check_biome(toy_moat, outcome = "outcome", batch = "batch", n_perm = 99)
+audit <- moat(toy_moat, outcome = "outcome", batch = "batch", n_perm = 99)
 plot_design(audit, variable = "batch")
 }

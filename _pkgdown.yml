@@ -53,18 +53,18 @@ articles:
 
 search:
   exclude:
-  - reference/biome_audit.html
-  - reference/new_biome_audit.html
+  - reference/moat_audit.html
+  - reference/new_moat_audit.html
   - reference/print.moat_audit.html
   - reference/moat-package.html
-  - reference/validate_biome_audit.html
+  - reference/validate_moat_audit.html
   - reference/validate_biome_input.html
 
 reference:
 - title: "Start Here"
   desc: "Run a complete audit, summarize risk, plan downstream analysis, and visualize key diagnostics."
   contents:
-  - check_biome
+  - moat
   - summary.moat_audit
   - autoplot.moat_audit
   - plan_analysis
@@ -102,7 +102,7 @@ reference:
   desc: "Example data and lightweight audit object helpers."
   contents:
   - toy_moat
-  - is_biome_audit
+  - is_moat_audit
 
 - title: "Package Helpers"
   contents:

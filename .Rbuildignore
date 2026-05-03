@@ -1,4 +1,4 @@
-^safebiome\.Rproj$
+^moat\.Rproj$
 ^\.Rproj\.user$
 ^\.github$
 ^docs$
@@ -8,6 +8,4 @@
 ^LICENSE\.md$
 ^issues_template\.md$
 ^data-raw$
-^_pkgdown\.yml$
-^docs$
-^pkgdown$
+^moat_report\.html$

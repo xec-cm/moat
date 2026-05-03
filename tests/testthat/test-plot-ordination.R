@@ -1,6 +1,6 @@
 test_that("plot_ordination returns a ggplot colored by batch or outcome", {
   se <- readRDS(test_path("fixtures/batch_effect_biome.rds"))
-  audit <- check_biome(
+  audit <- moat(
     se,
     outcome = "outcome",
     batch = "batch",
@@ -24,7 +24,7 @@ test_that("plot_ordination returns a ggplot colored by batch or outcome", {
 
 test_that("plot_ordination defaults to first distance and batch color", {
   se <- readRDS(test_path("fixtures/batch_effect_biome.rds"))
-  audit <- check_biome(
+  audit <- moat(
     se,
     outcome = "outcome",
     batch = "batch",
@@ -43,7 +43,7 @@ test_that("plot_ordination defaults to first distance and batch color", {
 
 test_that("plot_ordination supports all audited distances", {
   se <- readRDS(test_path("fixtures/batch_effect_biome.rds"))
-  audit <- check_biome(
+  audit <- moat(
     se,
     outcome = "outcome",
     batch = "batch",
@@ -60,7 +60,7 @@ test_that("plot_ordination supports all audited distances", {
 })
 
 test_that("plot_ordination validates unavailable diagnostics and variables", {
-  audit <- moat:::biome_audit(
+  audit <- moat:::moat_audit(
     batch = moat:::skipped_batch_result(),
     params = list(outcome = "outcome")
   )
@@ -68,7 +68,7 @@ test_that("plot_ordination validates unavailable diagnostics and variables", {
   expect_error(plot_ordination(audit), "No PCoA")
 
   se <- readRDS(test_path("fixtures/batch_effect_biome.rds"))
-  audit <- check_biome(
+  audit <- moat(
     se,
     outcome = "outcome",
     batch = "batch",
@@ -81,7 +81,7 @@ test_that("plot_ordination validates unavailable diagnostics and variables", {
 })
 
 test_that("plot_ordination helpers cover malformed stored PCoA diagnostics", {
-  unnamed_audit <- moat:::biome_audit(
+  unnamed_audit <- moat:::moat_audit(
     batch = list(
       status = "evaluated",
       pcoa = list(list(coordinates = data.frame(), variance = data.frame()))
@@ -90,7 +90,7 @@ test_that("plot_ordination helpers cover malformed stored PCoA diagnostics", {
   )
   expect_equal(moat:::resolve_ordination_distances(unnamed_audit), "1")
 
-  no_color_audit <- moat:::biome_audit(
+  no_color_audit <- moat:::moat_audit(
     batch = list(
       status = "evaluated",
       pcoa = list(bray = list(
@@ -105,7 +105,7 @@ test_that("plot_ordination helpers cover malformed stored PCoA diagnostics", {
     "No outcome, batch, or covariate"
   )
 
-  malformed_audit <- moat:::biome_audit(
+  malformed_audit <- moat:::moat_audit(
     batch = list(
       status = "evaluated",
       pcoa = list(

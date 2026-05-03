@@ -173,12 +173,12 @@ row-wise cross-validation is not enough for the metadata structure supplied.
 
 # Full Audit Integration
 
-The same leakage recommendations flow through `check_biome()` and
+The same leakage recommendations flow through `moat()` and
 `plan_analysis()`. This lets the validation choice sit next to design, batch,
 and correction diagnostics instead of being handled as an afterthought.
 
 ```{r full-audit}
-audit <- check_biome(
+audit <- moat(
   repeated_biome,
   outcome = "outcome",
   subject = "subject",

@@ -900,10 +900,10 @@ row-wise cross-validation is not enough for the metadata structure supplied.</p>
 </div>
 <div id="full-audit-integration" class="section level1" number="6">
 <h1><span class="header-section-number">6</span> Full Audit Integration</h1>
-<p>The same leakage recommendations flow through <code>check_biome()</code> and
+<p>The same leakage recommendations flow through <code>moat()</code> and
 <code>plan_analysis()</code>. This lets the validation choice sit next to design, batch,
 and correction diagnostics instead of being handled as an afterthought.</p>
-<pre class="r"><code>audit &lt;- check_biome(
+<pre class="r"><code>audit &lt;- moat(
   repeated_biome,
   outcome = &quot;outcome&quot;,
   subject = &quot;subject&quot;,

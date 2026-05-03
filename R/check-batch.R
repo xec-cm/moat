@@ -139,7 +139,7 @@ check_dispersion <- function(
         "{cli::qty(length(missing_variables))}Required metadata variable{?s} {?is/are} missing.",
         "x" = "{cli::qty(length(missing_variables))}Missing variable{?s}: {.val {missing_variables}}."
       ),
-      class = "safebiome_error_missing_metadata_variable"
+      class = "moat_error_missing_metadata_variable"
     )
   }
 
@@ -151,7 +151,7 @@ check_dispersion <- function(
         "{cli::qty(nrow(missing_summary))}Missing values found in required metadata variable{?s}.",
         "x" = "{format_missing_summary(missing_summary)}."
       ),
-      class = "safebiome_error_missing_metadata_values"
+      class = "moat_error_missing_metadata_values"
     )
   }
 
@@ -312,7 +312,7 @@ resolve_batch_metadata <- function(x, metadata = NULL) {
 
   cli::cli_abort(
     "{.arg metadata} must be provided when {.arg x} is not a SummarizedExperiment.",
-    class = "safebiome_error_invalid_argument"
+    class = "moat_error_invalid_argument"
   )
 }
 
@@ -321,7 +321,7 @@ check_dist_object <- function(x, name) {
   if (!inherits(x, "dist")) {
     cli::cli_abort(
       "{.arg {name}} must be a {.cls dist} object.",
-      class = "safebiome_error_invalid_argument"
+      class = "moat_error_invalid_argument"
     )
   }
 
@@ -329,7 +329,7 @@ check_dist_object <- function(x, name) {
   if (anyNA(values) || any(!is.finite(values))) {
     cli::cli_abort(
       "{.arg {name}} must contain finite non-missing distances.",
-      class = "safebiome_error_invalid_argument"
+      class = "moat_error_invalid_argument"
     )
   }
 
@@ -348,7 +348,7 @@ align_metadata_to_distance <- function(metadata, distance) {
         "{.arg metadata} must have one row per sample in {.arg distance}.",
         "x" = "{.arg metadata} has {nrow(metadata)} row{?s}; {.arg distance} has {n_samples} sample{?s}."
       ),
-      class = "safebiome_error_metadata_distance_mismatch"
+      class = "moat_error_metadata_distance_mismatch"
     )
   }
 

@@ -161,7 +161,7 @@ test_that("outcome dispersion warnings appear in audit summaries", {
     colData = data.frame(outcome = outcome, batch = batch, row.names = colnames(counts))
   )
 
-  audit <- check_biome(se, outcome = "outcome", batch = "batch", distances = "bray", n_perm = 99)
+  audit <- moat(se, outcome = "outcome", batch = "batch", distances = "bray", n_perm = 99)
   audit_summary <- summary(audit)
 
   expect_true(any(grepl("Outcome dispersion differs", audit$batch$warnings)))

@@ -2,7 +2,6 @@
 % Please edit documentation in R/moat-package.R
 \docType{package}
 \name{moat-package}
-\alias{moat}
 \alias{moat-package}
 \title{moat: Microbiome Omics Audit Toolkit}
 \description{

@@ -182,7 +182,7 @@ check_correction_common_inputs <- function(
         "{cli::qty(length(missing_variables))}Required metadata variable{?s} {?is/are} missing.",
         "x" = "{cli::qty(length(missing_variables))}Missing variable{?s}: {.val {missing_variables}}."
       ),
-      class = "safebiome_error_missing_metadata_variable"
+      class = "moat_error_missing_metadata_variable"
     )
   }
 
@@ -193,7 +193,7 @@ check_correction_common_inputs <- function(
         "{cli::qty(nrow(missing_summary))}Missing values found in required metadata variable{?s}.",
         "x" = "{format_missing_summary(missing_summary)}."
       ),
-      class = "safebiome_error_missing_metadata_values"
+      class = "moat_error_missing_metadata_values"
     )
   }
 
@@ -201,7 +201,7 @@ check_correction_common_inputs <- function(
   if (length(outcome_levels) < 2) {
     cli::cli_abort(
       "{.arg outcome} must contain at least two levels.",
-      class = "safebiome_error_outcome_levels"
+      class = "moat_error_outcome_levels"
     )
   }
 
@@ -211,8 +211,8 @@ check_correction_common_inputs <- function(
 #' @keywords internal
 check_batch_balance_variable <- function(batch, metadata, outcome) {
   counts <- table(
-    .safebiome_batch = as.character(metadata[[batch]]),
-    .safebiome_outcome = as.character(metadata[[outcome]])
+    .moat_batch = as.character(metadata[[batch]]),
+    .moat_outcome = as.character(metadata[[outcome]])
   )
   proportions <- prop.table(counts, margin = 1)
   empty_cells <- sum(counts == 0)

@@ -14,10 +14,10 @@
 #'
 #' @examples
 #' data("toy_moat")
-#' audit <- check_biome(toy_moat, outcome = "outcome", batch = "batch", n_perm = 99)
+#' audit <- moat(toy_moat, outcome = "outcome", batch = "batch", n_perm = 99)
 #' plan_analysis(audit)
 plan_analysis <- function(audit, verbose = FALSE) {
-  validate_biome_audit(audit)
+  validate_moat_audit(audit)
   check_flag(verbose, "verbose")
 
   variables <- audit$params
@@ -44,7 +44,7 @@ plan_analysis <- function(audit, verbose = FALSE) {
       warnings = warnings,
       rationale = list(
         risk_summary = audit$risk_summary$modules,
-        recommendations = format_biome_recommendations(audit$recommendations)
+        recommendations = format_moat_recommendations(audit$recommendations)
       ),
       verbose = verbose
     ),
@@ -54,7 +54,7 @@ plan_analysis <- function(audit, verbose = FALSE) {
 
 #' @export
 print.moat_analysis_plan <- function(x, ...) {
-  risk_color <- biome_risk_color(x$risk$overall)
+  risk_color <- moat_risk_color(x$risk$overall)
   validation_color <- analysis_validation_color(x$ml_validation$scheme)
   batch_color <- analysis_batch_strategy_color(x$batch_strategy$strategy)
 
@@ -92,7 +92,7 @@ print.moat_analysis_plan <- function(x, ...) {
     } else {
       for (i in seq_len(nrow(x$rationale$risk_summary))) {
         row <- x$rationale$risk_summary[i, , drop = FALSE]
-        module_risk_color <- biome_risk_color(row$risk)
+        module_risk_color <- moat_risk_color(row$risk)
         cli::cli_li("{.field {row$module}}: {module_risk_color(toupper(row$risk))}")
         for (reason in row$reasons[[1]]) {
           cli::cli_li("  {reason}")

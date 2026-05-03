@@ -1,6 +1,6 @@
 test_that("plot_variance returns a ggplot for one distance", {
   se <- readRDS(test_path("fixtures/batch_effect_biome.rds"))
-  audit <- check_biome(
+  audit <- moat(
     se,
     outcome = "outcome",
     batch = "batch",
@@ -19,7 +19,7 @@ test_that("plot_variance returns a ggplot for one distance", {
 
 test_that("plot_variance supports all audited distances", {
   se <- readRDS(test_path("fixtures/batch_effect_biome.rds"))
-  audit <- check_biome(
+  audit <- moat(
     se,
     outcome = "outcome",
     batch = "batch",
@@ -36,7 +36,7 @@ test_that("plot_variance supports all audited distances", {
 
 test_that("plot_variance defaults to the first available distance", {
   se <- readRDS(test_path("fixtures/batch_effect_biome.rds"))
-  audit <- check_biome(
+  audit <- moat(
     se,
     outcome = "outcome",
     batch = "batch",
@@ -55,7 +55,7 @@ test_that("plot_variance works with covariate terms", {
   se <- readRDS(test_path("fixtures/repeated_biome.rds"))
   SummarizedExperiment::colData(se)$batch <- rep(c("A", "B"), each = 20)
   SummarizedExperiment::colData(se)$age <- seq_len(40)
-  audit <- check_biome(
+  audit <- moat(
     se,
     outcome = "outcome",
     batch = "batch",
@@ -72,7 +72,7 @@ test_that("plot_variance works with covariate terms", {
 })
 
 test_that("plot_variance validates unavailable batch diagnostics", {
-  audit <- moat:::biome_audit(
+  audit <- moat:::moat_audit(
     batch = moat:::skipped_batch_result(),
     params = list(outcome = "outcome")
   )
@@ -83,7 +83,7 @@ test_that("plot_variance validates unavailable batch diagnostics", {
 
 test_that("plot_variance reports missing distances clearly", {
   se <- readRDS(test_path("fixtures/batch_effect_biome.rds"))
-  audit <- check_biome(
+  audit <- moat(
     se,
     outcome = "outcome",
     batch = "batch",

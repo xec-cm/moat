@@ -117,7 +117,7 @@ check_continuous_design <- function(metadata, outcome, variables) {
         "{.arg variables} must name numeric metadata variables.",
         "x" = "Non-numeric variable{?s}: {.val {non_numeric_variables}}."
       ),
-      class = "safebiome_error_invalid_argument"
+      class = "moat_error_invalid_argument"
     )
   }
 
@@ -157,7 +157,7 @@ check_design_common_inputs <- function(metadata, outcome, variables) {
         "{cli::qty(length(missing_variables))}Required metadata variable{?s} {?is/are} missing.",
         "x" = "{cli::qty(length(missing_variables))}Missing variable{?s}: {.val {missing_variables}}."
       ),
-      class = "safebiome_error_missing_metadata_variable"
+      class = "moat_error_missing_metadata_variable"
     )
   }
 
@@ -168,7 +168,7 @@ check_design_common_inputs <- function(metadata, outcome, variables) {
         "{cli::qty(nrow(missing_summary))}Missing values found in required metadata variable{?s}.",
         "x" = "{format_missing_summary(missing_summary)}."
       ),
-      class = "safebiome_error_missing_metadata_values"
+      class = "moat_error_missing_metadata_values"
     )
   }
 
@@ -176,7 +176,7 @@ check_design_common_inputs <- function(metadata, outcome, variables) {
   if (length(outcome_levels) < 2) {
     cli::cli_abort(
       "{.arg outcome} must contain at least two levels.",
-      class = "safebiome_error_outcome_levels"
+      class = "moat_error_outcome_levels"
     )
   }
 
@@ -188,7 +188,7 @@ check_metadata_frame <- function(metadata) {
   if (!is.data.frame(metadata)) {
     cli::cli_abort(
       "{.arg metadata} must be a data frame.",
-      class = "safebiome_error_invalid_argument"
+      class = "moat_error_invalid_argument"
     )
   }
 
@@ -198,8 +198,8 @@ check_metadata_frame <- function(metadata) {
 #' @keywords internal
 check_categorical_design_variable <- function(variable, metadata, outcome) {
   contingency_table <- table(
-    .safebiome_variable = as.character(metadata[[variable]]),
-    .safebiome_outcome = as.character(metadata[[outcome]])
+    .moat_variable = as.character(metadata[[variable]]),
+    .moat_outcome = as.character(metadata[[outcome]])
   )
 
   empty_cells <- sum(contingency_table == 0)
@@ -338,7 +338,7 @@ compute_cramers_v <- function(x) {
   if (!is.matrix(x) && !is.table(x)) {
     cli::cli_abort(
       "{.arg x} must be a contingency table.",
-      class = "safebiome_error_invalid_argument"
+      class = "moat_error_invalid_argument"
     )
   }
 

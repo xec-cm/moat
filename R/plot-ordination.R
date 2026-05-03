@@ -19,10 +19,10 @@
 #'
 #' @examples
 #' data("toy_moat")
-#' audit <- check_biome(toy_moat, outcome = "outcome", batch = "batch", n_perm = 99)
+#' audit <- moat(toy_moat, outcome = "outcome", batch = "batch", n_perm = 99)
 #' plot_ordination(audit, color = "batch", distance = "bray")
 plot_ordination <- function(audit, color = NULL, distance = NULL, aspect = c("auto", "equal")) {
-  validate_biome_audit(audit)
+  validate_moat_audit(audit)
   check_plot_variable(color, "color", allow_null = TRUE)
   check_plot_character(distance, "distance", allow_null = TRUE)
   aspect <- match.arg(aspect)
@@ -46,7 +46,7 @@ plot_ordination <- function(audit, color = NULL, distance = NULL, aspect = c("au
       y = axis_labels$y,
       color = color
     ) +
-    theme_safebiome_plot()
+    theme_moat_plot()
 
   if (identical(aspect, "equal")) {
     plot <- plot + ggplot2::coord_equal()
@@ -65,7 +65,7 @@ resolve_ordination_distances <- function(audit, distance = NULL) {
   if (!is.list(pcoa) || length(pcoa) == 0) {
     cli::cli_abort(
       "No PCoA batch diagnostics are available in {.arg audit}.",
-      class = "safebiome_error_plot_unavailable"
+      class = "moat_error_plot_unavailable"
     )
   }
 
@@ -90,7 +90,7 @@ resolve_ordination_distances <- function(audit, distance = NULL) {
         "x" = "Missing: {.val {missing}}.",
         "i" = "Available: {.val {available}}."
       ),
-      class = "safebiome_error_plot_distance_unavailable"
+      class = "moat_error_plot_distance_unavailable"
     )
   }
 
@@ -114,7 +114,7 @@ resolve_ordination_color <- function(audit, color = NULL, distances) {
 
   cli::cli_abort(
     "No outcome, batch, or covariate variable is available for coloring the ordination plot.",
-    class = "safebiome_error_plot_variable_unavailable"
+    class = "moat_error_plot_variable_unavailable"
   )
 }
 
@@ -127,7 +127,7 @@ validate_ordination_color <- function(audit, color, distances) {
         "Variable {.val {color}} is not available in stored PCoA coordinates.",
         "i" = "Available variables: {.val {available}}."
       ),
-      class = "safebiome_error_plot_variable_unavailable"
+      class = "moat_error_plot_variable_unavailable"
     )
   }
 
@@ -173,7 +173,7 @@ ordination_plot_data <- function(audit, distances, color) {
   if (length(rows) == 0) {
     cli::cli_abort(
       "No plottable PCoA coordinates are available for the selected distances.",
-      class = "safebiome_error_plot_unavailable"
+      class = "moat_error_plot_unavailable"
     )
   }
 

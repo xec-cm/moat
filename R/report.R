@@ -16,11 +16,11 @@
 #' @examples
 #' \dontrun{
 #' data("toy_moat")
-#' audit <- check_biome(toy_moat, outcome = "outcome", batch = "batch", n_perm = 99)
+#' audit <- moat(toy_moat, outcome = "outcome", batch = "batch", n_perm = 99)
 #' report(audit)
 #' }
 report <- function(audit, file = "moat_report.html", quiet = TRUE, ...) {
-  validate_biome_audit(audit)
+  validate_moat_audit(audit)
   check_string(file, "file")
   check_flag(quiet, "quiet")
   check_report_dependencies()
@@ -63,14 +63,14 @@ check_report_dependencies <- function() {
   if (!report_has_rmarkdown()) {
     cli::cli_abort(
       "{.pkg rmarkdown} must be installed to render MOAT reports.",
-      class = "safebiome_error_missing_suggested_package"
+      class = "moat_error_missing_suggested_package"
     )
   }
 
   if (!report_has_pandoc()) {
     cli::cli_abort(
       "Pandoc must be available to render MOAT reports.",
-      class = "safebiome_error_missing_pandoc"
+      class = "moat_error_missing_pandoc"
     )
   }
 
@@ -96,7 +96,7 @@ moat_report_template <- function() {
   if (!file.exists(template)) {
     cli::cli_abort(
       "The MOAT report template could not be found.",
-      class = "safebiome_error_missing_report_template"
+      class = "moat_error_missing_report_template"
     )
   }
   template
@@ -104,7 +104,7 @@ moat_report_template <- function() {
 
 #' @keywords internal
 audit_report_data <- function(audit) {
-  validate_biome_audit(audit)
+  validate_moat_audit(audit)
   list(
     dataset = audit_report_dataset(audit),
     risk = audit_report_risk(audit),
@@ -112,7 +112,7 @@ audit_report_data <- function(audit) {
     correction = audit_report_correction(audit),
     batch = audit_report_batch(audit),
     leakage = audit_report_leakage(audit),
-    recommendations = format_biome_recommendations(audit$recommendations),
+    recommendations = format_moat_recommendations(audit$recommendations),
     plan = plan_analysis(audit)
   )
 }

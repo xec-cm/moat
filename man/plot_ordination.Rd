@@ -35,6 +35,6 @@ covariate variable stored with the ordination coordinates.
 }
 \examples{
 data("toy_moat")
-audit <- check_biome(toy_moat, outcome = "outcome", batch = "batch", n_perm = 99)
+audit <- moat(toy_moat, outcome = "outcome", batch = "batch", n_perm = 99)
 plot_ordination(audit, color = "batch", distance = "bray")
 }

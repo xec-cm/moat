@@ -1,6 +1,6 @@
 test_that("report data prepares readable sections from an audit", {
   data("toy_moat")
-  audit <- check_biome(
+  audit <- moat(
     toy_moat,
     outcome = "outcome",
     batch = "batch",
@@ -25,13 +25,13 @@ test_that("report data prepares readable sections from an audit", {
 
 test_that("report validates inputs and locates its template", {
   expect_error(report(list()), "moat_audit")
-  expect_error(report(moat:::biome_audit(), file = NA_character_), "file")
-  expect_error(report(moat:::biome_audit(), quiet = NA), "quiet")
+  expect_error(report(moat:::moat_audit(), file = NA_character_), "file")
+  expect_error(report(moat:::moat_audit(), quiet = NA), "quiet")
   expect_true(file.exists(moat:::moat_report_template()))
 })
 
 test_that("report passes audit data to the R Markdown renderer", {
-  audit <- moat:::biome_audit(risk = "low")
+  audit <- moat:::moat_audit(risk = "low")
   output <- file.path(tempdir(), "nested", "mock-report.html")
   captured <- new.env(parent = emptyenv())
 
@@ -96,7 +96,7 @@ test_that("render_report_rmarkdown delegates to the renderer implementation", {
 })
 
 test_that("report helpers cover fallback audit sections", {
-  audit <- moat:::biome_audit(
+  audit <- moat:::moat_audit(
     batch = list(status = "skipped", risk = "unknown"),
     design = list(status = "skipped"),
     risk = "unknown"
@@ -119,7 +119,7 @@ test_that("report renders an offline HTML report", {
   testthat::skip_if_not(rmarkdown::pandoc_available(), "Pandoc is required to render R Markdown reports.")
 
   data("toy_moat")
-  audit <- check_biome(
+  audit <- moat(
     toy_moat,
     outcome = "outcome",
     batch = "batch",

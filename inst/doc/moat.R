@@ -20,7 +20,7 @@ head(SummarizedExperiment::colData(toy_moat))
 
 
 ## ----run-audit----------------------------------------------------------------
-audit <- check_biome(
+audit <- moat(
   toy_moat,
   outcome = "outcome",
   batch = "batch",

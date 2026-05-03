@@ -95,7 +95,7 @@ leakage_time$temporal_leakage[c(
 
 
 ## ----full-audit---------------------------------------------------------------
-audit <- check_biome(
+audit <- moat(
   repeated_biome,
   outcome = "outcome",
   subject = "subject",

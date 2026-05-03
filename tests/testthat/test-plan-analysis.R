@@ -1,5 +1,5 @@
 test_that("plan_analysis returns the required structured components", {
-  audit <- moat:::biome_audit(
+  audit <- moat:::moat_audit(
     params = list(outcome = "condition")
   )
 
@@ -31,7 +31,7 @@ test_that("plan_analysis returns the required structured components", {
 
 test_that("confounded batch warns against naive correction", {
   se <- readRDS(test_path("fixtures/confounded_biome.rds"))
-  audit <- check_biome(
+  audit <- moat(
     se,
     outcome = "outcome",
     batch = "batch",
@@ -51,7 +51,7 @@ test_that("confounded batch warns against naive correction", {
 
 test_that("repeated measures recommend grouped validation and restricted permutations", {
   se <- readRDS(test_path("fixtures/repeated_biome.rds"))
-  audit <- check_biome(
+  audit <- moat(
     se,
     outcome = "outcome",
     subject = "subject",
@@ -71,7 +71,7 @@ test_that("repeated measures recommend grouped validation and restricted permuta
 
 test_that("batch-dominated microbiome recommends sensitivity analysis", {
   se <- readRDS(test_path("fixtures/batch_effect_biome.rds"))
-  audit <- check_biome(
+  audit <- moat(
     se,
     outcome = "outcome",
     batch = "batch",
@@ -91,7 +91,7 @@ test_that("identifiable batch adjustment is included cautiously in DA formula", 
   se <- readRDS(test_path("fixtures/repeated_biome.rds"))
   SummarizedExperiment::colData(se)$batch <- rep(c("A", "B"), each = 20)
   SummarizedExperiment::colData(se)$age <- seq_len(40)
-  audit <- check_biome(
+  audit <- moat(
     se,
     outcome = "outcome",
     batch = "batch",
@@ -112,7 +112,7 @@ test_that("identifiable batch adjustment is included cautiously in DA formula", 
 })
 
 test_that("plan_analysis print method is readable and invisible", {
-  audit <- moat:::biome_audit(
+  audit <- moat:::moat_audit(
     params = list(outcome = "condition"),
     risk = "moderate"
   )
@@ -129,7 +129,7 @@ test_that("plan_analysis print method is readable and invisible", {
 })
 
 test_that("plan_analysis display keeps quoting only when names need it", {
-  audit <- moat:::biome_audit(
+  audit <- moat:::moat_audit(
     params = list(outcome = "case status", batch = "batch")
   )
 
@@ -144,12 +144,12 @@ test_that("plan_analysis display keeps quoting only when names need it", {
 test_that("plan_analysis validates inputs", {
   expect_error(plan_analysis(list()), "must inherit")
 
-  audit <- moat:::biome_audit()
+  audit <- moat:::moat_audit()
   expect_error(plan_analysis(audit, verbose = NA), "logical value")
 })
 
 test_that("plan_analysis covers fallback formulas and display colors", {
-  audit <- moat:::biome_audit(params = list())
+  audit <- moat:::moat_audit(params = list())
 
   da_formula <- moat:::recommend_da_formula(audit, audit$params)
   permanova_formula <- moat:::recommend_permanova_formula(audit$params)
@@ -168,7 +168,7 @@ test_that("plan_analysis covers fallback formulas and display colors", {
 })
 
 test_that("plan_analysis covers repeated-only permutation and cautious batch strategy", {
-  repeated_audit <- moat:::biome_audit(
+  repeated_audit <- moat:::moat_audit(
     leakage = list(
       repeated_measures = list(status = "evaluated", risk = "high"),
       temporal_leakage = list(status = "skipped"),
@@ -180,7 +180,7 @@ test_that("plan_analysis covers repeated-only permutation and cautious batch str
   expect_equal(permutation$scheme, "restricted_by_subject")
   expect_equal(permutation$strata, "subject")
 
-  cautious_audit <- moat:::biome_audit(
+  cautious_audit <- moat:::moat_audit(
     batch = list(status = "evaluated", risk = "low"),
     correction = list(feasibility = "safe"),
     params = list(batch = "batch")

@@ -12,7 +12,7 @@
 #'
 #' @return A \code{moat_audit} object.
 #' @keywords internal
-new_biome_audit <- function(
+new_moat_audit <- function(
   input = list(),
   design = list(),
   batch = list(),
@@ -38,7 +38,7 @@ new_biome_audit <- function(
       risk_summary = risk_summary,
       recommendations = recommendations,
       risk = risk,
-      params = normalize_biome_audit_params(params)
+      params = normalize_moat_audit_params(params)
     ),
     class = c("moat_audit", "list")
   )
@@ -50,21 +50,21 @@ new_biome_audit <- function(
 #'
 #' @return The validated \code{moat_audit} object.
 #' @keywords internal
-validate_biome_audit <- function(x) {
+validate_moat_audit <- function(x) {
   if (!inherits(x, "moat_audit")) {
     cli::cli_abort(
       c(
         "Object must inherit from {.cls moat_audit}.",
         "x" = "Object has class {.cls {class(x)}}."
       ),
-      class = "safebiome_error_invalid_class"
+      class = "moat_error_invalid_class"
     )
   }
 
   if (!is.list(x)) {
     cli::cli_abort(
       "The underlying structure of a {.cls moat_audit} must be a list.",
-      class = "safebiome_error_invalid_structure"
+      class = "moat_error_invalid_structure"
     )
   }
 
@@ -78,7 +78,7 @@ validate_biome_audit <- function(x) {
         "Missing required components in {.cls moat_audit} object.",
         "x" = "Missing: {.val {missing_names}}."
       ),
-      class = "safebiome_error_missing_components"
+      class = "moat_error_missing_components"
     )
   }
 
@@ -88,7 +88,7 @@ validate_biome_audit <- function(x) {
         "Unexpected components found in {.cls moat_audit} object.",
         "x" = "Unexpected: {.val {unexpected_names}}."
       ),
-      class = "safebiome_error_unexpected_components"
+      class = "moat_error_unexpected_components"
     )
   }
 
@@ -100,14 +100,14 @@ validate_biome_audit <- function(x) {
         "Audit components must use list-like structures.",
         "x" = "Invalid component{?s}: {.field {invalid_modules}}."
       ),
-      class = "safebiome_error_invalid_component_type"
+      class = "moat_error_invalid_component_type"
     )
   }
 
   if (!is.character(x$recommendations) && !is.list(x$recommendations)) {
     cli::cli_abort(
       "{.field recommendations} must be a character vector or list.",
-      class = "safebiome_error_invalid_recommendations"
+      class = "moat_error_invalid_recommendations"
     )
   }
 
@@ -117,7 +117,7 @@ validate_biome_audit <- function(x) {
         "The {.field risk} component must be a single string.",
         "x" = "Provided {.field risk} has type {.type {x$risk}} and length {length(x$risk)}."
       ),
-      class = "safebiome_error_invalid_risk"
+      class = "moat_error_invalid_risk"
     )
   }
 
@@ -128,14 +128,14 @@ validate_biome_audit <- function(x) {
         "{.field risk} must be one of {.val {allowed_risk}}.",
         "x" = "Provided risk: {.val {x$risk}}."
       ),
-      class = "safebiome_error_invalid_risk_level"
+      class = "moat_error_invalid_risk_level"
     )
   }
 
   if (!"schema_version" %in% names(x$params)) {
     cli::cli_abort(
       "{.field params} must include a {.field schema_version} entry.",
-      class = "safebiome_error_missing_schema_version"
+      class = "moat_error_missing_schema_version"
     )
   }
 
@@ -149,10 +149,10 @@ validate_biome_audit <- function(x) {
 #' This is the official constructor that should be used by other functions
 #' in the package to generate the final audit report.
 #'
-#' @inheritParams new_biome_audit
+#' @inheritParams new_moat_audit
 #' @return A validated \code{moat_audit} object.
 #' @keywords internal
-biome_audit <- function(
+moat_audit <- function(
   input = list(),
   design = list(),
   batch = list(),
@@ -163,7 +163,7 @@ biome_audit <- function(
   risk = "unknown",
   params = list()
 ) {
-  res <- new_biome_audit(
+  res <- new_moat_audit(
     input = input,
     design = design,
     batch = batch,
@@ -175,7 +175,7 @@ biome_audit <- function(
     params = params
   )
 
-  validate_biome_audit(res)
+  validate_moat_audit(res)
 }
 
 #' Test if an object is a moat_audit
@@ -187,9 +187,9 @@ biome_audit <- function(
 #' @export
 #' @examples
 #' # This is an internal object structure, but can be tested:
-#' audit <- moat:::biome_audit(risk = "low")
-#' is_biome_audit(audit)
-is_biome_audit <- function(x) { inherits(x, "moat_audit") }
+#' audit <- moat:::moat_audit(risk = "low")
+#' is_moat_audit(audit)
+is_moat_audit <- function(x) { inherits(x, "moat_audit") }
 
 #' Print a moat_audit object
 #'
@@ -202,7 +202,7 @@ is_biome_audit <- function(x) { inherits(x, "moat_audit") }
 print.moat_audit <- function(x, ...) {
   cli::cli_h1("MOAT Audit Report")
 
-  risk_color <- biome_risk_color(x$risk)
+  risk_color <- moat_risk_color(x$risk)
   cli::cli_alert_info("Overall Risk: {risk_color(x$risk)}")
   cli::cli_alert_info("Schema version: {cli::col_blue(x$params$schema_version)}")
   
@@ -210,13 +210,13 @@ print.moat_audit <- function(x, ...) {
   
   modules <- c("design", "batch", "correction", "leakage")
   for (mod in modules) {
-    status <- biome_audit_module_status(x[[mod]])
+    status <- moat_audit_module_status(x[[mod]])
     cli::cli_li("{.field {mod}}: {status}")
   }
   
   if (length(x$recommendations) > 0) {
     cli::cli_h2("Recommendations:")
-    for (rec in format_biome_recommendations(x$recommendations)) { cli::cli_li(rec) }
+    for (rec in format_moat_recommendations(x$recommendations)) { cli::cli_li(rec) }
   } else {
     cli::cli_alert_success("No critical recommendations.")
   }
@@ -225,7 +225,7 @@ print.moat_audit <- function(x, ...) {
 }
 
 #' @keywords internal
-biome_risk_color <- function(risk) {
+moat_risk_color <- function(risk) {
   switch(
     as.character(risk),
     "critical" = cli::col_red,
@@ -242,7 +242,7 @@ validate_risk_summary <- function(x) {
   if (!is.list(x)) {
     cli::cli_abort(
       "{.field risk_summary} must be a list.",
-      class = "safebiome_error_invalid_risk_summary"
+      class = "moat_error_invalid_risk_summary"
     )
   }
 
@@ -254,21 +254,21 @@ validate_risk_summary <- function(x) {
         "{.field risk_summary} is missing required components.",
         "x" = "Missing: {.val {missing_names}}."
       ),
-      class = "safebiome_error_invalid_risk_summary"
+      class = "moat_error_invalid_risk_summary"
     )
   }
 
   if (!is.list(x$overall) || !"risk" %in% names(x$overall) || !"reasons" %in% names(x$overall)) {
     cli::cli_abort(
       "{.field risk_summary$overall} must include {.field risk} and {.field reasons}.",
-      class = "safebiome_error_invalid_risk_summary"
+      class = "moat_error_invalid_risk_summary"
     )
   }
 
   if (!is.data.frame(x$modules)) {
     cli::cli_abort(
       "{.field risk_summary$modules} must be a data frame.",
-      class = "safebiome_error_invalid_risk_summary"
+      class = "moat_error_invalid_risk_summary"
     )
   }
 
@@ -276,29 +276,29 @@ validate_risk_summary <- function(x) {
 }
 
 #' @keywords internal
-biome_audit_schema_version <- function() { "0.1.0" }
+moat_audit_schema_version <- function() { "0.1.0" }
 
 #' @keywords internal
-normalize_biome_audit_params <- function(params) {
+normalize_moat_audit_params <- function(params) {
   if (!is.list(params)) {
-    cli::cli_abort("{.arg params} must be a list.", class = "safebiome_error_invalid_argument")
+    cli::cli_abort("{.arg params} must be a list.", class = "moat_error_invalid_argument")
   }
 
   if (!"schema_version" %in% names(params)) {
-    params <- c(list(schema_version = biome_audit_schema_version()), params)
+    params <- c(list(schema_version = moat_audit_schema_version()), params)
   }
 
   params
 }
 
 #' @keywords internal
-format_biome_recommendations <- function(x) {
+format_moat_recommendations <- function(x) {
   if (is.character(x)) { return(x) }
   vapply(x, as.character, character(1))
 }
 
 #' @keywords internal
-biome_audit_module_status <- function(x) {
+moat_audit_module_status <- function(x) {
   if (length(x) == 0) { return("Pending/Skipped") }
   if (identical(x$status, "pending")) { return("Pending") }
   "Evaluated"

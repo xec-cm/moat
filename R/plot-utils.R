@@ -1,5 +1,5 @@
 #' @keywords internal
-theme_safebiome_plot <- function() {
+theme_moat_plot <- function() {
   ggplot2::theme_minimal(base_size = 11) +
     ggplot2::theme(
       panel.grid.major = ggplot2::element_line(color = "#E6E8EB", linewidth = 0.25),
@@ -16,7 +16,7 @@ theme_safebiome_plot <- function() {
 }
 
 #' @keywords internal
-safebiome_role_palette <- function() {
+moat_role_palette <- function() {
   c(
     outcome = "#0072B2",
     batch = "#D55E00",
@@ -26,7 +26,7 @@ safebiome_role_palette <- function() {
 }
 
 #' @keywords internal
-safebiome_risk_palette <- function() {
+moat_risk_palette <- function() {
   c(
     unknown = "#9CA3AF",
     low = "#009E73",
@@ -44,7 +44,7 @@ check_plot_variable <- function(variable, name = "variable", allow_null = FALSE)
   if (!is.character(variable) || length(variable) != 1 || is.na(variable) || !nzchar(variable)) {
     cli::cli_abort(
       "{.arg {name}} must be a single non-empty string.",
-      class = "safebiome_error_invalid_argument"
+      class = "moat_error_invalid_argument"
     )
   }
 
@@ -59,7 +59,7 @@ check_plot_character <- function(x, name, allow_null = FALSE) {
   if (!is.character(x) || length(x) == 0 || anyNA(x) || any(!nzchar(x))) {
     cli::cli_abort(
       "{.arg {name}} must be a non-empty character vector.",
-      class = "safebiome_error_invalid_argument"
+      class = "moat_error_invalid_argument"
     )
   }
 

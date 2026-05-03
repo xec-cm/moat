@@ -49,7 +49,7 @@ validate_biome_input <- function(
         "x" = "Requested assay: {.val {assay}}.",
         "i" = "Available assay{?s}: {.val {available_assays}}."
       ),
-      class = "safebiome_error_missing_assay"
+      class = "moat_error_missing_assay"
     )
   }
 
@@ -62,7 +62,7 @@ validate_biome_input <- function(
         "{cli::qty(length(missing_variables))}Required metadata variable{?s} {?is/are} missing from {.fn SummarizedExperiment::colData}.",
         "x" = "{cli::qty(length(missing_variables))}Missing variable{?s}: {.val {missing_variables}}."
       ),
-      class = "safebiome_error_missing_metadata_variable"
+      class = "moat_error_missing_metadata_variable"
     )
   }
 
@@ -74,7 +74,7 @@ validate_biome_input <- function(
         "{.arg outcome} must contain at least two non-missing levels.",
         "x" = "Variable {.var {outcome}} has {length(outcome_levels)} non-missing level{?s}."
       ),
-      class = "safebiome_error_outcome_levels"
+      class = "moat_error_outcome_levels"
     )
   }
 
@@ -85,7 +85,7 @@ validate_biome_input <- function(
         "{cli::qty(nrow(missing_summary))}Missing values found in required metadata variable{?s}.",
         "x" = "{format_missing_summary(missing_summary)}."
       ),
-      class = "safebiome_error_missing_metadata_values"
+      class = "moat_error_missing_metadata_values"
     )
   }
 
@@ -115,7 +115,7 @@ check_se <- function(x) {
         "{.arg x} must be a {.cls SummarizedExperiment} or {.cls TreeSummarizedExperiment} object.",
         "x" = "Received object with class {.cls {class(x)}}."
       ),
-      class = "safebiome_error_invalid_input_object"
+      class = "moat_error_invalid_input_object"
     )
   }
 }
@@ -125,7 +125,7 @@ check_string <- function(x, name) {
   if (!is.character(x) || length(x) != 1 || is.na(x) || identical(x, "")) {
     cli::cli_abort(
       "{.arg {name}} must be a single non-missing string.",
-      class = "safebiome_error_invalid_argument"
+      class = "moat_error_invalid_argument"
     )
   }
 }
@@ -136,7 +136,7 @@ check_character_or_null <- function(x, name) {
   if (!is.character(x) || anyNA(x) || any(x == "")) {
     cli::cli_abort(
       "{.arg {name}} must be {.code NULL} or a character vector without missing or empty values.",
-      class = "safebiome_error_invalid_argument"
+      class = "moat_error_invalid_argument"
     )
   }
 
@@ -154,7 +154,7 @@ check_non_empty_character <- function(x, name) {
   if (!is.character(x) || length(x) == 0 || anyNA(x) || any(x == "")) {
     cli::cli_abort(
       "{.arg {name}} must be a non-empty character vector without missing or empty values.",
-      class = "safebiome_error_invalid_argument"
+      class = "moat_error_invalid_argument"
     )
   }
 
@@ -173,7 +173,7 @@ check_positive_integer <- function(x, name) {
   ) {
     cli::cli_abort(
       "{.arg {name}} must be a single positive integer.",
-      class = "safebiome_error_invalid_argument"
+      class = "moat_error_invalid_argument"
     )
   }
 
@@ -185,7 +185,7 @@ check_flag <- function(x, name) {
   if (!is.logical(x) || length(x) != 1 || is.na(x)) {
     cli::cli_abort(
       "{.arg {name}} must be a single non-missing logical value.",
-      class = "safebiome_error_invalid_argument"
+      class = "moat_error_invalid_argument"
     )
   }
 

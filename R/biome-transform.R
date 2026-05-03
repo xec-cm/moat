@@ -102,7 +102,7 @@ extract_biome_matrix <- function(x, assay = "counts") {
           "x" = "Requested assay: {.val {assay}}.",
           "i" = "Available assay{?s}: {.val {available_assays}}."
         ),
-        class = "safebiome_error_missing_assay"
+        class = "moat_error_missing_assay"
       )
     }
     return(validate_biome_matrix(SummarizedExperiment::assay(x, assay)))
@@ -120,35 +120,35 @@ validate_biome_matrix <- function(x) {
   if (!is.matrix(x)) {
     cli::cli_abort(
       "{.arg x} must be a numeric matrix-like object.",
-      class = "safebiome_error_invalid_argument"
+      class = "moat_error_invalid_argument"
     )
   }
 
   if (!is.numeric(x)) {
     cli::cli_abort(
       "{.arg x} must contain numeric values.",
-      class = "safebiome_error_invalid_argument"
+      class = "moat_error_invalid_argument"
     )
   }
 
   if (anyNA(x)) {
     cli::cli_abort(
       "{.arg x} must not contain missing values.",
-      class = "safebiome_error_invalid_argument"
+      class = "moat_error_invalid_argument"
     )
   }
 
   if (any(x < 0)) {
     cli::cli_abort(
       "{.arg x} must not contain negative values.",
-      class = "safebiome_error_invalid_argument"
+      class = "moat_error_invalid_argument"
     )
   }
 
   if (nrow(x) == 0 || ncol(x) == 0) {
     cli::cli_abort(
       "{.arg x} must have at least one feature and one sample.",
-      class = "safebiome_error_invalid_argument"
+      class = "moat_error_invalid_argument"
     )
   }
 
@@ -161,7 +161,7 @@ check_positive_number <- function(x, name) {
   if (!is.numeric(x) || length(x) != 1 || is.na(x) || !is.finite(x) || x <= 0) {
     cli::cli_abort(
       "{.arg {name}} must be a single positive number.",
-      class = "safebiome_error_invalid_argument"
+      class = "moat_error_invalid_argument"
     )
   }
 
@@ -174,7 +174,7 @@ transform_biome_relative <- function(x) {
   if (any(sample_totals <= 0)) {
     cli::cli_abort(
       "{.arg x} must have positive sample totals for relative abundance transformation.",
-      class = "safebiome_error_zero_sample_total"
+      class = "moat_error_zero_sample_total"
     )
   }
 
@@ -216,7 +216,7 @@ resolve_distance_transform <- function(distance, transform) {
         "{.arg transform} is not compatible with {.arg distance} = {.val {distance}}.",
         "i" = "Use {.val auto} or one of {.val {valid_transforms}}."
       ),
-      class = "safebiome_error_incompatible_transform"
+      class = "moat_error_incompatible_transform"
     )
   }
 

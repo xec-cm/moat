@@ -149,7 +149,7 @@ check_leakage_variables <- function(metadata, variables) {
         "{cli::qty(length(missing_variables))}Required metadata variable{?s} {?is/are} missing.",
         "x" = "{cli::qty(length(missing_variables))}Missing variable{?s}: {.val {missing_variables}}."
       ),
-      class = "safebiome_error_missing_metadata_variable"
+      class = "moat_error_missing_metadata_variable"
     )
   }
 
@@ -160,7 +160,7 @@ check_leakage_variables <- function(metadata, variables) {
         "{cli::qty(nrow(missing_summary))}Missing values found in required metadata variable{?s}.",
         "x" = "{format_missing_summary(missing_summary)}."
       ),
-      class = "safebiome_error_missing_metadata_values"
+      class = "moat_error_missing_metadata_values"
     )
   }
 
@@ -173,7 +173,7 @@ check_leakage_outcome <- function(metadata, outcome) {
   if (length(outcome_levels) < 2) {
     cli::cli_abort(
       "{.arg outcome} must contain at least two levels.",
-      class = "safebiome_error_outcome_levels"
+      class = "moat_error_outcome_levels"
     )
   }
 
@@ -209,8 +209,8 @@ check_batch_leakage <- function(metadata, outcome, batch = NULL) {
 #' @keywords internal
 check_batch_leakage_variable <- function(batch, metadata, outcome) {
   counts <- table(
-    .safebiome_batch = as.character(metadata[[batch]]),
-    .safebiome_outcome = as.character(metadata[[outcome]])
+    .moat_batch = as.character(metadata[[batch]]),
+    .moat_outcome = as.character(metadata[[outcome]])
   )
   empty_cells <- sum(counts == 0)
   batch_levels_single_outcome <- sum(rowSums(counts > 0) == 1)
@@ -266,10 +266,10 @@ check_temporal_leakage <- function(
   }
 
   subject_time_counts <- stats::xtabs(
-    ~ .safebiome_subject + .safebiome_time,
+    ~ .moat_subject + .moat_time,
     data = data.frame(
-      .safebiome_subject = as.character(metadata[[subject]]),
-      .safebiome_time = as.character(metadata[[time]])
+      .moat_subject = as.character(metadata[[subject]]),
+      .moat_time = as.character(metadata[[time]])
     )
   )
   subjects_with_multiple_timepoints <- sum(rowSums(subject_time_counts > 0) > 1)

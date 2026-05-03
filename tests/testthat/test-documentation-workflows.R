@@ -1,7 +1,7 @@
 test_that("README workflow runs with current exported APIs", {
   data("toy_moat")
 
-  audit <- check_biome(
+  audit <- moat(
     toy_moat,
     outcome = "outcome",
     batch = "batch",
@@ -25,7 +25,7 @@ test_that("README workflow runs with current exported APIs", {
 
 test_that("documentation workflow functions are exported", {
   workflow_functions <- c(
-    "check_biome",
+    "moat",
     "plan_analysis",
     "report",
     "plot_design",

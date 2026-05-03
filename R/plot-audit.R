@@ -13,10 +13,10 @@
 #'
 #' @examples
 #' data("toy_moat")
-#' audit <- check_biome(toy_moat, outcome = "outcome", batch = "batch", n_perm = 99)
+#' audit <- moat(toy_moat, outcome = "outcome", batch = "batch", n_perm = 99)
 #' ggplot2::autoplot(audit)
 autoplot.moat_audit <- function(object, ...) {
-  validate_biome_audit(object)
+  validate_moat_audit(object)
   plot_data <- audit_risk_dashboard_data(object)
   caption <- audit_risk_dashboard_caption(object)
 
@@ -37,7 +37,7 @@ autoplot.moat_audit <- function(object, ...) {
       limits = c(0, 4.55),
       expand = ggplot2::expansion(mult = c(0, 0.02))
     ) +
-    ggplot2::scale_fill_manual(values = safebiome_risk_palette(), drop = FALSE, name = "Risk") +
+    ggplot2::scale_fill_manual(values = moat_risk_palette(), drop = FALSE, name = "Risk") +
     ggplot2::labs(
       title = "MOAT risk dashboard",
       subtitle = paste("Overall risk:", toupper(normalize_audit_risk(object$risk))),
@@ -46,7 +46,7 @@ autoplot.moat_audit <- function(object, ...) {
       caption = caption
     ) +
     ggplot2::coord_flip() +
-    theme_safebiome_plot()
+    theme_moat_plot()
 }
 
 #' @keywords internal
@@ -56,7 +56,7 @@ audit_risk_dashboard_data <- function(audit) {
   rows <- lapply(modules, audit_risk_dashboard_row, audit = audit, summary_modules = summary_modules)
   result <- do.call(rbind, rows)
   result$module <- factor(result$module, levels = rev(modules))
-  result$risk <- factor(result$risk, levels = names(safebiome_risk_palette()))
+  result$risk <- factor(result$risk, levels = names(moat_risk_palette()))
   result$risk_rank <- audit_risk_rank(as.character(result$risk))
   result$risk_label <- toupper(as.character(result$risk))
   result

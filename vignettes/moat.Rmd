@@ -59,7 +59,7 @@ For examples and vignettes we use a small number of permutations. Real analyses
 should generally use a larger value, such as the default `999`.
 
 ```{r run-audit}
-audit <- check_biome(
+audit <- moat(
   toy_moat,
   outcome = "outcome",
   batch = "batch",
@@ -143,7 +143,7 @@ plot_variance(audit, distance = "bray")
 Validation leakage can occur when samples from the same subject, batch, or time
 structure are split across train and test folds in a way that makes prediction
 look better than it is. MOAT reports the recommended cross-validation
-scheme based on the metadata supplied to `check_biome()`.
+scheme based on the metadata supplied to `moat()`.
 
 ```{r leakage-summary}
 audit$leakage$recommended_cv

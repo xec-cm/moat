@@ -539,7 +539,7 @@ check_predictability_seed <- function(seed) {
   ) {
     cli::cli_abort(
       "{.arg seed} must be a single finite integer.",
-      class = "safebiome_error_invalid_argument"
+      class = "moat_error_invalid_argument"
     )
   }
 

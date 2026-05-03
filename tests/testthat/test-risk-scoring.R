@@ -106,7 +106,7 @@ test_that("metadata-only predictability contributes to design risk scoring", {
 })
 
 test_that("manual audits receive a minimal risk summary", {
-  audit <- moat:::biome_audit(
+  audit <- moat:::moat_audit(
     risk = "medium",
     recommendations = "Review design."
   )
@@ -118,7 +118,7 @@ test_that("manual audits receive a minimal risk summary", {
 })
 
 test_that("summary.moat_audit returns and prints readable risk summaries", {
-  audit <- moat:::biome_audit(
+  audit <- moat:::moat_audit(
     risk = "critical",
     risk_summary = list(
       status = "evaluated",
@@ -139,7 +139,7 @@ test_that("summary.moat_audit returns and prints readable risk summaries", {
   )
   audit$risk_summary$modules$reasons <- I(list("Correction model is non-identifiable."))
   audit$risk_summary$modules$recommendations <- I(list("Do not rely on batch correction."))
-  audit <- moat:::validate_biome_audit(audit)
+  audit <- moat:::validate_moat_audit(audit)
 
   summary_object <- summary(audit, verbose = TRUE)
   printed <- capture.output(returned <- print(summary_object), type = "message")

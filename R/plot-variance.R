@@ -14,10 +14,10 @@
 #'
 #' @examples
 #' data("toy_moat")
-#' audit <- check_biome(toy_moat, outcome = "outcome", batch = "batch", n_perm = 99)
+#' audit <- moat(toy_moat, outcome = "outcome", batch = "batch", n_perm = 99)
 #' plot_variance(audit, distance = "bray")
 plot_variance <- function(audit, distance = NULL) {
-  validate_biome_audit(audit)
+  validate_moat_audit(audit)
   check_plot_character(distance, "distance", allow_null = TRUE)
 
   selected_distances <- resolve_variance_distances(audit, distance)
@@ -44,7 +44,7 @@ plot_variance <- function(audit, distance = NULL) {
       limits = c(0, y_limit),
       expand = ggplot2::expansion(mult = c(0, 0.02))
     ) +
-    ggplot2::scale_fill_manual(values = safebiome_role_palette(), drop = FALSE, name = "Role") +
+    ggplot2::scale_fill_manual(values = moat_role_palette(), drop = FALSE, name = "Role") +
     ggplot2::labs(
       title = "PERMANOVA variance explained",
       subtitle = "Terms are ordered by R2 within the selected audit diagnostics.",
@@ -53,7 +53,7 @@ plot_variance <- function(audit, distance = NULL) {
       caption = dominance_caption
     ) +
     ggplot2::coord_flip() +
-    theme_safebiome_plot()
+    theme_moat_plot()
 
   if (length(unique(plot_data$distance)) > 1) {
     plot <- plot + ggplot2::facet_wrap(ggplot2::vars(.data$distance), scales = "free_y")
@@ -68,7 +68,7 @@ resolve_variance_distances <- function(audit, distance = NULL) {
   if (!is.list(permanova) || length(permanova) == 0) {
     cli::cli_abort(
       "No PERMANOVA batch diagnostics are available in {.arg audit}.",
-      class = "safebiome_error_plot_unavailable"
+      class = "moat_error_plot_unavailable"
     )
   }
 
@@ -93,7 +93,7 @@ resolve_variance_distances <- function(audit, distance = NULL) {
         "x" = "Missing: {.val {missing}}.",
         "i" = "Available: {.val {available}}."
       ),
-      class = "safebiome_error_plot_distance_unavailable"
+      class = "moat_error_plot_distance_unavailable"
     )
   }
 
@@ -123,12 +123,12 @@ permanova_terms_plot_data <- function(audit, distances) {
   if (length(rows) == 0) {
     cli::cli_abort(
       "No plottable PERMANOVA terms are available for the selected distance{?s}.",
-      class = "safebiome_error_plot_unavailable"
+      class = "moat_error_plot_unavailable"
     )
   }
 
   result <- do.call(rbind, rows)
-  result$role <- factor(result$role, levels = names(safebiome_role_palette()))
+  result$role <- factor(result$role, levels = names(moat_role_palette()))
   result$term <- reorder_permanova_terms(result)
   result$r2_label <- sprintf("%.1f%%", 100 * result$r2)
   result

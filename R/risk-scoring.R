@@ -308,7 +308,7 @@ add_risk_summary_list_columns <- function(x, module_scores) {
 #' @keywords internal
 minimal_risk_summary <- function(risk = "unknown", recommendations = character()) {
   risk <- normalize_audit_risk(risk)
-  recommendations <- format_biome_recommendations(recommendations)
+  recommendations <- format_moat_recommendations(recommendations)
   list(
     status = "manual",
     module = "risk",
@@ -347,7 +347,7 @@ module_recommendations_for_scoring <- function(x) {
   if (!is.list(x) || is.null(x$recommendations)) {
     return(character())
   }
-  format_biome_recommendations(x$recommendations)
+  format_moat_recommendations(x$recommendations)
 }
 
 #' Print a MOAT audit summary
@@ -360,14 +360,14 @@ module_recommendations_for_scoring <- function(x) {
 #' @return A `summary.moat_audit` object.
 #' @export
 summary.moat_audit <- function(object, verbose = FALSE, ...) {
-  validate_biome_audit(object)
+  validate_moat_audit(object)
   check_flag(verbose, "verbose")
 
   structure(
     list(
       risk = object$risk,
       risk_summary = object$risk_summary,
-      recommendations = format_biome_recommendations(object$recommendations),
+      recommendations = format_moat_recommendations(object$recommendations),
       verbose = verbose
     ),
     class = "summary.moat_audit"

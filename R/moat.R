@@ -1,6 +1,6 @@
 #' Audit a microbiome study design
 #'
-#' `check_biome()` is the main entry point for MOAT. It validates a
+#' `moat()` is the main entry point for MOAT. It validates a
 #' `SummarizedExperiment`-like object, records the audit parameters, and returns
 #' a stable `moat_audit` object. Design and correction diagnostics are
 #' evaluated from metadata; batch diagnostics combine distance-based PERMANOVA,
@@ -35,14 +35,14 @@
 #' @examples
 #' data("toy_moat")
 #'
-#' audit <- check_biome(
+#' audit <- moat(
 #'   toy_moat,
 #'   outcome = "outcome",
 #'   batch = "batch"
 #' )
 #'
-#' is_biome_audit(audit)
-check_biome <- function(
+#' is_moat_audit(audit)
+moat <- function(
   x,
   outcome,
   batch = NULL,
@@ -105,7 +105,7 @@ check_biome <- function(
     leakage = leakage_audit
   )
 
-  biome_audit(
+  moat_audit(
     input = input$summary,
     design = design_audit,
     batch = batch_audit,
@@ -130,7 +130,7 @@ check_biome <- function(
 }
 
 #' @keywords internal
-pending_biome_module <- function(name) {
+pending_moat_module <- function(name) {
   list(
     status = "pending",
     module = name
