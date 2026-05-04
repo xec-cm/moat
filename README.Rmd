@@ -56,10 +56,7 @@ summary(audit)
 The audit object keeps module-level diagnostics:
 
 ```{r inspect-audit}
-audit$design[, c("variable", "role", "effect_size_name", "effect_size", "risk")]
-audit$batch$summary[, c("distance", "outcome_r2", "batch_r2", "risk")]
-audit$correction$feasibility
-audit$leakage$recommended_cv
+module_risks(audit)
 ```
 
 `plan_analysis()` translates the audit into downstream analysis guidance:
@@ -102,6 +99,9 @@ an analysis is invalid, and a low-risk audit does not prove that all downstream
 models are safe. The package is designed to make design limitations explicit so
 that conclusions are interpreted with the right sensitivity analyses and
 reporting context.
+
+The risk thresholds are documented in `vignette("risk-thresholds", package =
+"moat")` and are available programmatically with `risk_thresholds()`.
 
 ## Development Checks
 

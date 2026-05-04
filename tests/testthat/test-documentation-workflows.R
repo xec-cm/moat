@@ -11,12 +11,14 @@ test_that("README workflow runs with current exported APIs", {
   )
   audit_summary <- summary(audit)
   plan <- plan_analysis(audit)
+  risks <- module_risks(audit)
   design_plot <- plot_design(audit, variable = "batch")
   variance_plot <- plot_variance(audit, distance = "bray")
 
   expect_s3_class(audit, "moat_audit")
   expect_s3_class(audit_summary, "summary.moat_audit")
   expect_s3_class(plan, "moat_analysis_plan")
+  expect_s3_class(risks, "tbl_df")
   expect_s3_class(design_plot, "ggplot")
   expect_s3_class(variance_plot, "ggplot")
   expect_equal(audit$params$outcome, "outcome")
@@ -26,6 +28,10 @@ test_that("README workflow runs with current exported APIs", {
 test_that("documentation workflow functions are exported", {
   workflow_functions <- c(
     "moat",
+    "module_risks",
+    "audit_reasons",
+    "audit_recommendations",
+    "risk_thresholds",
     "plan_analysis",
     "report",
     "plot_design",
