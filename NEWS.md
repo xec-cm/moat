@@ -57,6 +57,8 @@
 ## Documentation And Release Preparation
 
 * Added an introductory vignette covering the full audit workflow.
+* Added a vignette showing how pre-analysis audit changes interpretation for
+  batch-dominated beta diversity, metadata-only predictability, and leakage.
 * Added a validation-leakage vignette for microbiome machine-learning
   workflows.
 * Updated README with current user-facing APIs.
