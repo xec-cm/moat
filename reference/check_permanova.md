@@ -14,7 +14,8 @@ check_permanova(
   outcome,
   batch = NULL,
   covariates = NULL,
-  n_perm = 999
+  n_perm = 999,
+  order_sensitivity = TRUE
 )
 ```
 
@@ -44,6 +45,11 @@ check_permanova(
 
   A single positive integer giving the number of permutations.
 
+- order_sensitivity:
+
+  A single logical value indicating whether to compare outcome-first and
+  batch-first PERMANOVA term orders. Defaults to `TRUE`.
+
 ## Value
 
 A list with PERMANOVA diagnostics.
@@ -69,7 +75,7 @@ check_permanova(distance, metadata, outcome = "outcome", batch = "batch", n_perm
 #> 
 #> $terms
 #>            term    role df sum_of_squares          r2  statistic p_value
-#> outcome outcome outcome  1    0.004004636 0.003494571   2.654277    0.10
+#> outcome outcome outcome  1    0.004004636 0.003494571   2.654277    0.08
 #> batch     batch   batch  1    1.086130965 0.947791939 719.888915    0.01
 #> 
 #> $outcome_r2
@@ -86,6 +92,31 @@ check_permanova(distance, metadata, outcome = "outcome", batch = "batch", n_perm
 #> 
 #> $risk
 #> [1] "high"
+#> 
+#> $order_sensitivity
+#> $order_sensitivity$status
+#> [1] "evaluated"
+#> 
+#> $order_sensitivity$comparisons
+#>           order                    formula    status  outcome_r2  batch_r2
+#> 1 outcome_first distance ~ outcome + batch evaluated 0.003494571 0.9477919
+#> 2   batch_first distance ~ batch + outcome evaluated 0.001253356 0.9500332
+#>   outcome_p_value batch_p_value error
+#> 1            0.10          0.01  <NA>
+#> 2            0.29          0.01  <NA>
+#> 
+#> $order_sensitivity$outcome_r2_difference
+#> [1] 0.002241215
+#> 
+#> $order_sensitivity$batch_r2_difference
+#> [1] 0.002241215
+#> 
+#> $order_sensitivity$risk
+#> [1] "low"
+#> 
+#> $order_sensitivity$warning
+#> character(0)
+#> 
 #> 
 #> $warnings
 #> character(0)

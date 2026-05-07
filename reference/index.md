@@ -15,6 +15,16 @@ visualize key diagnostics.
   : Generate a downstream analysis plan from a MOAT audit
 - [`report()`](https://xec-cm.github.io/moat/reference/report.md) :
   Render a MOAT audit HTML report
+- [`module_risks()`](https://xec-cm.github.io/moat/reference/module_risks.md)
+  : Extract module-level audit risks
+- [`as.data.frame(`*`<moat_audit>`*`)`](https://xec-cm.github.io/moat/reference/as.data.frame.moat_audit.md)
+  : Coerce a MOAT audit to a compact data frame
+- [`audit_reasons()`](https://xec-cm.github.io/moat/reference/audit_reasons.md)
+  : Extract audit risk reasons
+- [`audit_recommendations()`](https://xec-cm.github.io/moat/reference/audit_recommendations.md)
+  : Extract audit recommendations
+- [`risk_thresholds()`](https://xec-cm.github.io/moat/reference/risk_thresholds.md)
+  : Risk threshold reference
 - [`plot_design()`](https://xec-cm.github.io/moat/reference/plot_design.md)
   : Plot outcome distribution across a design variable
 - [`plot_ordination()`](https://xec-cm.github.io/moat/reference/plot_ordination.md)

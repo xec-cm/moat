@@ -9,6 +9,8 @@
   the package object classes.
 - Replaced remaining legacy condition classes and audit-object helpers
   with `moat_*` names; no compatibility aliases are provided.
+- Added tidy audit extraction helpers and a programmatic risk-threshold
+  reference for reports and methods documentation.
 
 ### New Package
 
@@ -51,6 +53,8 @@
   [`check_batch()`](https://xec-cm.github.io/moat/reference/check_batch.md)
   for PERMANOVA, dispersion, and PCoA-axis batch audits across selected
   distances.
+- Added optional PERMANOVA term-order sensitivity diagnostics for
+  outcome-first versus batch-first model formulas.
 
 ### Leakage And Risk Scoring
 
@@ -83,7 +87,13 @@
 ### Documentation And Release Preparation
 
 - Added an introductory vignette covering the full audit workflow.
+- Added a vignette showing how pre-analysis audit changes interpretation
+  for batch-dominated beta diversity, metadata-only predictability, and
+  leakage.
 - Added a validation-leakage vignette for microbiome machine-learning
   workflows.
 - Updated README with current user-facing APIs.
+- Made source-only documentation workflow tests skip cleanly in
+  installed package checks and stopped tracking generated vignette HTML
+  artifacts.
 - Added citation metadata placeholder for the development package.

@@ -35,7 +35,9 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/moat.html">Full audit workflow</a></li>
+    <li><a class="dropdown-item" href="../articles/audit-interpretation.html">Why audit changes interpretation</a></li>
     <li><a class="dropdown-item" href="../articles/leakage-ml.html">Validation leakage in ML</a></li>
+    <li><a class="dropdown-item" href="../articles/risk-thresholds.html">Risk thresholds</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">News</a></li>
@@ -152,6 +154,18 @@ Real analyses should generally use a larger value, such as the default
 <span><span class="co">#&gt; • No subject variable provided; repeated-measure leakage was not evaluated.</span></span>
 <span><span class="co">#&gt; • Batch variables appear balanced enough for standard validation.</span></span>
 <span><span class="co">#&gt; • No time variable provided; temporal leakage was not evaluated.</span></span></code></pre></div>
+<p>For compact reporting, <code><a href="../reference/module_risks.html">module_risks()</a></code> extracts the
+module-level status and main reason without requiring users to inspect
+the nested audit object.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/module_risks.html">module_risks</a></span><span class="op">(</span><span class="va">audit</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 6</span></span></span>
+<span><span class="co">#&gt;   module     status    risk  main_reason             n_reasons n_recommendations</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> design     evaluated low   Design audit risk is l…         1                 0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> batch      evaluated high  Batch audit for bray d…         1                 2</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> correction evaluated low   Batch adjustment appea…         1                 1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> leakage    evaluated low   Overall leakage risk i…         4                 4</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="interpret-design-risk">Interpret Design Risk<a class="anchor" aria-label="anchor" href="#interpret-design-risk"></a>
@@ -159,7 +173,7 @@ Real analyses should generally use a larger value, such as the default
 <p>The design module checks whether metadata variables are associated
 with the outcome. For categorical variables it stores a contingency
 table, Cramer’s V, empty-cell counts, and a conservative risk label.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">audit</span><span class="op">$</span><span class="va">design</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
 <span>  <span class="st">"variable"</span>,</span>
 <span>  <span class="st">"role"</span>,</span>
@@ -174,7 +188,7 @@ table, Cramer’s V, empty-cell counts, and a conservative risk label.</p>
 <p><code><a href="../reference/plot_design.html">plot_design()</a></code> shows the outcome distribution across an
 audited categorical variable. Empty cells are outlined because they can
 indicate confounding or complete separation.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_design.html">plot_design</a></span><span class="op">(</span><span class="va">audit</span>, variable <span class="op">=</span> <span class="st">"batch"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="moat_files/figure-html/plot-design-1.png" class="r-plt" alt="" width="672" style="display: block; margin: auto;"></p>
 </div>
@@ -184,7 +198,7 @@ indicate confounding or complete separation.</p>
 <p>Batch adjustment is only meaningful when outcome and batch are not
 perfectly aliased. The correction module summarizes whether ordinary
 adjustment appears identifiable from the metadata.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">audit</span><span class="op">$</span><span class="va">correction</span><span class="op">$</span><span class="va">feasibility</span></span>
 <span><span class="co">#&gt; [1] "safe"</span></span>
 <span><span class="va">audit</span><span class="op">$</span><span class="va">correction</span><span class="op">$</span><span class="va">recommendations</span></span>
@@ -192,6 +206,9 @@ adjustment appears identifiable from the metadata.</p>
 <p>This diagnostic is not a command to correct the data. It is a warning
 about what kinds of downstream adjustment are statistically
 defensible.</p>
+<p>Thresholds used by all risk modules are documented in the companion
+article <code><a href="../articles/risk-thresholds.html">vignette("risk-thresholds", package = "moat")</a></code> and
+exposed as a table by <code><a href="../reference/risk_thresholds.html">risk_thresholds()</a></code>.</p>
 </div>
 <div class="section level2">
 <h2 id="interpret-batch-risk">Interpret Batch Risk<a class="anchor" aria-label="anchor" href="#interpret-batch-risk"></a>
@@ -200,7 +217,7 @@ defensible.</p>
 diagnostics, and ordination-axis association checks. The summary table
 reports how much microbiome variation is attributed to the outcome and
 to batch.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">audit</span><span class="op">$</span><span class="va">batch</span><span class="op">$</span><span class="va">summary</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
 <span>  <span class="st">"distance"</span>,</span>
 <span>  <span class="st">"outcome_r2"</span>,</span>
@@ -218,7 +235,7 @@ to batch.</p>
 <p><code><a href="../reference/plot_variance.html">plot_variance()</a></code> visualizes the PERMANOVA R2 terms. A
 batch term that exceeds the outcome term is a strong signal that the
 downstream analysis needs explicit batch sensitivity checks.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_variance.html">plot_variance</a></span><span class="op">(</span><span class="va">audit</span>, distance <span class="op">=</span> <span class="st">"bray"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="moat_files/figure-html/plot-variance-1.png" class="r-plt" alt="" width="672" style="display: block; margin: auto;"></p>
 </div>
@@ -230,7 +247,7 @@ batch, or time structure are split across train and test folds in a way
 that makes prediction look better than it is. MOAT reports the
 recommended cross-validation scheme based on the metadata supplied to
 <code><a href="../reference/moat.html">moat()</a></code>.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">audit</span><span class="op">$</span><span class="va">leakage</span><span class="op">$</span><span class="va">recommended_cv</span></span>
 <span><span class="co">#&gt; [1] "standard_cv"</span></span>
 <span><span class="va">audit</span><span class="op">$</span><span class="va">leakage</span><span class="op">$</span><span class="va">recommendations</span></span>
@@ -245,7 +262,7 @@ recommended cross-validation scheme based on the metadata supplied to
 <p><code><a href="../reference/plan_analysis.html">plan_analysis()</a></code> translates the audit into recommended
 formulas, validation schemes, batch strategy, and sensitivity
 analyses.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plan_analysis.html">plan_analysis</a></span><span class="op">(</span><span class="va">audit</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">MOAT analysis plan</span> <span style="color: #00BBBB;">──────────────────────────────────────────────────────────</span></span></span>
@@ -283,7 +300,7 @@ data distribution, and experimental design.</p>
 <div class="section level2">
 <h2 id="session-information">Session Information<a class="anchor" aria-label="anchor" href="#session-information"></a>
 </h2>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; R version 4.5.2 (2025-10-31)</span></span>
 <span><span class="co">#&gt; Platform: x86_64-pc-linux-gnu</span></span>
@@ -336,17 +353,18 @@ data distribution, and experimental design.</p>
 <span><span class="co">#&gt; [45] splines_4.5.2               fastmap_1.2.0              </span></span>
 <span><span class="co">#&gt; [47] grid_4.5.2                  cli_3.6.6                  </span></span>
 <span><span class="co">#&gt; [49] SparseArray_1.10.10         magrittr_2.0.5             </span></span>
-<span><span class="co">#&gt; [51] S4Arrays_1.10.1             withr_3.0.2                </span></span>
-<span><span class="co">#&gt; [53] scales_1.4.0                rmarkdown_2.31             </span></span>
-<span><span class="co">#&gt; [55] XVector_0.50.0              matrixStats_1.5.0          </span></span>
-<span><span class="co">#&gt; [57] otel_0.2.0                  ragg_1.5.2                 </span></span>
-<span><span class="co">#&gt; [59] evaluate_1.0.5              knitr_1.51                 </span></span>
-<span><span class="co">#&gt; [61] GenomicRanges_1.62.1        IRanges_2.44.0             </span></span>
-<span><span class="co">#&gt; [63] mgcv_1.9-4                  rlang_1.2.0                </span></span>
-<span><span class="co">#&gt; [65] glue_1.8.1                  BiocManager_1.30.27        </span></span>
-<span><span class="co">#&gt; [67] BiocGenerics_0.56.0         jsonlite_2.0.0             </span></span>
-<span><span class="co">#&gt; [69] R6_2.6.1                    MatrixGenerics_1.22.0      </span></span>
-<span><span class="co">#&gt; [71] systemfonts_1.3.2           fs_2.1.0</span></span></code></pre></div>
+<span><span class="co">#&gt; [51] S4Arrays_1.10.1             utf8_1.2.6                 </span></span>
+<span><span class="co">#&gt; [53] withr_3.0.2                 scales_1.4.0               </span></span>
+<span><span class="co">#&gt; [55] rmarkdown_2.31              XVector_0.50.0             </span></span>
+<span><span class="co">#&gt; [57] matrixStats_1.5.0           otel_0.2.0                 </span></span>
+<span><span class="co">#&gt; [59] ragg_1.5.2                  evaluate_1.0.5             </span></span>
+<span><span class="co">#&gt; [61] knitr_1.51                  GenomicRanges_1.62.1       </span></span>
+<span><span class="co">#&gt; [63] IRanges_2.44.0              mgcv_1.9-4                 </span></span>
+<span><span class="co">#&gt; [65] rlang_1.2.0                 glue_1.8.1                 </span></span>
+<span><span class="co">#&gt; [67] BiocManager_1.30.27         BiocGenerics_0.56.0        </span></span>
+<span><span class="co">#&gt; [69] jsonlite_2.0.0              R6_2.6.1                   </span></span>
+<span><span class="co">#&gt; [71] MatrixGenerics_1.22.0       systemfonts_1.3.2          </span></span>
+<span><span class="co">#&gt; [73] fs_2.1.0</span></span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

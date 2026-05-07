@@ -19,7 +19,7 @@ moat(
   subject = NULL,
   time = NULL,
   assay = "counts",
-  transform = "clr",
+  transform = "auto",
   distances = c("aitchison", "bray"),
   n_perm = 999,
   verbose = TRUE
@@ -62,8 +62,9 @@ moat(
 
 - transform:
 
-  A single string naming the microbiome transformation to record for
-  downstream audit modules. Defaults to `"clr"`.
+  A single string naming the microbiome transformation to use in
+  distance-based audit modules. Use `"auto"` to choose the default
+  transformation for each distance. Defaults to `"auto"`.
 
 - distances:
 

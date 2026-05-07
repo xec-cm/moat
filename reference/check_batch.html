@@ -28,7 +28,9 @@ axis-by-metadata association tests."></head><body>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/moat.html">Full audit workflow</a></li>
+    <li><a class="dropdown-item" href="../articles/audit-interpretation.html">Why audit changes interpretation</a></li>
     <li><a class="dropdown-item" href="../articles/leakage-ml.html">Validation leakage in ML</a></li>
+    <li><a class="dropdown-item" href="../articles/risk-thresholds.html">Risk thresholds</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">News</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -64,8 +66,10 @@ axis-by-metadata association tests.</p>
 <span>  batch <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  covariates <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  assay <span class="op">=</span> <span class="st">"counts"</span>,</span>
+<span>  transform <span class="op">=</span> <span class="st">"auto"</span>,</span>
 <span>  distances <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"aitchison"</span>, <span class="st">"bray"</span><span class="op">)</span>,</span>
-<span>  n_perm <span class="op">=</span> <span class="fl">999</span></span>
+<span>  n_perm <span class="op">=</span> <span class="fl">999</span>,</span>
+<span>  order_sensitivity <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -100,6 +104,12 @@ axis-by-metadata association tests.</p>
 <code>SummarizedExperiment</code>. Defaults to <code>"counts"</code>.</p></dd>
 
 
+<dt id="arg-transform">transform<a class="anchor" aria-label="anchor" href="#arg-transform"></a></dt>
+<dd><p>A single string naming the microbiome transformation to use
+before distance calculation. Use <code>"auto"</code> to choose the default
+transformation for each distance. Defaults to <code>"auto"</code>.</p></dd>
+
+
 <dt id="arg-distances">distances<a class="anchor" aria-label="anchor" href="#arg-distances"></a></dt>
 <dd><p>A character vector naming microbiome distances. Supported
 values are those accepted by <code><a href="compute_biome_distance.html">compute_biome_distance()</a></code>.</p></dd>
@@ -107,6 +117,11 @@ values are those accepted by <code><a href="compute_biome_distance.html">compute
 
 <dt id="arg-n-perm">n_perm<a class="anchor" aria-label="anchor" href="#arg-n-perm"></a></dt>
 <dd><p>A single positive integer giving the number of permutations.</p></dd>
+
+
+<dt id="arg-order-sensitivity">order_sensitivity<a class="anchor" aria-label="anchor" href="#arg-order-sensitivity"></a></dt>
+<dd><p>A single logical value indicating whether to compare
+outcome-first and batch-first PERMANOVA term orders. Defaults to <code>TRUE</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -131,9 +146,12 @@ values are those accepted by <code><a href="compute_biome_distance.html">compute
 <span class="r-out co"><span class="r-pr">#&gt;</span>    distance    status  outcome_r2  batch_r2 covariate_r2 batch_dominance_score</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1 aitchison evaluated 0.003064485 0.9446739           NA              308.2651</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2      bray evaluated 0.003494571 0.9477919           NA              271.2184</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   permanova_risk dispersion_risk permdisp_risk pcoa_risk risk</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1           high             low           low      high high</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2           high             low           low      high high</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   permanova_risk dispersion_risk permdisp_risk pcoa_risk order_sensitivity_risk</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1           high             low           low      high                    low</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2           high             low           low      high                    low</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   risk</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 high</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 high</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $permanova</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $permanova$aitchison</span>
@@ -151,7 +169,7 @@ values are those accepted by <code><a href="compute_biome_distance.html">compute
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $permanova$aitchison$terms</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            term    role df sum_of_squares          r2  statistic p_value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> outcome outcome outcome  1       1.047253 0.003064485   2.169583    0.26</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> outcome outcome outcome  1       1.047253 0.003064485   2.169583    0.29</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> batch     batch   batch  1     322.831519 0.944673884 668.806793    0.01</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $permanova$aitchison$outcome_r2</span>
@@ -168,6 +186,31 @@ values are those accepted by <code><a href="compute_biome_distance.html">compute
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $permanova$aitchison$risk</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "high"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $permanova$aitchison$order_sensitivity</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $permanova$aitchison$order_sensitivity$status</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "evaluated"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $permanova$aitchison$order_sensitivity$comparisons</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           order                    formula    status   outcome_r2  batch_r2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 outcome_first distance ~ outcome + batch evaluated 0.0030644849 0.9446739</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2   batch_first distance ~ batch + outcome evaluated 0.0009285702 0.9468098</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   outcome_p_value batch_p_value error</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1            0.16          0.01  &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2            0.50          0.01  &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $permanova$aitchison$order_sensitivity$outcome_r2_difference</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.002135915</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $permanova$aitchison$order_sensitivity$batch_r2_difference</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.002135915</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $permanova$aitchison$order_sensitivity$risk</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "low"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $permanova$aitchison$order_sensitivity$warning</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> character(0)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $permanova$aitchison$warnings</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> character(0)</span>
@@ -188,7 +231,7 @@ values are those accepted by <code><a href="compute_biome_distance.html">compute
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $permanova$bray$terms</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            term    role df sum_of_squares          r2  statistic p_value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> outcome outcome outcome  1    0.004004636 0.003494571   2.654277    0.10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> outcome outcome outcome  1    0.004004636 0.003494571   2.654277    0.05</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> batch     batch   batch  1    1.086130965 0.947791939 719.888915    0.01</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $permanova$bray$outcome_r2</span>
@@ -206,6 +249,31 @@ values are those accepted by <code><a href="compute_biome_distance.html">compute
 <span class="r-out co"><span class="r-pr">#&gt;</span> $permanova$bray$risk</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "high"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $permanova$bray$order_sensitivity</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $permanova$bray$order_sensitivity$status</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "evaluated"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $permanova$bray$order_sensitivity$comparisons</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           order                    formula    status  outcome_r2  batch_r2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 outcome_first distance ~ outcome + batch evaluated 0.003494571 0.9477919</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2   batch_first distance ~ batch + outcome evaluated 0.001253356 0.9500332</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   outcome_p_value batch_p_value error</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1            0.07          0.01  &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2            0.24          0.01  &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $permanova$bray$order_sensitivity$outcome_r2_difference</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.002241215</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $permanova$bray$order_sensitivity$batch_r2_difference</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.002241215</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $permanova$bray$order_sensitivity$risk</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "low"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $permanova$bray$order_sensitivity$warning</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> character(0)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $permanova$bray$warnings</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> character(0)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -214,23 +282,23 @@ values are those accepted by <code><a href="compute_biome_distance.html">compute
 <span class="r-out co"><span class="r-pr">#&gt;</span> $dispersion</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $dispersion$aitchison</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   variable    role    status n_groups    statistic p_value risk error</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1  outcome outcome evaluated        2 0.0001256283    0.98  low  &lt;NA&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2    batch   batch evaluated        2 0.1415936957    0.69  low  &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1  outcome outcome evaluated        2 0.0001256283    0.95  low  &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2    batch   batch evaluated        2 0.1415936957    0.75  low  &lt;NA&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $dispersion$bray</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   variable    role    status n_groups    statistic p_value risk error</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1  outcome outcome evaluated        2 0.0009879928    0.96  low  &lt;NA&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2    batch   batch evaluated        2 0.4410051761    0.60  low  &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1  outcome outcome evaluated        2 0.0009879928    0.92  low  &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2    batch   batch evaluated        2 0.4410051761    0.53  low  &lt;NA&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $permdisp</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $permdisp$aitchison</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   batch    status n_groups statistic p_value risk error</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 batch evaluated        2 0.1415937    0.69  low  &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 batch evaluated        2 0.1415937    0.75  low  &lt;NA&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $permdisp$bray</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   batch    status n_groups statistic p_value risk error</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 batch evaluated        2 0.4410052     0.6  low  &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 batch evaluated        2 0.4410052    0.53  low  &lt;NA&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $pcoa</span>

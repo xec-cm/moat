@@ -16,8 +16,10 @@ check_batch(
   batch = NULL,
   covariates = NULL,
   assay = "counts",
+  transform = "auto",
   distances = c("aitchison", "bray"),
-  n_perm = 999
+  n_perm = 999,
+  order_sensitivity = TRUE
 )
 ```
 
@@ -51,6 +53,12 @@ check_batch(
   A single string naming the assay to extract when `x` is a
   `SummarizedExperiment`. Defaults to `"counts"`.
 
+- transform:
+
+  A single string naming the microbiome transformation to use before
+  distance calculation. Use `"auto"` to choose the default
+  transformation for each distance. Defaults to `"auto"`.
+
 - distances:
 
   A character vector naming microbiome distances. Supported values are
@@ -60,6 +68,11 @@ check_batch(
 - n_perm:
 
   A single positive integer giving the number of permutations.
+
+- order_sensitivity:
+
+  A single logical value indicating whether to compare outcome-first and
+  batch-first PERMANOVA term orders. Defaults to `TRUE`.
 
 ## Value
 
@@ -83,9 +96,12 @@ check_batch(toy_moat, outcome = "outcome", batch = "batch", n_perm = 99)
 #>    distance    status  outcome_r2  batch_r2 covariate_r2 batch_dominance_score
 #> 1 aitchison evaluated 0.003064485 0.9446739           NA              308.2651
 #> 2      bray evaluated 0.003494571 0.9477919           NA              271.2184
-#>   permanova_risk dispersion_risk permdisp_risk pcoa_risk risk
-#> 1           high             low           low      high high
-#> 2           high             low           low      high high
+#>   permanova_risk dispersion_risk permdisp_risk pcoa_risk order_sensitivity_risk
+#> 1           high             low           low      high                    low
+#> 2           high             low           low      high                    low
+#>   risk
+#> 1 high
+#> 2 high
 #> 
 #> $permanova
 #> $permanova$aitchison
@@ -103,7 +119,7 @@ check_batch(toy_moat, outcome = "outcome", batch = "batch", n_perm = 99)
 #> 
 #> $permanova$aitchison$terms
 #>            term    role df sum_of_squares          r2  statistic p_value
-#> outcome outcome outcome  1       1.047253 0.003064485   2.169583    0.26
+#> outcome outcome outcome  1       1.047253 0.003064485   2.169583    0.29
 #> batch     batch   batch  1     322.831519 0.944673884 668.806793    0.01
 #> 
 #> $permanova$aitchison$outcome_r2
@@ -120,6 +136,31 @@ check_batch(toy_moat, outcome = "outcome", batch = "batch", n_perm = 99)
 #> 
 #> $permanova$aitchison$risk
 #> [1] "high"
+#> 
+#> $permanova$aitchison$order_sensitivity
+#> $permanova$aitchison$order_sensitivity$status
+#> [1] "evaluated"
+#> 
+#> $permanova$aitchison$order_sensitivity$comparisons
+#>           order                    formula    status   outcome_r2  batch_r2
+#> 1 outcome_first distance ~ outcome + batch evaluated 0.0030644849 0.9446739
+#> 2   batch_first distance ~ batch + outcome evaluated 0.0009285702 0.9468098
+#>   outcome_p_value batch_p_value error
+#> 1            0.16          0.01  <NA>
+#> 2            0.50          0.01  <NA>
+#> 
+#> $permanova$aitchison$order_sensitivity$outcome_r2_difference
+#> [1] 0.002135915
+#> 
+#> $permanova$aitchison$order_sensitivity$batch_r2_difference
+#> [1] 0.002135915
+#> 
+#> $permanova$aitchison$order_sensitivity$risk
+#> [1] "low"
+#> 
+#> $permanova$aitchison$order_sensitivity$warning
+#> character(0)
+#> 
 #> 
 #> $permanova$aitchison$warnings
 #> character(0)
@@ -140,7 +181,7 @@ check_batch(toy_moat, outcome = "outcome", batch = "batch", n_perm = 99)
 #> 
 #> $permanova$bray$terms
 #>            term    role df sum_of_squares          r2  statistic p_value
-#> outcome outcome outcome  1    0.004004636 0.003494571   2.654277    0.10
+#> outcome outcome outcome  1    0.004004636 0.003494571   2.654277    0.05
 #> batch     batch   batch  1    1.086130965 0.947791939 719.888915    0.01
 #> 
 #> $permanova$bray$outcome_r2
@@ -158,6 +199,31 @@ check_batch(toy_moat, outcome = "outcome", batch = "batch", n_perm = 99)
 #> $permanova$bray$risk
 #> [1] "high"
 #> 
+#> $permanova$bray$order_sensitivity
+#> $permanova$bray$order_sensitivity$status
+#> [1] "evaluated"
+#> 
+#> $permanova$bray$order_sensitivity$comparisons
+#>           order                    formula    status  outcome_r2  batch_r2
+#> 1 outcome_first distance ~ outcome + batch evaluated 0.003494571 0.9477919
+#> 2   batch_first distance ~ batch + outcome evaluated 0.001253356 0.9500332
+#>   outcome_p_value batch_p_value error
+#> 1            0.07          0.01  <NA>
+#> 2            0.24          0.01  <NA>
+#> 
+#> $permanova$bray$order_sensitivity$outcome_r2_difference
+#> [1] 0.002241215
+#> 
+#> $permanova$bray$order_sensitivity$batch_r2_difference
+#> [1] 0.002241215
+#> 
+#> $permanova$bray$order_sensitivity$risk
+#> [1] "low"
+#> 
+#> $permanova$bray$order_sensitivity$warning
+#> character(0)
+#> 
+#> 
 #> $permanova$bray$warnings
 #> character(0)
 #> 
@@ -166,23 +232,23 @@ check_batch(toy_moat, outcome = "outcome", batch = "batch", n_perm = 99)
 #> $dispersion
 #> $dispersion$aitchison
 #>   variable    role    status n_groups    statistic p_value risk error
-#> 1  outcome outcome evaluated        2 0.0001256283    0.98  low  <NA>
-#> 2    batch   batch evaluated        2 0.1415936957    0.69  low  <NA>
+#> 1  outcome outcome evaluated        2 0.0001256283    0.95  low  <NA>
+#> 2    batch   batch evaluated        2 0.1415936957    0.75  low  <NA>
 #> 
 #> $dispersion$bray
 #>   variable    role    status n_groups    statistic p_value risk error
-#> 1  outcome outcome evaluated        2 0.0009879928    0.96  low  <NA>
-#> 2    batch   batch evaluated        2 0.4410051761    0.60  low  <NA>
+#> 1  outcome outcome evaluated        2 0.0009879928    0.92  low  <NA>
+#> 2    batch   batch evaluated        2 0.4410051761    0.53  low  <NA>
 #> 
 #> 
 #> $permdisp
 #> $permdisp$aitchison
 #>   batch    status n_groups statistic p_value risk error
-#> 1 batch evaluated        2 0.1415937    0.69  low  <NA>
+#> 1 batch evaluated        2 0.1415937    0.75  low  <NA>
 #> 
 #> $permdisp$bray
 #>   batch    status n_groups statistic p_value risk error
-#> 1 batch evaluated        2 0.4410052     0.6  low  <NA>
+#> 1 batch evaluated        2 0.4410052    0.53  low  <NA>
 #> 
 #> 
 #> $pcoa

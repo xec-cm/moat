@@ -22,7 +22,9 @@ matrix and reports tidy R2, p-value, and batch-dominance diagnostics."></head><b
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/moat.html">Full audit workflow</a></li>
+    <li><a class="dropdown-item" href="../articles/audit-interpretation.html">Why audit changes interpretation</a></li>
     <li><a class="dropdown-item" href="../articles/leakage-ml.html">Validation leakage in ML</a></li>
+    <li><a class="dropdown-item" href="../articles/risk-thresholds.html">Risk thresholds</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">News</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -54,7 +56,8 @@ matrix and reports tidy R2, p-value, and batch-dominance diagnostics.</p>
 <span>  <span class="va">outcome</span>,</span>
 <span>  batch <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  covariates <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  n_perm <span class="op">=</span> <span class="fl">999</span></span>
+<span>  n_perm <span class="op">=</span> <span class="fl">999</span>,</span>
+<span>  order_sensitivity <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -85,6 +88,11 @@ matrix and reports tidy R2, p-value, and batch-dominance diagnostics.</p>
 <dt id="arg-n-perm">n_perm<a class="anchor" aria-label="anchor" href="#arg-n-perm"></a></dt>
 <dd><p>A single positive integer giving the number of permutations.</p></dd>
 
+
+<dt id="arg-order-sensitivity">order_sensitivity<a class="anchor" aria-label="anchor" href="#arg-order-sensitivity"></a></dt>
+<dd><p>A single logical value indicating whether to compare
+outcome-first and batch-first PERMANOVA term orders. Defaults to <code>TRUE</code>.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -111,7 +119,7 @@ matrix and reports tidy R2, p-value, and batch-dominance diagnostics.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $terms</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            term    role df sum_of_squares          r2  statistic p_value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> outcome outcome outcome  1    0.004004636 0.003494571   2.654277    0.10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> outcome outcome outcome  1    0.004004636 0.003494571   2.654277    0.08</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> batch     batch   batch  1    1.086130965 0.947791939 719.888915    0.01</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $outcome_r2</span>
@@ -128,6 +136,31 @@ matrix and reports tidy R2, p-value, and batch-dominance diagnostics.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $risk</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "high"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $order_sensitivity</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $order_sensitivity$status</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "evaluated"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $order_sensitivity$comparisons</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           order                    formula    status  outcome_r2  batch_r2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 outcome_first distance ~ outcome + batch evaluated 0.003494571 0.9477919</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2   batch_first distance ~ batch + outcome evaluated 0.001253356 0.9500332</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   outcome_p_value batch_p_value error</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1            0.10          0.01  &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2            0.29          0.01  &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $order_sensitivity$outcome_r2_difference</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.002241215</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $order_sensitivity$batch_r2_difference</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.002241215</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $order_sensitivity$risk</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "low"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $order_sensitivity$warning</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> character(0)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $warnings</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> character(0)</span>

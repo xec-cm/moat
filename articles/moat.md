@@ -89,6 +89,23 @@ summary(audit)
 #> • No time variable provided; temporal leakage was not evaluated.
 ```
 
+For compact reporting,
+[`module_risks()`](https://xec-cm.github.io/moat/reference/module_risks.md)
+extracts the module-level status and main reason without requiring users
+to inspect the nested audit object.
+
+``` r
+
+module_risks(audit)
+#> # A tibble: 4 × 6
+#>   module     status    risk  main_reason             n_reasons n_recommendations
+#>   <chr>      <chr>     <chr> <chr>                       <int>             <int>
+#> 1 design     evaluated low   Design audit risk is l…         1                 0
+#> 2 batch      evaluated high  Batch audit for bray d…         1                 2
+#> 3 correction evaluated low   Batch adjustment appea…         1                 1
+#> 4 leakage    evaluated low   Overall leakage risk i…         4                 4
+```
+
 ## Interpret Design Risk
 
 The design module checks whether metadata variables are associated with
@@ -138,6 +155,12 @@ audit$correction$recommendations
 
 This diagnostic is not a command to correct the data. It is a warning
 about what kinds of downstream adjustment are statistically defensible.
+
+Thresholds used by all risk modules are documented in the companion
+article
+[`vignette("risk-thresholds", package = "moat")`](https://xec-cm.github.io/moat/articles/risk-thresholds.md)
+and exposed as a table by
+[`risk_thresholds()`](https://xec-cm.github.io/moat/reference/risk_thresholds.md).
 
 ## Interpret Batch Risk
 
@@ -295,15 +318,16 @@ sessionInfo()
 #> [45] splines_4.5.2               fastmap_1.2.0              
 #> [47] grid_4.5.2                  cli_3.6.6                  
 #> [49] SparseArray_1.10.10         magrittr_2.0.5             
-#> [51] S4Arrays_1.10.1             withr_3.0.2                
-#> [53] scales_1.4.0                rmarkdown_2.31             
-#> [55] XVector_0.50.0              matrixStats_1.5.0          
-#> [57] otel_0.2.0                  ragg_1.5.2                 
-#> [59] evaluate_1.0.5              knitr_1.51                 
-#> [61] GenomicRanges_1.62.1        IRanges_2.44.0             
-#> [63] mgcv_1.9-4                  rlang_1.2.0                
-#> [65] glue_1.8.1                  BiocManager_1.30.27        
-#> [67] BiocGenerics_0.56.0         jsonlite_2.0.0             
-#> [69] R6_2.6.1                    MatrixGenerics_1.22.0      
-#> [71] systemfonts_1.3.2           fs_2.1.0
+#> [51] S4Arrays_1.10.1             utf8_1.2.6                 
+#> [53] withr_3.0.2                 scales_1.4.0               
+#> [55] rmarkdown_2.31              XVector_0.50.0             
+#> [57] matrixStats_1.5.0           otel_0.2.0                 
+#> [59] ragg_1.5.2                  evaluate_1.0.5             
+#> [61] knitr_1.51                  GenomicRanges_1.62.1       
+#> [63] IRanges_2.44.0              mgcv_1.9-4                 
+#> [65] rlang_1.2.0                 glue_1.8.1                 
+#> [67] BiocManager_1.30.27         BiocGenerics_0.56.0        
+#> [69] jsonlite_2.0.0              R6_2.6.1                   
+#> [71] MatrixGenerics_1.22.0       systemfonts_1.3.2          
+#> [73] fs_2.1.0
 ```

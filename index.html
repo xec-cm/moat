@@ -39,7 +39,9 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="articles/moat.html">Full audit workflow</a></li>
+    <li><a class="dropdown-item" href="articles/audit-interpretation.html">Why audit changes interpretation</a></li>
     <li><a class="dropdown-item" href="articles/leakage-ml.html">Validation leakage in ML</a></li>
+    <li><a class="dropdown-item" href="articles/risk-thresholds.html">Risk thresholds</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">News</a></li>
@@ -111,16 +113,14 @@
 <span><span class="co">#&gt; • No time variable provided; temporal leakage was not evaluated.</span></span></code></pre></div>
 <p>The audit object keeps module-level diagnostics:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">audit</span><span class="op">$</span><span class="va">design</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"variable"</span>, <span class="st">"role"</span>, <span class="st">"effect_size_name"</span>, <span class="st">"effect_size"</span>, <span class="st">"risk"</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="co">#&gt;   variable  role effect_size_name effect_size risk</span></span>
-<span><span class="co">#&gt; 1    batch batch        cramers_v  0.05057217  low</span></span>
-<span><span class="va">audit</span><span class="op">$</span><span class="va">batch</span><span class="op">$</span><span class="va">summary</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"distance"</span>, <span class="st">"outcome_r2"</span>, <span class="st">"batch_r2"</span>, <span class="st">"risk"</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="co">#&gt;   distance  outcome_r2  batch_r2 risk</span></span>
-<span><span class="co">#&gt; 1     bray 0.003494571 0.9477919 high</span></span>
-<span><span class="va">audit</span><span class="op">$</span><span class="va">correction</span><span class="op">$</span><span class="va">feasibility</span></span>
-<span><span class="co">#&gt; [1] "safe"</span></span>
-<span><span class="va">audit</span><span class="op">$</span><span class="va">leakage</span><span class="op">$</span><span class="va">recommended_cv</span></span>
-<span><span class="co">#&gt; [1] "standard_cv"</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="reference/module_risks.html">module_risks</a></span><span class="op">(</span><span class="va">audit</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 4 × 6</span></span>
+<span><span class="co">#&gt;   module     status    risk  main_reason                                 n_reasons n_recommendations</span></span>
+<span><span class="co">#&gt;   &lt;chr&gt;      &lt;chr&gt;     &lt;chr&gt; &lt;chr&gt;                                           &lt;int&gt;             &lt;int&gt;</span></span>
+<span><span class="co">#&gt; 1 design     evaluated low   Design audit risk is low.                           1                 0</span></span>
+<span><span class="co">#&gt; 2 batch      evaluated high  Batch audit for bray distance has high ris…         1                 2</span></span>
+<span><span class="co">#&gt; 3 correction evaluated low   Batch adjustment appears statistically ide…         1                 1</span></span>
+<span><span class="co">#&gt; 4 leakage    evaluated low   Overall leakage risk is low.                        4                 4</span></span></code></pre></div>
 <p><code><a href="reference/plan_analysis.html">plan_analysis()</a></code> translates the audit into downstream analysis guidance:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/plan_analysis.html">plan_analysis</a></span><span class="op">(</span><span class="va">audit</span><span class="op">)</span></span>
@@ -183,6 +183,7 @@
 <h2 id="scientific-position">Scientific Position<a class="anchor" aria-label="anchor" href="#scientific-position"></a>
 </h2>
 <p><code>moat</code> is intentionally conservative. A high-risk audit does not prove that an analysis is invalid, and a low-risk audit does not prove that all downstream models are safe. The package is designed to make design limitations explicit so that conclusions are interpreted with the right sensitivity analyses and reporting context.</p>
+<p>The risk thresholds are documented in <code><a href="articles/risk-thresholds.html">vignette("risk-thresholds", package = "moat")</a></code> and are available programmatically with <code><a href="reference/risk_thresholds.html">risk_thresholds()</a></code>.</p>
 </div>
 <div class="section level2">
 <h2 id="development-checks">Development Checks<a class="anchor" aria-label="anchor" href="#development-checks"></a>

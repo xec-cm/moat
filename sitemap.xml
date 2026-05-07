@@ -2,12 +2,17 @@
 <url><loc>https://xec-cm.github.io/moat/404.html</loc></url>
 <url><loc>https://xec-cm.github.io/moat/LICENSE-text.html</loc></url>
 <url><loc>https://xec-cm.github.io/moat/LICENSE.html</loc></url>
+<url><loc>https://xec-cm.github.io/moat/articles/audit-interpretation.html</loc></url>
 <url><loc>https://xec-cm.github.io/moat/articles/index.html</loc></url>
 <url><loc>https://xec-cm.github.io/moat/articles/leakage-ml.html</loc></url>
 <url><loc>https://xec-cm.github.io/moat/articles/moat.html</loc></url>
+<url><loc>https://xec-cm.github.io/moat/articles/risk-thresholds.html</loc></url>
 <url><loc>https://xec-cm.github.io/moat/authors.html</loc></url>
 <url><loc>https://xec-cm.github.io/moat/index.html</loc></url>
 <url><loc>https://xec-cm.github.io/moat/news/index.html</loc></url>
+<url><loc>https://xec-cm.github.io/moat/reference/as.data.frame.moat_audit.html</loc></url>
+<url><loc>https://xec-cm.github.io/moat/reference/audit_reasons.html</loc></url>
+<url><loc>https://xec-cm.github.io/moat/reference/audit_recommendations.html</loc></url>
 <url><loc>https://xec-cm.github.io/moat/reference/autoplot.moat_audit.html</loc></url>
 <url><loc>https://xec-cm.github.io/moat/reference/check_balance.html</loc></url>
 <url><loc>https://xec-cm.github.io/moat/reference/check_batch.html</loc></url>
@@ -26,6 +31,7 @@
 <url><loc>https://xec-cm.github.io/moat/reference/moat-package.html</loc></url>
 <url><loc>https://xec-cm.github.io/moat/reference/moat.html</loc></url>
 <url><loc>https://xec-cm.github.io/moat/reference/moat_audit.html</loc></url>
+<url><loc>https://xec-cm.github.io/moat/reference/module_risks.html</loc></url>
 <url><loc>https://xec-cm.github.io/moat/reference/new_moat_audit.html</loc></url>
 <url><loc>https://xec-cm.github.io/moat/reference/pipe.html</loc></url>
 <url><loc>https://xec-cm.github.io/moat/reference/plan_analysis.html</loc></url>
@@ -34,6 +40,7 @@
 <url><loc>https://xec-cm.github.io/moat/reference/plot_variance.html</loc></url>
 <url><loc>https://xec-cm.github.io/moat/reference/print.moat_audit.html</loc></url>
 <url><loc>https://xec-cm.github.io/moat/reference/report.html</loc></url>
+<url><loc>https://xec-cm.github.io/moat/reference/risk_thresholds.html</loc></url>
 <url><loc>https://xec-cm.github.io/moat/reference/summary.moat_audit.html</loc></url>
 <url><loc>https://xec-cm.github.io/moat/reference/toy_moat.html</loc></url>
 <url><loc>https://xec-cm.github.io/moat/reference/transform_biome.html</loc></url>
