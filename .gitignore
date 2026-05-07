@@ -3,3 +3,4 @@
 *.BiocCheck/
 *.tar.gz
 docs
+vignettes/*.html

@@ -9,3 +9,4 @@
 ^issues_template\.md$
 ^data-raw$
 ^moat_report\.html$
+^vignettes/.*[.]html$

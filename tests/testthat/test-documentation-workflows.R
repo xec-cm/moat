@@ -43,7 +43,10 @@ test_that("documentation workflow functions are exported", {
 
 test_that("audit interpretation vignette documents concrete failure modes", {
   vignette_path <- test_path("../../vignettes/audit-interpretation.Rmd")
-  expect_true(file.exists(vignette_path))
+  skip_if_not(
+    file.exists(vignette_path),
+    "Source vignette is not available in installed-package checks."
+  )
 
   text <- paste(readLines(vignette_path, warn = FALSE), collapse = "\n")
 
@@ -57,7 +60,10 @@ test_that("audit interpretation vignette documents concrete failure modes", {
 
 test_that("pkgdown article navigation includes audit interpretation vignette", {
   pkgdown_path <- test_path("../../_pkgdown.yml")
-  expect_true(file.exists(pkgdown_path))
+  skip_if_not(
+    file.exists(pkgdown_path),
+    "pkgdown config is not available in installed-package checks."
+  )
 
   text <- paste(readLines(pkgdown_path, warn = FALSE), collapse = "\n")
 
@@ -67,7 +73,10 @@ test_that("pkgdown article navigation includes audit interpretation vignette", {
 
 test_that("pkgdown reference index includes documented audit extraction methods", {
   pkgdown_path <- test_path("../../_pkgdown.yml")
-  expect_true(file.exists(pkgdown_path))
+  skip_if_not(
+    file.exists(pkgdown_path),
+    "pkgdown config is not available in installed-package checks."
+  )
 
   text <- paste(readLines(pkgdown_path, warn = FALSE), collapse = "\n")
 

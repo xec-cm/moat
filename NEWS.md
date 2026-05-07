@@ -62,4 +62,6 @@
 * Added a validation-leakage vignette for microbiome machine-learning
   workflows.
 * Updated README with current user-facing APIs.
+* Made source-only documentation workflow tests skip cleanly in installed
+  package checks and stopped tracking generated vignette HTML artifacts.
 * Added citation metadata placeholder for the development package.
