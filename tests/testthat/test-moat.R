@@ -11,7 +11,7 @@ test_that("moat returns an evaluated audit with full public API parameters", {
     subject = "subject",
     time = "timepoint",
     assay = "counts",
-    transform = "clr",
+    transform = "auto",
     distances = c("aitchison", "bray"),
     n_perm = 999,
     verbose = FALSE
@@ -28,7 +28,7 @@ test_that("moat returns an evaluated audit with full public API parameters", {
   expect_equal(audit$params$subject, "subject")
   expect_equal(audit$params$time, "timepoint")
   expect_equal(audit$params$assay, "counts")
-  expect_equal(audit$params$transform, "clr")
+  expect_equal(audit$params$transform, "auto")
   expect_equal(audit$params$distances, c("aitchison", "bray"))
   expect_equal(audit$params$n_perm, 999)
   expect_false(audit$params$verbose)
@@ -64,7 +64,7 @@ test_that("moat handles missing optional arguments gracefully", {
   expect_null(audit$params$covariates)
   expect_null(audit$params$subject)
   expect_null(audit$params$time)
-  expect_equal(audit$params$transform, "clr")
+  expect_equal(audit$params$transform, "auto")
   expect_equal(audit$params$distances, c("aitchison", "bray"))
   expect_equal(audit$params$n_perm, 999)
   expect_true(audit$params$verbose)
@@ -76,8 +76,37 @@ test_that("moat handles missing optional arguments gracefully", {
   expect_equal(audit$correction$feasibility, "not_applicable")
 })
 
+test_that("moat propagates transform to batch distance calculations", {
+  se <- readRDS(test_path("fixtures/clean_biome.rds"))
+  SummarizedExperiment::colData(se)$batch <- sample(rep(c("Batch_1", "Batch_2"), each = 20))
+  metadata <- as.data.frame(SummarizedExperiment::colData(se))
+  distance <- compute_biome_distance(se, distance = "bray", transform = "relative")
+  expected <- check_permanova(
+    distance = distance,
+    metadata = metadata,
+    outcome = "outcome",
+    batch = "batch",
+    n_perm = 9
+  )
+
+  audit <- moat(
+    se,
+    outcome = "outcome",
+    batch = "batch",
+    transform = "relative",
+    distances = "bray",
+    n_perm = 9
+  )
+
+  expect_equal(audit$params$transform, "relative")
+  expect_equal(audit$batch$permanova$bray$outcome_r2, expected$outcome_r2, tolerance = 1e-12)
+  expect_equal(audit$batch$permanova$bray$batch_r2, expected$batch_r2, tolerance = 1e-12)
+  expect_equal(audit$batch$permanova$bray$terms$r2, expected$terms$r2, tolerance = 1e-12)
+})
+
 test_that("moat validates issue 6 public API arguments", {
   se <- readRDS(test_path("fixtures/repeated_biome.rds"))
+  SummarizedExperiment::colData(se)$batch <- rep(c("A", "B"), each = 20)
 
   expect_error(
     moat(se, outcome = "outcome", time = "missing_time"),
@@ -94,6 +123,10 @@ test_that("moat validates issue 6 public API arguments", {
   expect_error(
     moat(se, outcome = "outcome", transform = ""),
     "single non-missing string"
+  )
+  expect_error(
+    moat(se, outcome = "outcome", batch = "batch", transform = "clr", distances = "bray"),
+    "not compatible"
   )
   expect_error(
     moat(se, outcome = "outcome", distances = character()),

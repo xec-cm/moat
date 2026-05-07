@@ -182,6 +182,9 @@ check_dispersion <- function(
 #' @inheritParams check_permanova
 #' @param assay A single string naming the assay to extract when `x` is a
 #'   `SummarizedExperiment`. Defaults to `"counts"`.
+#' @param transform A single string naming the microbiome transformation to use
+#'   before distance calculation. Use `"auto"` to choose the default
+#'   transformation for each distance. Defaults to `"auto"`.
 #' @param distances A character vector naming microbiome distances. Supported
 #'   values are those accepted by [compute_biome_distance()].
 #'
@@ -198,10 +201,13 @@ check_batch <- function(
   batch = NULL,
   covariates = NULL,
   assay = "counts",
+  transform = "auto",
   distances = c("aitchison", "bray"),
   n_perm = 999
 ) {
   check_string(assay, "assay")
+  check_string(transform, "transform")
+  transform <- match.arg(transform, c("auto", "clr", "relative", "presence_absence", "none"))
   check_non_empty_character(distances, "distances")
   check_character_or_null(batch, "batch")
   check_character_or_null(covariates, "covariates")
@@ -223,6 +229,7 @@ check_batch <- function(
     batch = batch,
     covariates = covariates,
     assay = assay,
+    transform = transform,
     n_perm = n_perm
   )
 
@@ -253,9 +260,15 @@ evaluate_batch_distance <- function(
   batch,
   covariates,
   assay,
+  transform,
   n_perm
 ) {
-  distance <- compute_biome_distance(x, assay = assay, distance = distance_name)
+  distance <- compute_biome_distance(
+    x,
+    assay = assay,
+    transform = transform,
+    distance = distance_name
+  )
   metadata <- align_metadata_to_distance(metadata, distance)
   permanova <- check_permanova(
     distance = distance,

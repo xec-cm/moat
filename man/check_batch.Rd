@@ -11,6 +11,7 @@ check_batch(
   batch = NULL,
   covariates = NULL,
   assay = "counts",
+  transform = "auto",
   distances = c("aitchison", "bray"),
   n_perm = 999
 )
@@ -30,6 +31,10 @@ check_batch(
 
 \item{assay}{A single string naming the assay to extract when \code{x} is a
 \code{SummarizedExperiment}. Defaults to \code{"counts"}.}
+
+\item{transform}{A single string naming the microbiome transformation to use
+before distance calculation. Use \code{"auto"} to choose the default
+transformation for each distance. Defaults to \code{"auto"}.}
 
 \item{distances}{A character vector naming microbiome distances. Supported
 values are those accepted by \code{\link[=compute_biome_distance]{compute_biome_distance()}}.}
