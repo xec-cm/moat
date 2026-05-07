@@ -30,6 +30,8 @@ navbar:
       menu:
       - text: "Full audit workflow"
         href: articles/moat.html
+      - text: "Why audit changes interpretation"
+        href: articles/audit-interpretation.html
       - text: "Validation leakage in ML"
         href: articles/leakage-ml.html
       - text: "Risk thresholds"
@@ -51,6 +53,7 @@ articles:
   navbar: "Workflows"
   contents:
   - moat
+  - audit-interpretation
   - leakage-ml
   - risk-thresholds
 
@@ -73,6 +76,7 @@ reference:
   - plan_analysis
   - report
   - module_risks
+  - as.data.frame.moat_audit
   - audit_reasons
   - audit_recommendations
   - risk_thresholds

@@ -1,0 +1,213 @@
+---
+title: "Why pre-analysis audit changes interpretation"
+author:
+  - name: Francesc Catala-Moll
+    affiliation: IrsiCaixa AIDS Research Institute
+package: moat
+output:
+  BiocStyle::html_document:
+    toc: true
+    toc_depth: 2
+vignette: >
+  %\VignetteIndexEntry{Why pre-analysis audit changes interpretation}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.align = "center",
+  fig.width = 7,
+  fig.height = 4.2
+)
+```
+
+# Why Interpretation Needs An Audit
+
+A microbiome result can look biologically plausible while still being driven by
+study design, batch structure, or validation leakage. MOAT is meant to make
+those risks visible before the downstream model becomes the story.
+
+This vignette shows three compact examples where a naive interpretation changes
+after checking the audit:
+
+1. a beta-diversity signal dominated by batch,
+2. outcome information already present in metadata,
+3. validation leakage from repeated subjects or batch-outcome alignment.
+
+```{r load-package}
+library(moat)
+data("toy_moat")
+```
+
+# Batch-Dominated Beta Diversity
+
+A common first pass is to ask whether microbiome composition is associated with
+the outcome. The code below fits an outcome-only PERMANOVA on Bray-Curtis
+distances.
+
+```{r naive-permanova}
+metadata <- as.data.frame(SummarizedExperiment::colData(toy_moat))
+distance <- compute_biome_distance(toy_moat, distance = "bray")
+
+naive <- check_permanova(
+  distance,
+  metadata = metadata,
+  outcome = "outcome",
+  n_perm = 99
+)
+
+naive$terms[, c("term", "r2", "p_value")]
+```
+
+Read alone, this can encourage an outcome-centered interpretation. The audit
+adds the batch variable and reports the outcome and batch contributions
+together.
+
+```{r batch-audit}
+audit <- moat(
+  toy_moat,
+  outcome = "outcome",
+  batch = "batch",
+  distances = "bray",
+  n_perm = 99,
+  verbose = FALSE
+)
+
+audit$batch$summary[, c(
+  "distance",
+  "outcome_r2",
+  "batch_r2",
+  "batch_dominance_score",
+  "permanova_risk",
+  "order_sensitivity_risk",
+  "risk"
+)]
+```
+
+When batch explains as much or more variation than the outcome, the result
+should be reported as a batch-sensitive finding rather than a clean biological
+separation. The practical next step is to carry the audit into the analysis
+plan.
+
+```{r batch-plan}
+plan <- plan_analysis(audit)
+
+plan$permanova
+plan$batch_strategy
+```
+
+# Metadata-Only Outcome Predictability
+
+Microbiome models can also inherit information from metadata. In this small
+example, center is strongly aligned with outcome before any microbiome feature
+is used.
+
+```{r metadata-risk-data}
+metadata_confounded <- data.frame(
+  outcome = rep(c("Control", "Disease"), each = 20),
+  center = rep(c("Center_A", "Center_B"), each = 20),
+  age_group = rep(c("young", "old"), times = 20)
+)
+
+table(metadata_confounded$center, metadata_confounded$outcome)
+```
+
+`check_design()` stores a metadata-only predictability diagnostic as an
+attribute. A high value means downstream microbiome signatures may partly
+reflect design or validation structure.
+
+```{r metadata-predictability}
+design <- check_design(
+  metadata_confounded,
+  outcome = "outcome",
+  batch = "center",
+  covariates = "age_group"
+)
+
+design[, c("variable", "role", "effect_size_name", "effect_size", "risk")]
+
+metadata_predictability <- attr(design, "metadata_predictability")
+metadata_predictability[c("status", "risk", "cv_balanced_accuracy", "recommendations")]
+```
+
+The interpretation changes from "metadata are harmless annotations" to
+"metadata already carries outcome information". Any microbiome model should
+report this risk and use validation that does not let center or batch structure
+stand in for biology.
+
+# Validation Leakage
+
+Leakage appears when the validation split lets the model reuse structure that
+will not generalize. Repeated subjects are a simple example: if samples from the
+same subject appear in both train and test folds, row-wise cross-validation can
+look better than subject-level prediction.
+
+```{r repeated-subjects}
+repeated_biome <- toy_moat
+SummarizedExperiment::colData(repeated_biome)$subject <- rep(
+  paste0("S", seq_len(ncol(repeated_biome) / 2)),
+  each = 2
+)
+SummarizedExperiment::colData(repeated_biome)$timepoint <- rep(
+  c("baseline", "followup"),
+  times = ncol(repeated_biome) / 2
+)
+
+repeated_metadata <- as.data.frame(SummarizedExperiment::colData(repeated_biome))
+head(repeated_metadata)
+```
+
+`check_leakage()` turns that metadata structure into validation guidance.
+
+```{r leakage-check}
+leakage <- check_leakage(
+  repeated_metadata,
+  outcome = "outcome",
+  subject = "subject",
+  batch = "batch",
+  time = "timepoint"
+)
+
+leakage[c("risk", "recommended_cv", "recommendations")]
+```
+
+The same recommendation is carried by the full audit and the analysis plan.
+
+```{r leakage-plan}
+leakage_audit <- moat(
+  repeated_biome,
+  outcome = "outcome",
+  batch = "batch",
+  subject = "subject",
+  time = "timepoint",
+  distances = "bray",
+  n_perm = 99,
+  verbose = FALSE
+)
+
+leakage_plan <- plan_analysis(leakage_audit)
+
+leakage_plan$ml_validation
+leakage_plan$permutation
+```
+
+# Practical Reporting Pattern
+
+For each downstream analysis, report the naive target next to the audit-guided
+qualification:
+
+- report outcome R2 together with batch R2 before interpreting beta diversity,
+- report metadata-only predictability before claiming microbiome prediction,
+- report leakage-aware validation when repeated subjects, time, or batch
+  structure are present,
+- use `plan_analysis()` to turn the audit into formulas, validation schemes,
+  and sensitivity checks.
+
+# Session Information
+
+```{r session-info}
+sessionInfo()
+```

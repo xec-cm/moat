@@ -41,6 +41,39 @@ test_that("documentation workflow functions are exported", {
   expect_true(all(workflow_functions %in% getNamespaceExports("moat")))
 })
 
+test_that("audit interpretation vignette documents concrete failure modes", {
+  vignette_path <- test_path("../../vignettes/audit-interpretation.Rmd")
+  expect_true(file.exists(vignette_path))
+
+  text <- paste(readLines(vignette_path, warn = FALSE), collapse = "\n")
+
+  expect_match(text, "moat\\(")
+  expect_match(text, "plan_analysis\\(")
+  expect_match(text, "check_leakage\\(")
+  expect_match(text, "metadata_predictability")
+  expect_match(text, "batch_dominance_score")
+  expect_match(text, "order_sensitivity_risk")
+})
+
+test_that("pkgdown article navigation includes audit interpretation vignette", {
+  pkgdown_path <- test_path("../../_pkgdown.yml")
+  expect_true(file.exists(pkgdown_path))
+
+  text <- paste(readLines(pkgdown_path, warn = FALSE), collapse = "\n")
+
+  expect_match(text, "articles/audit-interpretation\\.html")
+  expect_match(text, "\\n  - audit-interpretation")
+})
+
+test_that("pkgdown reference index includes documented audit extraction methods", {
+  pkgdown_path <- test_path("../../_pkgdown.yml")
+  expect_true(file.exists(pkgdown_path))
+
+  text <- paste(readLines(pkgdown_path, warn = FALSE), collapse = "\n")
+
+  expect_match(text, "\\n  - as\\.data\\.frame\\.moat_audit")
+})
+
 test_that("package citation metadata is available", {
   citation <- suppressWarnings(utils::citation("moat"))
 
