@@ -141,11 +141,13 @@ Real analyses should generally use a larger value, such as the default
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; • Batch audit for bray distance has high risk (batch R2 = 0.948; PERMANOVA =</span></span>
 <span><span class="co">#&gt; high, dispersion = low, PCoA = high).</span></span>
+<span><span class="co">#&gt; • Feature-level batch diagnostic is high (50 feature-batch associations with</span></span>
+<span><span class="co">#&gt; adjusted p &lt;= 0.05 and batch R2 &gt;= 0.1; max feature batch R2 = 0.973).</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── <span style="font-weight: bold;">Recommended next steps</span> ──</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; • Batch signal is strong relative to outcome or ordination structure; report</span></span>
-<span><span class="co">#&gt; batch diagnostics before downstream analysis.</span></span>
+<span><span class="co">#&gt; • Batch signal is strong in distance, ordination, dispersion, or feature-level</span></span>
+<span><span class="co">#&gt; diagnostics; report batch diagnostics before downstream analysis.</span></span>
 <span><span class="co">#&gt; • Avoid interpreting outcome effects without sensitivity analyses that account</span></span>
 <span><span class="co">#&gt; for batch.</span></span>
 <span><span class="co">#&gt; • Batch adjustment appears statistically identifiable based on metadata</span></span>
@@ -163,7 +165,7 @@ the nested audit object.</p>
 <span><span class="co">#&gt;   module     status    risk  main_reason             n_reasons n_recommendations</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> design     evaluated low   Design audit risk is l…         1                 0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> batch      evaluated high  Batch audit for bray d…         1                 2</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> batch      evaluated high  Batch audit for bray d…         2                 2</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> correction evaluated low   Batch adjustment appea…         1                 1</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> leakage    evaluated low   Overall leakage risk i…         4                 4</span></span></code></pre></div>
 </div>
@@ -232,6 +234,10 @@ to batch.</p>
 <span><span class="co">#&gt; 1     bray 0.003494571 0.9477919              271.2184           high</span></span>
 <span><span class="co">#&gt;   permdisp_risk pcoa_risk risk</span></span>
 <span><span class="co">#&gt; 1           low      high high</span></span></code></pre></div>
+<p>Feature-level screening is available in
+<code>audit$batch$features</code>. It flags taxa with strong batch
+association as pre-analysis evidence to report and inspect, not as a
+replacement for downstream differential abundance models.</p>
 <p><code><a href="../reference/plot_variance.html">plot_variance()</a></code> visualizes the PERMANOVA R2 terms. A
 batch term that exceeds the outcome term is a strong signal that the
 downstream analysis needs explicit batch sensitivity checks.</p>
@@ -292,6 +298,7 @@ analyses.</p>
 <span><span class="co">#&gt; ── <span style="font-weight: bold;">Warnings</span> ──</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Batch audit for bray distance has high risk (batch R2 = 0.948; PERMANOVA = high, dispersion = low, PCoA = high).</span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Feature-level batch diagnostic is high (50 feature-batch associations with adjusted p &lt;= 0.05 and batch R2 &gt;= 0.1; max feature batch R2 = 0.973).</span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Batch-dominated microbiome signal requires explicit sensitivity analysis.</span></span></code></pre></div>
 <p>The plan should be read as a structured starting point. Analysts
 still need to choose methods appropriate for their scientific question,

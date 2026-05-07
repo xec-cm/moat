@@ -33,7 +33,7 @@ module_risks(audit)
 #>   module     status    risk  main_reason             n_reasons n_recommendations
 #>   <chr>      <chr>     <chr> <chr>                       <int>             <int>
 #> 1 design     evaluated low   Design audit risk is l…         1                 0
-#> 2 batch      evaluated high  Batch audit for aitchi…         2                 2
+#> 2 batch      evaluated high  Batch audit for aitchi…         3                 2
 #> 3 correction evaluated low   Batch adjustment appea…         1                 1
 #> 4 leakage    evaluated low   Overall leakage risk i…         4                 4
 ```

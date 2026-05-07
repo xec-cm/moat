@@ -69,17 +69,18 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"toy_moat"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">audit</span> <span class="op">&lt;-</span> <span class="fu"><a href="moat.html">moat</a></span><span class="op">(</span><span class="va">toy_moat</span>, outcome <span class="op">=</span> <span class="st">"outcome"</span>, batch <span class="op">=</span> <span class="st">"batch"</span>, n_perm <span class="op">=</span> <span class="fl">99</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">audit_reasons</span><span class="op">(</span><span class="va">audit</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 8 × 5</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 9 × 5</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   module     status    risk  reason_id reason                                   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                                    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> design     evaluated low           1 Design audit risk is low.                </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> batch      evaluated high          1 Batch audit for aitchison distance has h…</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> batch      evaluated high          2 Batch audit for bray distance has high r…</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> correction evaluated low           1 Batch adjustment appears statistically i…</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> leakage    evaluated low           1 Overall leakage risk is low.             </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span> leakage    evaluated low           2 No subject variable provided; repeated-m…</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">7</span> leakage    evaluated low           3 Batch variables appear balanced enough f…</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">8</span> leakage    evaluated low           4 No time variable provided; temporal leak…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> batch      evaluated high          3 Feature-level batch diagnostic is high (…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> correction evaluated low           1 Batch adjustment appears statistically i…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span> leakage    evaluated low           1 Overall leakage risk is low.             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">7</span> leakage    evaluated low           2 No subject variable provided; repeated-m…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">8</span> leakage    evaluated low           3 Batch variables appear balanced enough f…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">9</span> leakage    evaluated low           4 No time variable provided; temporal leak…</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

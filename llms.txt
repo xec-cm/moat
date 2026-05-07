@@ -141,7 +141,8 @@ plot_variance(audit, distance = "bray")
 - **Correction feasibility:** whether batch adjustment is statistically
   identifiable from the observed design.
 - **Microbiome batch effects:** whether batch explains microbiome
-  variation using PERMANOVA, dispersion, and ordination diagnostics.
+  variation using PERMANOVA, dispersion, ordination diagnostics, and
+  feature-level screening for batch-associated taxa.
 - **Validation leakage:** whether repeated measures, batch-outcome
   association, or time structure require grouped or time-aware
   validation.
@@ -235,6 +236,8 @@ batch effects.
   : Check PERMANOVA variation explained by metadata variables
 - [`check_dispersion()`](https://xec-cm.github.io/moat/reference/check_dispersion.md)
   : Check multivariate dispersion differences across metadata variables
+- [`check_feature_batch()`](https://xec-cm.github.io/moat/reference/check_feature_batch.md)
+  : Check feature-level batch associations
 - [`check_batch()`](https://xec-cm.github.io/moat/reference/check_batch.md)
   : Check microbiome batch effects across distances
 

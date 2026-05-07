@@ -21,7 +21,7 @@ with columns `module`, `metric`, `risk`, `condition`, and `notes`.
 
 ``` r
 risk_thresholds()
-#> # A tibble: 32 × 5
+#> # A tibble: 34 × 5
 #>    module      metric                                      risk  condition notes
 #>    <chr>       <chr>                                       <chr> <chr>     <chr>
 #>  1 risk levels unknown                                     unkn… insuffic… Unkn…
@@ -34,5 +34,5 @@ risk_thresholds()
 #>  8 design      categorical Cramer's V / p-value / sparse … mode… Cramer's… Spar…
 #>  9 design      continuous standardized mean difference     high  standard… Cont…
 #> 10 design      continuous standardized mean difference / … mode… standard… Visi…
-#> # ℹ 22 more rows
+#> # ℹ 24 more rows
 ```

@@ -63,6 +63,8 @@ batch effects.
   : Check PERMANOVA variation explained by metadata variables
 - [`check_dispersion()`](https://xec-cm.github.io/moat/reference/check_dispersion.md)
   : Check multivariate dispersion differences across metadata variables
+- [`check_feature_batch()`](https://xec-cm.github.io/moat/reference/check_feature_batch.md)
+  : Check feature-level batch associations
 - [`check_batch()`](https://xec-cm.github.io/moat/reference/check_batch.md)
   : Check microbiome batch effects across distances
 

@@ -73,6 +73,7 @@ batch-driven validation leakage, and optional temporal leakage.</p>
 <span>  transform <span class="op">=</span> <span class="st">"auto"</span>,</span>
 <span>  distances <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"aitchison"</span>, <span class="st">"bray"</span><span class="op">)</span>,</span>
 <span>  n_perm <span class="op">=</span> <span class="fl">999</span>,</span>
+<span>  feature_associations <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -129,6 +130,11 @@ downstream audit modules. Defaults to <code>c("aitchison", "bray")</code>.</p></
 <dt id="arg-n-perm">n_perm<a class="anchor" aria-label="anchor" href="#arg-n-perm"></a></dt>
 <dd><p>A single positive integer with the planned number of
 permutations for downstream audit modules. Defaults to <code>999</code>.</p></dd>
+
+
+<dt id="arg-feature-associations">feature_associations<a class="anchor" aria-label="anchor" href="#arg-feature-associations"></a></dt>
+<dd><p>A single logical value indicating whether to
+screen individual features for batch associations. Defaults to <code>TRUE</code>.</p></dd>
 
 
 <dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>

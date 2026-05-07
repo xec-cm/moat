@@ -74,11 +74,13 @@ summary(audit)
 #> 
 #> • Batch audit for bray distance has high risk (batch R2 = 0.948; PERMANOVA =
 #> high, dispersion = low, PCoA = high).
+#> • Feature-level batch diagnostic is high (50 feature-batch associations with
+#> adjusted p <= 0.05 and batch R2 >= 0.1; max feature batch R2 = 0.973).
 #> 
 #> ── Recommended next steps ──
 #> 
-#> • Batch signal is strong relative to outcome or ordination structure; report
-#> batch diagnostics before downstream analysis.
+#> • Batch signal is strong in distance, ordination, dispersion, or feature-level
+#> diagnostics; report batch diagnostics before downstream analysis.
 #> • Avoid interpreting outcome effects without sensitivity analyses that account
 #> for batch.
 #> • Batch adjustment appears statistically identifiable based on metadata
@@ -101,7 +103,7 @@ module_risks(audit)
 #>   module     status    risk  main_reason             n_reasons n_recommendations
 #>   <chr>      <chr>     <chr> <chr>                       <int>             <int>
 #> 1 design     evaluated low   Design audit risk is l…         1                 0
-#> 2 batch      evaluated high  Batch audit for bray d…         1                 2
+#> 2 batch      evaluated high  Batch audit for bray d…         2                 2
 #> 3 correction evaluated low   Batch adjustment appea…         1                 1
 #> 4 leakage    evaluated low   Overall leakage risk i…         4                 4
 ```
@@ -187,6 +189,11 @@ audit$batch$summary[, c(
 #> 1           low      high high
 ```
 
+Feature-level screening is available in `audit$batch$features`. It flags
+taxa with strong batch association as pre-analysis evidence to report
+and inspect, not as a replacement for downstream differential abundance
+models.
+
 [`plot_variance()`](https://xec-cm.github.io/moat/reference/plot_variance.md)
 visualizes the PERMANOVA R2 terms. A batch term that exceeds the outcome
 term is a strong signal that the downstream analysis needs explicit
@@ -255,6 +262,7 @@ plan_analysis(audit)
 #> ── Warnings ──
 #> 
 #> ! Batch audit for bray distance has high risk (batch R2 = 0.948; PERMANOVA = high, dispersion = low, PCoA = high).
+#> ! Feature-level batch diagnostic is high (50 feature-batch associations with adjusted p <= 0.05 and batch R2 >= 0.1; max feature batch R2 = 0.973).
 #> ! Batch-dominated microbiome signal requires explicit sensitivity analysis.
 ```
 
