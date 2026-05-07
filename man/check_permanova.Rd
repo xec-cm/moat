@@ -10,7 +10,8 @@ check_permanova(
   outcome,
   batch = NULL,
   covariates = NULL,
-  n_perm = 999
+  n_perm = 999,
+  order_sensitivity = TRUE
 )
 }
 \arguments{
@@ -25,6 +26,9 @@ check_permanova(
 \item{covariates}{Optional character vector naming covariates in \code{metadata}.}
 
 \item{n_perm}{A single positive integer giving the number of permutations.}
+
+\item{order_sensitivity}{A single logical value indicating whether to compare
+outcome-first and batch-first PERMANOVA term orders. Defaults to \code{TRUE}.}
 }
 \value{
 A list with PERMANOVA diagnostics.

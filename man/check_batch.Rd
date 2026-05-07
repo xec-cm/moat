@@ -13,7 +13,8 @@ check_batch(
   assay = "counts",
   transform = "auto",
   distances = c("aitchison", "bray"),
-  n_perm = 999
+  n_perm = 999,
+  order_sensitivity = TRUE
 )
 }
 \arguments{
@@ -40,6 +41,9 @@ transformation for each distance. Defaults to \code{"auto"}.}
 values are those accepted by \code{\link[=compute_biome_distance]{compute_biome_distance()}}.}
 
 \item{n_perm}{A single positive integer giving the number of permutations.}
+
+\item{order_sensitivity}{A single logical value indicating whether to compare
+outcome-first and batch-first PERMANOVA term orders. Defaults to \code{TRUE}.}
 }
 \value{
 A list with batch audit diagnostics and recommendations.
