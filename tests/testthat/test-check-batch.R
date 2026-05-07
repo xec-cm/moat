@@ -20,6 +20,16 @@ test_that("check_permanova returns tidy terms and dominance metrics", {
   expect_gt(result$batch_r2, result$outcome_r2)
   expect_gt(result$batch_dominance_score, 1)
   expect_equal(result$risk, "high")
+  expect_equal(result$order_sensitivity$status, "evaluated")
+  expect_s3_class(result$order_sensitivity$comparisons, "data.frame")
+  expect_equal(result$order_sensitivity$comparisons$order, c("outcome_first", "batch_first"))
+  expect_true(all(c(
+    "formula",
+    "outcome_r2",
+    "batch_r2",
+    "outcome_p_value",
+    "batch_p_value"
+  ) %in% names(result$order_sensitivity$comparisons)))
 })
 
 test_that("check_dispersion detects simulated dispersion differences", {
@@ -207,11 +217,18 @@ test_that("check_batch treats aliased batch terms as high risk", {
     distances = "bray",
     n_perm = 99
   )
+  audit <- moat(se, outcome = "outcome", batch = "batch", distances = "bray", n_perm = 99)
+  audit_summary <- summary(audit)
 
   expect_equal(permanova$risk, "high")
   expect_equal(permanova$batch_dominance_score, Inf)
-  expect_match(permanova$warnings, "could not be estimated")
+  expect_true(any(grepl("could not be estimated", permanova$warnings)))
+  expect_equal(permanova$order_sensitivity$status, "evaluated")
+  expect_true(permanova$order_sensitivity$risk %in% c("moderate", "high"))
   expect_equal(batch_result$risk, "high")
+  expect_true(any(grepl("term-order sensitivity", batch_result$warnings)))
+  expect_true(batch_result$summary$order_sensitivity_risk %in% c("moderate", "high"))
+  expect_true(any(grepl("term-order sensitivity", unlist(audit_summary$risk_summary$modules$reasons))))
 })
 
 test_that("check_batch skips cleanly without batch variables", {
@@ -261,6 +278,82 @@ test_that("check_batch passes incompatible transforms through distance validatio
     ),
     "not compatible"
   )
+})
+
+test_that("PERMANOVA order sensitivity can be disabled", {
+  se <- readRDS(test_path("fixtures/batch_effect_biome.rds"))
+  metadata <- as.data.frame(SummarizedExperiment::colData(se))
+  distance <- compute_biome_distance(se, distance = "bray")
+
+  result <- check_permanova(
+    distance = distance,
+    metadata = metadata,
+    outcome = "outcome",
+    batch = "batch",
+    n_perm = 9,
+    order_sensitivity = FALSE
+  )
+  batch_result <- check_batch(
+    se,
+    outcome = "outcome",
+    batch = "batch",
+    distances = "bray",
+    n_perm = 9,
+    order_sensitivity = FALSE
+  )
+
+  expect_equal(result$status, "evaluated")
+  expect_equal(result$order_sensitivity$status, "skipped")
+  expect_equal(nrow(result$order_sensitivity$comparisons), 0)
+  expect_equal(batch_result$permanova$bray$order_sensitivity$status, "skipped")
+  expect_equal(batch_result$summary$order_sensitivity_risk, "unknown")
+})
+
+test_that("PERMANOVA order sensitivity detects strongly confounded term attribution", {
+  set.seed(11)
+  metadata <- data.frame(
+    outcome = rep(c("Control", "Disease"), each = 20),
+    batch = rep(c("A", "B"), each = 20)
+  )
+  coordinates <- rbind(
+    matrix(rnorm(40, mean = 0, sd = 0.1), ncol = 2),
+    matrix(rnorm(40, mean = 4, sd = 0.1), ncol = 2)
+  )
+  distance <- stats::dist(coordinates)
+
+  result <- check_permanova(
+    distance = distance,
+    metadata = metadata,
+    outcome = "outcome",
+    batch = "batch",
+    n_perm = 9
+  )
+
+  expect_equal(result$order_sensitivity$status, "evaluated")
+  expect_equal(result$order_sensitivity$risk, "high")
+  expect_gt(result$order_sensitivity$outcome_r2_difference, 0.05)
+  expect_gt(result$order_sensitivity$batch_r2_difference, 0.05)
+  expect_true(any(grepl("term-order sensitivity", result$warnings)))
+})
+
+test_that("PERMANOVA order sensitivity reports low risk for balanced metadata", {
+  se <- readRDS(test_path("fixtures/clean_biome.rds"))
+  SummarizedExperiment::colData(se)$batch <- rep(c("Batch_1", "Batch_2"), times = 20)
+  metadata <- as.data.frame(SummarizedExperiment::colData(se))
+  distance <- compute_biome_distance(se, distance = "bray")
+
+  result <- check_permanova(
+    distance = distance,
+    metadata = metadata,
+    outcome = "outcome",
+    batch = "batch",
+    n_perm = 9
+  )
+
+  expect_equal(result$order_sensitivity$status, "evaluated")
+  expect_equal(result$order_sensitivity$risk, "low")
+  expect_lt(result$order_sensitivity$outcome_r2_difference, 0.02)
+  expect_lt(result$order_sensitivity$batch_r2_difference, 0.02)
 })
 
 test_that("check_permanova captures vegan runtime errors as diagnostics", {

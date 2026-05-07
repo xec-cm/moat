@@ -9,6 +9,8 @@
 #' @param batch Optional character vector naming batch variables in `metadata`.
 #' @param covariates Optional character vector naming covariates in `metadata`.
 #' @param n_perm A single positive integer giving the number of permutations.
+#' @param order_sensitivity A single logical value indicating whether to compare
+#'   outcome-first and batch-first PERMANOVA term orders. Defaults to `TRUE`.
 #'
 #' @return A list with PERMANOVA diagnostics.
 #' @export
@@ -24,12 +26,14 @@ check_permanova <- function(
   outcome,
   batch = NULL,
   covariates = NULL,
-  n_perm = 999
+  n_perm = 999,
+  order_sensitivity = TRUE
 ) {
   check_dist_object(distance, "distance")
   check_character_or_null(batch, "batch")
   check_character_or_null(covariates, "covariates")
   check_positive_integer(n_perm, "n_perm")
+  check_flag(order_sensitivity, "order_sensitivity")
   check_correction_common_inputs(metadata, outcome, batch = batch, covariates = covariates)
 
   metadata <- align_metadata_to_distance(metadata, distance)
@@ -54,6 +58,7 @@ check_permanova <- function(
       covariate_r2 = if (is.null(covariates)) NA_real_ else 0,
       batch_dominance_score = NA_real_,
       risk = "unknown",
+      order_sensitivity = skipped_permanova_order_sensitivity(batch, order_sensitivity),
       warnings = conditionMessage(result)
     ))
   }
@@ -86,6 +91,19 @@ check_permanova <- function(
     batch_p_value = batch_p_value,
     batch_non_estimable = length(missing_batch_terms) > 0
   )
+  sensitivity <- check_permanova_order_sensitivity(
+    distance = distance,
+    metadata = metadata,
+    outcome = outcome,
+    batch = batch,
+    covariates = covariates,
+    n_perm = n_perm,
+    enabled = order_sensitivity
+  )
+  sensitivity_warning <- permanova_order_sensitivity_warning(sensitivity)
+  if (length(sensitivity_warning) > 0) {
+    warnings <- c(warnings, sensitivity_warning)
+  }
 
   list(
     status = "evaluated",
@@ -98,6 +116,7 @@ check_permanova <- function(
     covariate_r2 = covariate_r2,
     batch_dominance_score = batch_dominance_score,
     risk = risk,
+    order_sensitivity = sensitivity,
     warnings = warnings
   )
 }
@@ -187,6 +206,8 @@ check_dispersion <- function(
 #'   transformation for each distance. Defaults to `"auto"`.
 #' @param distances A character vector naming microbiome distances. Supported
 #'   values are those accepted by [compute_biome_distance()].
+#' @param order_sensitivity A single logical value indicating whether to compare
+#'   outcome-first and batch-first PERMANOVA term orders. Defaults to `TRUE`.
 #'
 #' @return A list with batch audit diagnostics and recommendations.
 #' @export
@@ -203,7 +224,8 @@ check_batch <- function(
   assay = "counts",
   transform = "auto",
   distances = c("aitchison", "bray"),
-  n_perm = 999
+  n_perm = 999,
+  order_sensitivity = TRUE
 ) {
   check_string(assay, "assay")
   check_string(transform, "transform")
@@ -212,6 +234,7 @@ check_batch <- function(
   check_character_or_null(batch, "batch")
   check_character_or_null(covariates, "covariates")
   check_positive_integer(n_perm, "n_perm")
+  check_flag(order_sensitivity, "order_sensitivity")
 
   if (is.null(batch)) {
     return(skipped_batch_result())
@@ -230,7 +253,8 @@ check_batch <- function(
     covariates = covariates,
     assay = assay,
     transform = transform,
-    n_perm = n_perm
+    n_perm = n_perm,
+    order_sensitivity = order_sensitivity
   )
 
   summary <- make_batch_summary(diagnostics)
@@ -261,7 +285,8 @@ evaluate_batch_distance <- function(
   covariates,
   assay,
   transform,
-  n_perm
+  n_perm,
+  order_sensitivity
 ) {
   distance <- compute_biome_distance(
     x,
@@ -276,7 +301,8 @@ evaluate_batch_distance <- function(
     outcome = outcome,
     batch = batch,
     covariates = covariates,
-    n_perm = n_perm
+    n_perm = n_perm,
+    order_sensitivity = order_sensitivity
   )
   variables <- unique(c(outcome, batch, covariates))
   dispersion <- check_dispersion(distance, metadata = metadata, variables = variables, n_perm = n_perm)
@@ -505,6 +531,191 @@ assess_permanova_risk <- function(
     return("moderate")
   }
   "low"
+}
+
+#' @keywords internal
+check_permanova_order_sensitivity <- function(
+  distance,
+  metadata,
+  outcome,
+  batch = NULL,
+  covariates = NULL,
+  n_perm = 999,
+  enabled = TRUE
+) {
+  if (!enabled || is.null(batch)) {
+    return(skipped_permanova_order_sensitivity(batch, enabled))
+  }
+
+  orders <- list(
+    outcome_first = unique(c(outcome, batch, covariates)),
+    batch_first = unique(c(batch, outcome, covariates))
+  )
+  rows <- lapply(
+    names(orders),
+    permanova_order_sensitivity_row,
+    orders = orders,
+    distance = distance,
+    metadata = metadata,
+    outcome = outcome,
+    batch = batch,
+    covariates = covariates,
+    n_perm = n_perm
+  )
+  comparisons <- do.call(rbind, rows)
+  row.names(comparisons) <- NULL
+  errors <- comparisons$error[comparisons$status == "error"]
+  errors <- errors[!is.na(errors) & nzchar(errors)]
+  if (length(errors) > 0) {
+    return(list(
+      status = "error",
+      comparisons = comparisons,
+      outcome_r2_difference = NA_real_,
+      batch_r2_difference = NA_real_,
+      risk = "unknown",
+      warning = unique(errors)
+    ))
+  }
+
+  outcome_diff <- diff_range(comparisons$outcome_r2)
+  batch_diff <- diff_range(comparisons$batch_r2)
+  risk <- assess_order_sensitivity_risk(outcome_diff, batch_diff)
+  list(
+    status = "evaluated",
+    comparisons = comparisons,
+    outcome_r2_difference = outcome_diff,
+    batch_r2_difference = batch_diff,
+    risk = risk,
+    warning = if (risk %in% c("moderate", "high")) order_sensitivity_warning_text(outcome_diff, batch_diff, risk) else character()
+  )
+}
+
+#' @keywords internal
+skipped_permanova_order_sensitivity <- function(batch, enabled = TRUE) {
+  reason <- if (!enabled) {
+    "PERMANOVA order-sensitivity diagnostic was disabled."
+  } else if (is.null(batch)) {
+    "No batch variable provided for PERMANOVA order-sensitivity diagnostic."
+  } else {
+    "PERMANOVA order-sensitivity diagnostic was not evaluated."
+  }
+  list(
+    status = "skipped",
+    comparisons = empty_order_sensitivity_comparisons(),
+    outcome_r2_difference = NA_real_,
+    batch_r2_difference = NA_real_,
+    risk = "unknown",
+    warning = character(),
+    reason = reason
+  )
+}
+
+#' @keywords internal
+permanova_order_sensitivity_row <- function(
+  order_name,
+  orders,
+  distance,
+  metadata,
+  outcome,
+  batch,
+  covariates,
+  n_perm
+) {
+  formula <- make_distance_model_formula(orders[[order_name]])
+  result <- tryCatch(
+    vegan::adonis2(formula, data = metadata, permutations = n_perm, by = "terms"),
+    error = function(error) error
+  )
+  if (inherits(result, "error")) {
+    return(data.frame(
+      order = order_name,
+      formula = deparse1(formula),
+      status = "error",
+      outcome_r2 = NA_real_,
+      batch_r2 = NA_real_,
+      outcome_p_value = NA_real_,
+      batch_p_value = NA_real_,
+      error = conditionMessage(result),
+      stringsAsFactors = FALSE
+    ))
+  }
+
+  terms <- tidy_adonis2_terms(result, outcome = outcome, batch = batch, covariates = covariates)
+  data.frame(
+    order = order_name,
+    formula = deparse1(formula),
+    status = "evaluated",
+    outcome_r2 = sum_terms_r2(terms, outcome),
+    batch_r2 = sum_terms_r2(terms, batch),
+    outcome_p_value = min_terms_p_value(terms, outcome),
+    batch_p_value = min_terms_p_value(terms, batch),
+    error = NA_character_,
+    stringsAsFactors = FALSE
+  )
+}
+
+#' @keywords internal
+empty_order_sensitivity_comparisons <- function() {
+  data.frame(
+    order = character(),
+    formula = character(),
+    status = character(),
+    outcome_r2 = numeric(),
+    batch_r2 = numeric(),
+    outcome_p_value = numeric(),
+    batch_p_value = numeric(),
+    error = character(),
+    stringsAsFactors = FALSE
+  )
+}
+
+#' @keywords internal
+diff_range <- function(x) {
+  x <- x[!is.na(x)]
+  if (length(x) < 2) {
+    return(NA_real_)
+  }
+  max(x) - min(x)
+}
+
+#' @keywords internal
+assess_order_sensitivity_risk <- function(outcome_r2_difference, batch_r2_difference) {
+  max_difference <- max(c(outcome_r2_difference, batch_r2_difference), na.rm = TRUE)
+  if (!is.finite(max_difference)) {
+    return("unknown")
+  }
+  if (max_difference >= 0.05) {
+    return("high")
+  }
+  if (max_difference >= 0.02) {
+    return("moderate")
+  }
+  "low"
+}
+
+#' @keywords internal
+order_sensitivity_warning_text <- function(outcome_r2_difference, batch_r2_difference, risk) {
+  paste0(
+    "PERMANOVA term-order sensitivity is ",
+    risk,
+    " (outcome R2 difference = ",
+    format(round(outcome_r2_difference, 3), nsmall = 3),
+    "; batch R2 difference = ",
+    format(round(batch_r2_difference, 3), nsmall = 3),
+    "); interpret sequential R2 attribution cautiously."
+  )
+}
+
+#' @keywords internal
+permanova_order_sensitivity_warning <- function(sensitivity) {
+  if (!is.list(sensitivity) || !identical(sensitivity$status, "evaluated")) {
+    return(character())
+  }
+  risk <- normalize_audit_risk(sensitivity$risk)
+  if (!risk %in% c("moderate", "high")) {
+    return(character())
+  }
+  sensitivity$warning
 }
 
 #' @keywords internal
@@ -922,6 +1133,7 @@ make_batch_summary <- function(diagnostics) {
     dispersion_risk <- highest_batch_risk(x$dispersion$risk)
     permdisp_risk <- highest_batch_risk(x$permdisp$risk)
     pcoa_risk <- x$pcoa$risk
+    order_sensitivity_risk <- permanova_order_sensitivity_risk(permanova$order_sensitivity)
     data.frame(
       distance = x$distance,
       status = permanova$status,
@@ -933,6 +1145,7 @@ make_batch_summary <- function(diagnostics) {
       dispersion_risk = dispersion_risk,
       permdisp_risk = permdisp_risk,
       pcoa_risk = pcoa_risk,
+      order_sensitivity_risk = order_sensitivity_risk,
       risk = x$risk,
       stringsAsFactors = FALSE
     )
@@ -974,7 +1187,19 @@ batch_distance_warnings <- function(x) {
       )
     )
   }
+  order_sensitivity <- permanova_order_sensitivity_warning(x$permanova$order_sensitivity)
+  if (length(order_sensitivity) > 0) {
+    warnings <- c(warnings, paste0(x$distance, " distance: ", order_sensitivity))
+  }
   warnings
+}
+
+#' @keywords internal
+permanova_order_sensitivity_risk <- function(sensitivity) {
+  if (!is.list(sensitivity) || is.null(sensitivity$risk)) {
+    return("unknown")
+  }
+  normalize_audit_risk(sensitivity$risk)
 }
 
 #' @keywords internal

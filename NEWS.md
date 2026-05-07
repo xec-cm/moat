@@ -33,6 +33,8 @@
 * Added `check_permanova()` for distance-based PERMANOVA diagnostics.
 * Added `check_batch()` for PERMANOVA, dispersion, and PCoA-axis batch audits
   across selected distances.
+* Added optional PERMANOVA term-order sensitivity diagnostics for outcome-first
+  versus batch-first model formulas.
 
 ## Leakage And Risk Scoring
 
