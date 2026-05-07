@@ -14,6 +14,7 @@ test_that("moat returns an evaluated audit with full public API parameters", {
     transform = "auto",
     distances = c("aitchison", "bray"),
     n_perm = 999,
+    feature_associations = TRUE,
     verbose = FALSE
   )
 
@@ -31,6 +32,7 @@ test_that("moat returns an evaluated audit with full public API parameters", {
   expect_equal(audit$params$transform, "auto")
   expect_equal(audit$params$distances, c("aitchison", "bray"))
   expect_equal(audit$params$n_perm, 999)
+  expect_true(audit$params$feature_associations)
   expect_false(audit$params$verbose)
 
   expect_equal(audit$input$variables$time, "timepoint")
@@ -48,6 +50,7 @@ test_that("moat returns an evaluated audit with full public API parameters", {
   expect_equal(audit$batch$status, "evaluated")
   expect_equal(audit$batch$module, "batch")
   expect_equal(audit$batch$summary$distance, c("aitchison", "bray"))
+  expect_equal(audit$batch$features$status, "evaluated")
   expect_equal(audit$leakage$status, "evaluated")
   expect_equal(audit$leakage$module, "leakage")
   expect_equal(audit$leakage$repeated_measures$risk, "high")
@@ -67,9 +70,11 @@ test_that("moat handles missing optional arguments gracefully", {
   expect_equal(audit$params$transform, "auto")
   expect_equal(audit$params$distances, c("aitchison", "bray"))
   expect_equal(audit$params$n_perm, 999)
+  expect_true(audit$params$feature_associations)
   expect_true(audit$params$verbose)
   expect_equal(audit$batch$status, "skipped")
   expect_equal(audit$batch$module, "batch")
+  expect_equal(audit$batch$features$status, "skipped")
   expect_equal(audit$leakage$status, "skipped")
   expect_equal(audit$leakage$module, "leakage")
   expect_equal(audit$correction$status, "skipped")
@@ -135,6 +140,10 @@ test_that("moat validates issue 6 public API arguments", {
   expect_error(
     moat(se, outcome = "outcome", n_perm = 0),
     "positive integer"
+  )
+  expect_error(
+    moat(se, outcome = "outcome", feature_associations = NA),
+    "logical value"
   )
   expect_error(
     moat(se, outcome = "outcome", verbose = NA),

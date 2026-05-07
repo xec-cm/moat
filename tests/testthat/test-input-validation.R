@@ -143,4 +143,9 @@ test_that("lightweight public API validators reject malformed arguments", {
   expect_true(moat:::check_flag(TRUE, "verbose"))
   expect_error(moat:::check_flag(NA, "verbose"), "logical value")
   expect_error(moat:::check_flag(c(TRUE, FALSE), "verbose"), "logical value")
+
+  expect_true(moat:::check_probability(0.05, "alpha"))
+  expect_true(moat:::check_probability(0, "effect_size_threshold", include_zero = TRUE))
+  expect_error(moat:::check_probability(0, "alpha"), "\\(0, 1\\]")
+  expect_error(moat:::check_probability(1.5, "alpha"), "\\(0, 1\\]")
 })

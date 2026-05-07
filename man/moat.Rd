@@ -15,6 +15,7 @@ moat(
   transform = "auto",
   distances = c("aitchison", "bray"),
   n_perm = 999,
+  feature_associations = TRUE,
   verbose = TRUE
 )
 }
@@ -48,6 +49,9 @@ downstream audit modules. Defaults to \code{c("aitchison", "bray")}.}
 
 \item{n_perm}{A single positive integer with the planned number of
 permutations for downstream audit modules. Defaults to \code{999}.}
+
+\item{feature_associations}{A single logical value indicating whether to
+screen individual features for batch associations. Defaults to \code{TRUE}.}
 
 \item{verbose}{A single logical value indicating whether future audit modules
 should report progress. Defaults to \code{TRUE}.}

@@ -101,6 +101,7 @@ reference:
   - compute_biome_distance
   - check_permanova
   - check_dispersion
+  - check_feature_batch
   - check_batch
 
 - title: "Leakage Audits"

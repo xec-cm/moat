@@ -35,6 +35,8 @@
   across selected distances.
 * Added optional PERMANOVA term-order sensitivity diagnostics for outcome-first
   versus batch-first model formulas.
+* Added `check_feature_batch()` to screen individual microbiome features for
+  batch association and include compact feature-level summaries in batch audits.
 
 ## Leakage And Risk Scoring
 

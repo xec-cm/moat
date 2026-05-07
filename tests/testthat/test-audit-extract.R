@@ -91,5 +91,6 @@ test_that("risk_thresholds documents key implemented thresholds", {
   expect_true(any(result$module == "correction" & result$risk == "critical" & grepl("rank deficient", result$condition)))
   expect_true(any(result$module == "metadata predictability" & result$risk == "high" & grepl("0.8", result$condition)))
   expect_true(any(result$module == "leakage" & result$risk == "moderate" & grepl("Cramer's V >= 0.3", result$condition)))
+  expect_true(any(result$module == "feature-level batch" & result$risk == "high" & grepl("10%", result$condition)))
   expect_true(any(result$module == "global aggregation" & result$risk == "critical"))
 })

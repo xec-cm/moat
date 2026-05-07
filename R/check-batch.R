@@ -186,6 +186,120 @@ check_dispersion <- function(
   result
 }
 
+#' Check feature-level batch associations
+#'
+#' `check_feature_batch()` screens individual microbiome features for strong
+#' association with batch variables. The diagnostic is intended as a
+#' pre-analysis audit signal, not as a replacement for differential abundance
+#' modelling.
+#'
+#' @param x A numeric matrix-like object or a
+#'   [SummarizedExperiment::SummarizedExperiment()] object.
+#' @param metadata Optional data frame with sample metadata. When `x` is a
+#'   `SummarizedExperiment`, `colData(x)` is used by default.
+#' @param batch Optional character vector naming batch variables in `metadata`.
+#' @param outcome Optional single string naming the outcome variable in
+#'   `metadata`. When supplied, outcome associations are reported as context.
+#' @param assay A single string naming the assay to extract when `x` is a
+#'   `SummarizedExperiment`. Defaults to `"counts"`.
+#' @param transform A single string naming the feature transformation. Supported
+#'   values are `"relative"`, `"clr"`, `"presence_absence"`, and `"none"`.
+#'   Defaults to `"relative"`.
+#' @param p_adjust_method A single string naming the p-value adjustment method
+#'   passed to [stats::p.adjust()]. Defaults to `"BH"`.
+#' @param alpha A single number in `(0, 1]` used as the adjusted p-value
+#'   threshold. Defaults to `0.05`.
+#' @param effect_size_threshold A single number in `[0, 1]` used as the minimum
+#'   R2 for a moderate feature-level batch signal. Defaults to `0.10`.
+#'
+#' @return A list with feature-level batch diagnostics and recommendations.
+#' @export
+#'
+#' @examples
+#' data("toy_moat")
+#' check_feature_batch(toy_moat, batch = "batch", outcome = "outcome")
+check_feature_batch <- function(
+  x,
+  metadata = NULL,
+  batch = NULL,
+  outcome = NULL,
+  assay = "counts",
+  transform = "relative",
+  p_adjust_method = "BH",
+  alpha = 0.05,
+  effect_size_threshold = 0.10
+) {
+  check_string(assay, "assay")
+  check_string(transform, "transform")
+  transform <- match.arg(transform, c("relative", "clr", "presence_absence", "none"))
+  check_string(p_adjust_method, "p_adjust_method")
+  p_adjust_method <- match.arg(p_adjust_method, stats::p.adjust.methods)
+  check_character_or_null(batch, "batch")
+  check_string_or_null(outcome, "outcome")
+  check_probability(alpha, "alpha", include_zero = FALSE)
+  check_probability(effect_size_threshold, "effect_size_threshold", include_zero = TRUE)
+
+  if (is.null(batch)) {
+    return(skipped_feature_batch_result("No batch variable provided for feature-level batch diagnostic."))
+  }
+
+  metadata <- resolve_batch_metadata(x, metadata)
+  required_variables <- unique(c(batch, outcome))
+  check_feature_batch_metadata(metadata, required_variables)
+
+  counts <- extract_biome_matrix(x, assay = assay)
+  metadata <- align_metadata_to_feature_matrix(metadata, counts)
+  feature_names <- feature_matrix_names(counts)
+  transformed <- transform_feature_batch_matrix(counts, transform = transform)
+
+  batch_rows <- lapply(batch, feature_batch_variable_rows, features = transformed, metadata = metadata)
+  summary <- do.call(rbind, batch_rows)
+  row.names(summary) <- NULL
+  summary$feature <- feature_names[summary$feature_index]
+  summary <- summary[c("feature", setdiff(names(summary), "feature"))]
+  summary$batch_q_value <- ave_adjust_p_values(summary$batch_p_value, summary$batch, method = p_adjust_method)
+
+  if (!is.null(outcome)) {
+    outcome_rows <- feature_context_rows(
+      variable = outcome,
+      features = transformed,
+      metadata = metadata,
+      feature_names = feature_names,
+      p_adjust_method = p_adjust_method
+    )
+    summary <- merge_feature_outcome_context(summary, outcome_rows)
+  } else {
+    summary <- add_empty_feature_outcome_context(summary)
+  }
+
+  summary$prevalence <- feature_prevalence(counts)[match(summary$feature, feature_names)]
+  summary$n_samples <- ncol(counts)
+  summary$risk <- assess_feature_batch_row_risk(
+    q_value = summary$batch_q_value,
+    r2 = summary$batch_r2,
+    alpha = alpha,
+    effect_size_threshold = effect_size_threshold
+  )
+  summary <- order_feature_batch_summary(summary, alpha = alpha)
+
+  risk <- assess_feature_batch_risk(
+    summary,
+    alpha = alpha,
+    effect_size_threshold = effect_size_threshold
+  )
+  warnings <- feature_batch_warnings(summary, risk = risk, alpha = alpha, effect_size_threshold = effect_size_threshold)
+
+  list(
+    status = "evaluated",
+    module = "feature_batch",
+    risk = risk,
+    summary = summary,
+    top_features = top_feature_batch_rows(summary),
+    warnings = warnings,
+    recommendations = feature_batch_recommendations(risk)
+  )
+}
+
 #' Check microbiome batch effects across distances
 #'
 #' `check_batch()` combines distance calculation, PERMANOVA, dispersion, and
@@ -208,6 +322,8 @@ check_dispersion <- function(
 #'   values are those accepted by [compute_biome_distance()].
 #' @param order_sensitivity A single logical value indicating whether to compare
 #'   outcome-first and batch-first PERMANOVA term orders. Defaults to `TRUE`.
+#' @param feature_associations A single logical value indicating whether to
+#'   screen individual features for batch associations. Defaults to `TRUE`.
 #'
 #' @return A list with batch audit diagnostics and recommendations.
 #' @export
@@ -225,7 +341,8 @@ check_batch <- function(
   transform = "auto",
   distances = c("aitchison", "bray"),
   n_perm = 999,
-  order_sensitivity = TRUE
+  order_sensitivity = TRUE,
+  feature_associations = TRUE
 ) {
   check_string(assay, "assay")
   check_string(transform, "transform")
@@ -235,6 +352,7 @@ check_batch <- function(
   check_character_or_null(covariates, "covariates")
   check_positive_integer(n_perm, "n_perm")
   check_flag(order_sensitivity, "order_sensitivity")
+  check_flag(feature_associations, "feature_associations")
 
   if (is.null(batch)) {
     return(skipped_batch_result())
@@ -257,9 +375,22 @@ check_batch <- function(
     order_sensitivity = order_sensitivity
   )
 
-  summary <- make_batch_summary(diagnostics)
-  risk <- highest_batch_risk(summary$risk)
-  warnings <- batch_warnings(diagnostics)
+  features <- if (feature_associations) {
+    check_feature_batch(
+      x = x,
+      metadata = metadata,
+      batch = batch,
+      outcome = outcome,
+      assay = assay,
+      transform = feature_batch_transform_for_distance_transform(transform)
+    )
+  } else {
+    skipped_feature_batch_result("Feature-level batch diagnostic was disabled.")
+  }
+
+  summary <- add_feature_batch_summary(make_batch_summary(diagnostics), features)
+  risk <- highest_batch_risk(c(summary$risk, feature_batch_summary_risk(features)))
+  warnings <- c(batch_warnings(diagnostics), feature_batch_warning_for_batch(features))
 
   list(
     status = "evaluated",
@@ -270,6 +401,7 @@ check_batch <- function(
     dispersion = stats::setNames(lapply(diagnostics, `[[`, "dispersion"), distances),
     permdisp = stats::setNames(lapply(diagnostics, `[[`, "permdisp"), distances),
     pcoa = stats::setNames(lapply(diagnostics, `[[`, "pcoa"), distances),
+    features = features,
     warnings = warnings,
     recommendations = batch_recommendations(risk)
   )
@@ -1127,6 +1259,461 @@ assess_pcoa_risk <- function(max_axis_r2, min_p_value) {
 }
 
 #' @keywords internal
+check_probability <- function(x, name, include_zero = FALSE) {
+  lower_ok <- if (include_zero) x >= 0 else x > 0
+  if (
+    !is.numeric(x) ||
+      length(x) != 1 ||
+      is.na(x) ||
+      !is.finite(x) ||
+      !lower_ok ||
+      x > 1
+  ) {
+    lower <- if (include_zero) "[0, 1]" else "(0, 1]"
+    cli::cli_abort(
+      "{.arg {name}} must be a single number in {.val {lower}}.",
+      class = "moat_error_invalid_argument"
+    )
+  }
+
+  invisible(TRUE)
+}
+
+#' @keywords internal
+check_feature_batch_metadata <- function(metadata, variables) {
+  check_metadata_frame(metadata)
+  missing_variables <- setdiff(variables, names(metadata))
+  if (length(missing_variables) > 0) {
+    cli::cli_abort(
+      c(
+        "{cli::qty(length(missing_variables))}Required metadata variable{?s} {?is/are} missing.",
+        "x" = "{cli::qty(length(missing_variables))}Missing variable{?s}: {.val {missing_variables}}."
+      ),
+      class = "moat_error_missing_metadata_variable"
+    )
+  }
+
+  missing_summary <- summarize_missing_values(metadata, variables)
+  if (nrow(missing_summary) > 0) {
+    cli::cli_abort(
+      c(
+        "{cli::qty(nrow(missing_summary))}Missing values found in required metadata variable{?s}.",
+        "x" = "{format_missing_summary(missing_summary)}."
+      ),
+      class = "moat_error_missing_metadata_values"
+    )
+  }
+
+  invisible(TRUE)
+}
+
+#' @keywords internal
+align_metadata_to_feature_matrix <- function(metadata, features) {
+  if (nrow(metadata) != ncol(features)) {
+    cli::cli_abort(
+      c(
+        "{.arg metadata} must have one row per sample in {.arg x}.",
+        "x" = "{.arg metadata} has {nrow(metadata)} row{?s}; {.arg x} has {ncol(features)} sample{?s}."
+      ),
+      class = "moat_error_metadata_feature_mismatch"
+    )
+  }
+
+  sample_names <- colnames(features)
+  if (!is.null(sample_names) && all(sample_names %in% row.names(metadata))) {
+    metadata <- metadata[sample_names, , drop = FALSE]
+  }
+
+  metadata
+}
+
+#' @keywords internal
+feature_matrix_names <- function(features) {
+  names <- rownames(features)
+  if (is.null(names)) {
+    names <- paste0("feature_", seq_len(nrow(features)))
+  }
+  names
+}
+
+#' @keywords internal
+transform_feature_batch_matrix <- function(features, transform) {
+  if (identical(transform, "none")) {
+    return(features)
+  }
+  transform_biome(features, method = transform)
+}
+
+#' @keywords internal
+feature_batch_variable_rows <- function(variable, features, metadata) {
+  rows <- lapply(
+    seq_len(nrow(features)),
+    feature_association_row,
+    variable = variable,
+    features = features,
+    metadata = metadata
+  )
+  do.call(rbind, rows)
+}
+
+#' @keywords internal
+feature_association_row <- function(feature_index, variable, features, metadata) {
+  result <- feature_association_stats(
+    values = features[feature_index, ],
+    group = metadata[[variable]]
+  )
+  data.frame(
+    feature_index = feature_index,
+    batch = variable,
+    status = result$status,
+    batch_r2 = result$r2,
+    batch_p_value = result$p_value,
+    error = result$error,
+    stringsAsFactors = FALSE
+  )
+}
+
+#' @keywords internal
+feature_context_rows <- function(variable, features, metadata, feature_names, p_adjust_method) {
+  rows <- lapply(seq_len(nrow(features)), function(feature_index) {
+    result <- feature_association_stats(
+      values = features[feature_index, ],
+      group = metadata[[variable]]
+    )
+    data.frame(
+      feature = feature_names[[feature_index]],
+      outcome_r2 = result$r2,
+      outcome_p_value = result$p_value,
+      stringsAsFactors = FALSE
+    )
+  })
+  result <- do.call(rbind, rows)
+  result$outcome_q_value <- adjust_non_missing_p_values(result$outcome_p_value, method = p_adjust_method)
+  result
+}
+
+#' @keywords internal
+feature_association_stats <- function(values, group) {
+  if (length(unique(group)) < 2) {
+    return(list(
+      status = "skipped",
+      r2 = NA_real_,
+      p_value = NA_real_,
+      error = "Variable has fewer than two groups."
+    ))
+  }
+  result <- tryCatch(
+    {
+      model_data <- data.frame(feature = as.numeric(values), group = group)
+      fit <- stats::lm(feature ~ group, data = model_data)
+      test <- stats::anova(fit)
+      list(
+        status = "evaluated",
+        r2 = summary(fit)$r.squared,
+        p_value = test[["Pr(>F)"]][1],
+        error = NA_character_
+      )
+    },
+    error = function(error) {
+      list(
+        status = "error",
+        r2 = NA_real_,
+        p_value = NA_real_,
+        error = conditionMessage(error)
+      )
+    }
+  )
+  result
+}
+
+#' @keywords internal
+ave_adjust_p_values <- function(p_values, group, method) {
+  adjusted <- rep(NA_real_, length(p_values))
+  groups <- split(seq_along(p_values), group)
+  for (indices in groups) {
+    adjusted[indices] <- adjust_non_missing_p_values(p_values[indices], method = method)
+  }
+  adjusted
+}
+
+#' @keywords internal
+adjust_non_missing_p_values <- function(p_values, method) {
+  adjusted <- rep(NA_real_, length(p_values))
+  keep <- !is.na(p_values)
+  if (any(keep)) {
+    adjusted[keep] <- stats::p.adjust(p_values[keep], method = method)
+  }
+  adjusted
+}
+
+#' @keywords internal
+merge_feature_outcome_context <- function(summary, outcome_rows) {
+  result <- merge(summary, outcome_rows, by = "feature", all.x = TRUE, sort = FALSE)
+  result$batch_to_outcome_r2_ratio <- compute_feature_r2_ratio(result$batch_r2, result$outcome_r2)
+  result$batch_sensitive_outcome_feature <- FALSE
+  result
+}
+
+#' @keywords internal
+add_empty_feature_outcome_context <- function(summary) {
+  summary$outcome_r2 <- NA_real_
+  summary$outcome_p_value <- NA_real_
+  summary$outcome_q_value <- NA_real_
+  summary$batch_to_outcome_r2_ratio <- NA_real_
+  summary$batch_sensitive_outcome_feature <- FALSE
+  summary
+}
+
+#' @keywords internal
+compute_feature_r2_ratio <- function(batch_r2, outcome_r2) {
+  ratio <- rep(NA_real_, length(batch_r2))
+  valid <- !is.na(batch_r2) & !is.na(outcome_r2)
+  zero_outcome <- valid & outcome_r2 <= 0
+  ratio[zero_outcome & batch_r2 > 0] <- Inf
+  ratio[zero_outcome & batch_r2 <= 0] <- 0
+  ratio[valid & !zero_outcome] <- batch_r2[valid & !zero_outcome] / outcome_r2[valid & !zero_outcome]
+  ratio
+}
+
+#' @keywords internal
+feature_prevalence <- function(counts) {
+  rowMeans(counts > 0)
+}
+
+#' @keywords internal
+assess_feature_batch_row_risk <- function(q_value, r2, alpha, effect_size_threshold) {
+  risk <- rep("low", length(q_value))
+  risk[is.na(q_value) | is.na(r2)] <- "unknown"
+  signal <- !is.na(q_value) & !is.na(r2) & q_value <= alpha
+  risk[signal & r2 >= effect_size_threshold] <- "moderate"
+  risk[signal & r2 >= 0.20] <- "high"
+  risk
+}
+
+#' @keywords internal
+assess_feature_batch_risk <- function(summary, alpha, effect_size_threshold) {
+  evaluated <- summary[summary$status == "evaluated", , drop = FALSE]
+  if (nrow(evaluated) == 0) {
+    return("unknown")
+  }
+  signal <- !is.na(evaluated$batch_q_value) &
+    evaluated$batch_q_value <= alpha &
+    !is.na(evaluated$batch_r2) &
+    evaluated$batch_r2 >= effect_size_threshold
+  high_feature <- any(signal & evaluated$batch_r2 >= 0.20)
+  high_fraction <- any(feature_batch_signal_fraction(evaluated, signal) >= 0.10)
+  if (high_feature || high_fraction) {
+    return("high")
+  }
+  if (any(signal)) {
+    return("moderate")
+  }
+  "low"
+}
+
+#' @keywords internal
+feature_batch_signal_fraction <- function(evaluated, signal) {
+  fractions <- tapply(signal, evaluated$batch, mean)
+  fractions[is.na(fractions)] <- 0
+  unname(fractions)
+}
+
+#' @keywords internal
+feature_batch_warnings <- function(summary, risk, alpha, effect_size_threshold) {
+  risk <- normalize_audit_risk(risk)
+  if (!risk %in% c("moderate", "high")) {
+    return(character())
+  }
+  n_signal <- sum(
+    !is.na(summary$batch_q_value) &
+      summary$batch_q_value <= alpha &
+      !is.na(summary$batch_r2) &
+      summary$batch_r2 >= effect_size_threshold
+  )
+  max_r2 <- max(summary$batch_r2, na.rm = TRUE)
+  if (!is.finite(max_r2)) {
+    max_r2 <- NA_real_
+  }
+  warnings <- paste0(
+    "Feature-level batch diagnostic is ",
+    risk,
+    " (",
+    n_signal,
+    " feature-batch association",
+    if (n_signal == 1) "" else "s",
+    " with adjusted p <= ",
+    alpha,
+    " and batch R2 >= ",
+    effect_size_threshold,
+    "; max feature batch R2 = ",
+    format(round(max_r2, 3), nsmall = 3),
+    ")."
+  )
+  sensitive <- summary$batch_sensitive_outcome_feature %in% TRUE
+  if (any(sensitive)) {
+    warnings <- c(
+      warnings,
+      paste0(
+        sum(sensitive),
+        " outcome-associated feature",
+        if (sum(sensitive) == 1) "" else "s",
+        " also show comparable or stronger batch association; interpret feature-level outcome signals cautiously."
+      )
+    )
+  }
+  warnings
+}
+
+#' @keywords internal
+top_feature_batch_rows <- function(summary, n = 10) {
+  if (nrow(summary) == 0) {
+    return(summary)
+  }
+  order <- order(summary$batch_q_value, -summary$batch_r2, na.last = TRUE)
+  summary[utils::head(order, n), , drop = FALSE]
+}
+
+#' @keywords internal
+order_feature_batch_summary <- function(summary, alpha) {
+  summary$batch_sensitive_outcome_feature <- !is.na(summary$outcome_q_value) &
+    summary$outcome_q_value <= alpha &
+    summary$risk %in% c("moderate", "high") &
+    !is.na(summary$batch_r2) &
+    !is.na(summary$outcome_r2) &
+    summary$batch_r2 >= summary$outcome_r2
+  summary <- summary[c(
+    "feature",
+    "batch",
+    "n_samples",
+    "prevalence",
+    "batch_r2",
+    "batch_p_value",
+    "batch_q_value",
+    "outcome_r2",
+    "outcome_p_value",
+    "outcome_q_value",
+    "batch_to_outcome_r2_ratio",
+    "batch_sensitive_outcome_feature",
+    "risk",
+    "status",
+    "error"
+  )]
+  order <- order(summary$batch, summary$batch_q_value, -summary$batch_r2, na.last = TRUE)
+  summary[order, , drop = FALSE]
+}
+
+#' @keywords internal
+feature_batch_recommendations <- function(risk) {
+  switch(
+    normalize_audit_risk(risk),
+    "high" = c(
+      "Feature-level batch associations are strong; report batch-associated taxa before interpreting feature-level outcome signals.",
+      "Use downstream feature-level sensitivity analyses with explicit batch terms where statistically identifiable."
+    ),
+    "moderate" = "Some features show detectable batch association; inspect top features and report this screening diagnostic.",
+    "low" = "No strong feature-level batch association was detected by the screening diagnostic.",
+    "Feature-level batch association risk could not be determined."
+  )
+}
+
+#' @keywords internal
+skipped_feature_batch_result <- function(reason) {
+  list(
+    status = "skipped",
+    module = "feature_batch",
+    risk = "unknown",
+    summary = empty_feature_batch_summary(),
+    top_features = empty_feature_batch_summary(),
+    warnings = character(),
+    recommendations = reason,
+    reason = reason
+  )
+}
+
+#' @keywords internal
+empty_feature_batch_summary <- function() {
+  data.frame(
+    feature = character(),
+    batch = character(),
+    n_samples = integer(),
+    prevalence = numeric(),
+    batch_r2 = numeric(),
+    batch_p_value = numeric(),
+    batch_q_value = numeric(),
+    outcome_r2 = numeric(),
+    outcome_p_value = numeric(),
+    outcome_q_value = numeric(),
+    batch_to_outcome_r2_ratio = numeric(),
+    batch_sensitive_outcome_feature = logical(),
+    risk = character(),
+    status = character(),
+    error = character(),
+    stringsAsFactors = FALSE
+  )
+}
+
+#' @keywords internal
+feature_batch_transform_for_distance_transform <- function(transform) {
+  if (identical(transform, "clr")) {
+    return("clr")
+  }
+  if (identical(transform, "presence_absence")) {
+    return("presence_absence")
+  }
+  if (identical(transform, "none")) {
+    return("none")
+  }
+  "relative"
+}
+
+#' @keywords internal
+add_feature_batch_summary <- function(summary, features) {
+  compact <- compact_feature_batch_summary(features)
+  summary$n_batch_associated_features <- compact$n_batch_associated_features
+  summary$max_feature_batch_r2 <- compact$max_feature_batch_r2
+  summary$feature_association_risk <- compact$feature_association_risk
+  summary
+}
+
+#' @keywords internal
+compact_feature_batch_summary <- function(features) {
+  if (!is.list(features) || !identical(features$status, "evaluated") || !is.data.frame(features$summary)) {
+    return(list(
+      n_batch_associated_features = NA_integer_,
+      max_feature_batch_r2 = NA_real_,
+      feature_association_risk = "unknown"
+    ))
+  }
+  summary <- features$summary
+  associated <- normalize_audit_risk_vector(summary$risk) %in% c("moderate", "high")
+  max_r2 <- max(summary$batch_r2, na.rm = TRUE)
+  if (!is.finite(max_r2)) {
+    max_r2 <- NA_real_
+  }
+  list(
+    n_batch_associated_features = length(unique(summary$feature[associated])),
+    max_feature_batch_r2 = max_r2,
+    feature_association_risk = normalize_audit_risk(features$risk)
+  )
+}
+
+#' @keywords internal
+feature_batch_summary_risk <- function(features) {
+  if (!is.list(features) || is.null(features$risk)) {
+    return("unknown")
+  }
+  normalize_audit_risk(features$risk)
+}
+
+#' @keywords internal
+feature_batch_warning_for_batch <- function(features) {
+  if (!is.list(features) || !identical(features$status, "evaluated")) {
+    return(character())
+  }
+  features$warnings
+}
+
+#' @keywords internal
 make_batch_summary <- function(diagnostics) {
   rows <- lapply(diagnostics, function(x) {
     permanova <- x$permanova
@@ -1222,10 +1809,10 @@ batch_recommendations <- function(risk) {
   switch(
     risk,
     "high" = c(
-      "Batch signal is strong relative to outcome or ordination structure; report batch diagnostics before downstream analysis.",
+      "Batch signal is strong in distance, ordination, dispersion, or feature-level diagnostics; report batch diagnostics before downstream analysis.",
       "Avoid interpreting outcome effects without sensitivity analyses that account for batch."
     ),
-    "moderate" = "Batch signal is detectable; inspect distance-specific diagnostics and report sensitivity analyses.",
+    "moderate" = "Batch signal is detectable; inspect distance-specific and feature-level diagnostics and report sensitivity analyses.",
     "low" = "No strong batch signal was detected by the selected distance diagnostics.",
     "Batch risk could not be determined from the selected diagnostics."
   )
@@ -1242,6 +1829,7 @@ skipped_batch_result <- function() {
     dispersion = list(),
     permdisp = list(),
     pcoa = list(),
+    features = skipped_feature_batch_result("No batch variable provided; feature-level batch diagnostic was not evaluated."),
     warnings = character(),
     recommendations = "No batch variable provided; batch audit was not evaluated."
   )
