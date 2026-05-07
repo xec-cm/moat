@@ -112,6 +112,8 @@ risk_thresholds <- function() {
     "batch-space", "PERMDISP p-value", "moderate", "p <= 0.10", "Group dispersion may differ.",
     "batch-space", "PCoA axis association", "high", "maximum axis R2 >= 0.20 or minimum p <= 0.05", "Metadata aligns strongly with ordination axes.",
     "batch-space", "PCoA axis association", "moderate", "maximum axis R2 >= 0.10 or minimum p <= 0.10", "Metadata visibly aligns with ordination axes.",
+    "feature-level batch", "feature batch R2 / adjusted p-value", "high", "any feature has adjusted p <= alpha and batch R2 >= 0.20, or at least 10% of evaluated features are batch-associated", "Strong feature-level batch association can contaminate taxa-level interpretation.",
+    "feature-level batch", "feature batch R2 / adjusted p-value", "moderate", "any feature has adjusted p <= alpha and batch R2 >= effect_size_threshold", "Detectable feature-level batch association should be reported as screening evidence.",
     "correction", "batch-outcome positivity", "critical", "every batch level contains samples from only one outcome level", "Batch correction is non-identifiable from metadata.",
     "correction", "batch-outcome positivity", "high", "any batch level has a single outcome, or positivity score < 0.75", "Naive batch correction is unsafe without close inspection.",
     "correction", "batch-outcome sparse cells", "moderate", "any empty cell, or minimum cell count < 5", "Adjustment may be possible but sparse.",

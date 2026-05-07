@@ -132,6 +132,105 @@ test_that("check_batch detects a strong simulated batch effect", {
   expect_true(any(grepl("Batch signal is strong", result$recommendations)))
 })
 
+test_that("check_feature_batch detects feature-level batch associations", {
+  set.seed(37)
+  batch <- rep(c("A", "B"), each = 15)
+  outcome <- rep(c("Control", "Disease"), length.out = 30)
+  counts <- matrix(rpois(12 * 30, lambda = 60), nrow = 12)
+  counts[1:4, batch == "B"] <- counts[1:4, batch == "B"] + 450
+  rownames(counts) <- paste0("Taxon_", seq_len(nrow(counts)))
+  colnames(counts) <- paste0("S", seq_len(ncol(counts)))
+  metadata <- data.frame(
+    outcome = outcome,
+    batch = batch,
+    row.names = colnames(counts)
+  )
+
+  result <- check_feature_batch(
+    counts,
+    metadata = metadata,
+    batch = "batch",
+    outcome = "outcome",
+    transform = "relative",
+    alpha = 0.05,
+    effect_size_threshold = 0.10
+  )
+
+  expect_equal(result$status, "evaluated")
+  expect_equal(result$module, "feature_batch")
+  expect_equal(result$risk, "high")
+  expect_true(all(c(
+    "feature",
+    "batch",
+    "n_samples",
+    "prevalence",
+    "batch_r2",
+    "batch_p_value",
+    "batch_q_value",
+    "outcome_r2",
+    "outcome_p_value",
+    "outcome_q_value",
+    "batch_to_outcome_r2_ratio",
+    "batch_sensitive_outcome_feature",
+    "risk"
+  ) %in% names(result$summary)))
+  expect_true(any(result$summary$feature %in% paste0("Taxon_", 1:4) & result$summary$risk == "high"))
+  expect_lte(max(result$top_features$batch_q_value, na.rm = TRUE), 0.05)
+})
+
+test_that("check_feature_batch reports low risk on clean balanced features", {
+  batch <- rep(c("A", "B"), each = 10)
+  metadata <- data.frame(batch = batch)
+  values <- c(rep(c(10, 20), each = 5), rep(c(10, 20), each = 5))
+  counts <- matrix(rep(values, times = 6), nrow = 6, byrow = TRUE)
+  rownames(counts) <- paste0("Taxon_", seq_len(nrow(counts)))
+
+  result <- check_feature_batch(counts, metadata = metadata, batch = "batch", transform = "none")
+
+  expect_equal(result$status, "evaluated")
+  expect_equal(result$risk, "low")
+  expect_true(all(result$summary$risk == "low"))
+  expect_length(result$warnings, 0)
+})
+
+test_that("check_batch includes optional feature-level batch diagnostics", {
+  set.seed(38)
+  batch <- rep(c("A", "B"), each = 15)
+  outcome <- rep(c("Control", "Disease"), length.out = 30)
+  counts <- matrix(rpois(10 * 30, lambda = 80), nrow = 10)
+  counts[1:3, batch == "B"] <- counts[1:3, batch == "B"] + 500
+  rownames(counts) <- paste0("Taxon_", seq_len(nrow(counts)))
+  colnames(counts) <- paste0("S", seq_len(ncol(counts)))
+  metadata <- data.frame(outcome = outcome, batch = batch, row.names = colnames(counts))
+
+  result <- check_batch(
+    counts,
+    metadata = metadata,
+    outcome = "outcome",
+    batch = "batch",
+    distances = "bray",
+    n_perm = 99,
+    feature_associations = TRUE
+  )
+
+  expect_equal(result$features$status, "evaluated")
+  expect_true(all(c("n_batch_associated_features", "max_feature_batch_r2", "feature_association_risk") %in% names(result$summary)))
+  expect_gte(result$summary$n_batch_associated_features[[1]], 1)
+  expect_true(result$summary$feature_association_risk[[1]] %in% c("moderate", "high"))
+
+  skipped <- check_batch(
+    counts,
+    metadata = metadata,
+    outcome = "outcome",
+    batch = "batch",
+    distances = "bray",
+    n_perm = 99,
+    feature_associations = FALSE
+  )
+  expect_equal(skipped$features$status, "skipped")
+  expect_equal(skipped$summary$feature_association_risk, "unknown")
+})
+
 test_that("check_batch includes dispersion for outcome, batch, and covariates", {
   se <- readRDS(test_path("fixtures/repeated_biome.rds"))
   SummarizedExperiment::colData(se)$batch <- rep(c("A", "B"), each = 20)

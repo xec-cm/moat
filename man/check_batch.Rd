@@ -14,7 +14,8 @@ check_batch(
   transform = "auto",
   distances = c("aitchison", "bray"),
   n_perm = 999,
-  order_sensitivity = TRUE
+  order_sensitivity = TRUE,
+  feature_associations = TRUE
 )
 }
 \arguments{
@@ -44,6 +45,9 @@ values are those accepted by \code{\link[=compute_biome_distance]{compute_biome_
 
 \item{order_sensitivity}{A single logical value indicating whether to compare
 outcome-first and batch-first PERMANOVA term orders. Defaults to \code{TRUE}.}
+
+\item{feature_associations}{A single logical value indicating whether to
+screen individual features for batch associations. Defaults to \code{TRUE}.}
 }
 \value{
 A list with batch audit diagnostics and recommendations.

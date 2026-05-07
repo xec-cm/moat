@@ -27,6 +27,8 @@
 #'   downstream audit modules. Defaults to `c("aitchison", "bray")`.
 #' @param n_perm A single positive integer with the planned number of
 #'   permutations for downstream audit modules. Defaults to `999`.
+#' @param feature_associations A single logical value indicating whether to
+#'   screen individual features for batch associations. Defaults to `TRUE`.
 #' @param verbose A single logical value indicating whether future audit modules
 #'   should report progress. Defaults to `TRUE`.
 #'
@@ -54,12 +56,14 @@ moat <- function(
   transform = "auto",
   distances = c("aitchison", "bray"),
   n_perm = 999,
+  feature_associations = TRUE,
   verbose = TRUE
 ) {
   check_string(transform, "transform")
   transform <- match.arg(transform, c("auto", "clr", "relative", "presence_absence", "none"))
   check_non_empty_character(distances, "distances")
   check_positive_integer(n_perm, "n_perm")
+  check_flag(feature_associations, "feature_associations")
   check_flag(verbose, "verbose")
 
   input <- validate_biome_input(
@@ -80,7 +84,8 @@ moat <- function(
     assay = assay,
     transform = transform,
     distances = distances,
-    n_perm = n_perm
+    n_perm = n_perm,
+    feature_associations = feature_associations
   )
   leakage_audit <- check_leakage(
     metadata = input$metadata,
@@ -127,6 +132,7 @@ moat <- function(
       transform = transform,
       distances = distances,
       n_perm = n_perm,
+      feature_associations = feature_associations,
       verbose = verbose
     )
   )

@@ -136,7 +136,8 @@ plot_variance(audit, distance = "bray")
 - **Correction feasibility:** whether batch adjustment is statistically
   identifiable from the observed design.
 - **Microbiome batch effects:** whether batch explains microbiome
-  variation using PERMANOVA, dispersion, and ordination diagnostics.
+  variation using PERMANOVA, dispersion, ordination diagnostics, and
+  feature-level screening for batch-associated taxa.
 - **Validation leakage:** whether repeated measures, batch-outcome
   association, or time structure require grouped or time-aware
   validation.

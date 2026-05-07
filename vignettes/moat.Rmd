@@ -141,6 +141,10 @@ audit$batch$summary[, c(
 )]
 ```
 
+Feature-level screening is available in `audit$batch$features`. It flags taxa
+with strong batch association as pre-analysis evidence to report and inspect,
+not as a replacement for downstream differential abundance models.
+
 `plot_variance()` visualizes the PERMANOVA R2 terms. A batch term that exceeds
 the outcome term is a strong signal that the downstream analysis needs explicit
 batch sensitivity checks.
