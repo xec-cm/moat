@@ -246,6 +246,23 @@ test_that("check_batch validates metadata for matrix inputs", {
   )
 })
 
+test_that("check_batch passes incompatible transforms through distance validation", {
+  se <- readRDS(test_path("fixtures/clean_biome.rds"))
+  SummarizedExperiment::colData(se)$batch <- rep(c("A", "B"), each = 20)
+
+  expect_error(
+    check_batch(
+      se,
+      outcome = "outcome",
+      batch = "batch",
+      transform = "clr",
+      distances = "bray",
+      n_perm = 9
+    ),
+    "not compatible"
+  )
+})
+
 test_that("check_permanova captures vegan runtime errors as diagnostics", {
   metadata <- data.frame(
     outcome = c("Control", "Disease", "Control", "Disease"),

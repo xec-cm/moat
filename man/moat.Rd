@@ -12,7 +12,7 @@ moat(
   subject = NULL,
   time = NULL,
   assay = "counts",
-  transform = "clr",
+  transform = "auto",
   distances = c("aitchison", "bray"),
   n_perm = 999,
   verbose = TRUE
@@ -39,8 +39,9 @@ in \code{colData(x)}.}
 \item{assay}{A single string naming the assay to audit. Defaults to
 \code{"counts"}.}
 
-\item{transform}{A single string naming the microbiome transformation to
-record for downstream audit modules. Defaults to \code{"clr"}.}
+\item{transform}{A single string naming the microbiome transformation to use
+in distance-based audit modules. Use \code{"auto"} to choose the default
+transformation for each distance. Defaults to \code{"auto"}.}
 
 \item{distances}{A character vector naming microbiome distances to record for
 downstream audit modules. Defaults to \code{c("aitchison", "bray")}.}
